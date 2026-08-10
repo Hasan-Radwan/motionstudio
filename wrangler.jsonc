@@ -1,12 +1,15 @@
 {
-  // Deploy the built site as Cloudflare Workers Static Assets.
+  // Deploy the built site as a Worker that serves Cloudflare Static Assets.
   // Cloudflare runs the Build command (npm run build) to produce ./dist, then the
-  // Deploy command (npx wrangler deploy) uploads it using this config.
+  // Deploy command (npx wrangler deploy) bundles worker.js + uploads ./dist.
+  // The worker passes every request to the ASSETS binding (see worker.js), which
+  // serves the files and falls back to index.html for unknown routes (SPA).
   "name": "motionstudio",
   "compatibility_date": "2024-11-01",
+  "main": "worker.js",
   "assets": {
     "directory": "./dist",
-    // Serve index.html for unknown paths (single-page app).
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   }
 }
