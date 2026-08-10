@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# build output (Cloudflare builds this itself)
+dist/
+
+# local env / secrets
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+*.log
+.vscode/
+.idea/

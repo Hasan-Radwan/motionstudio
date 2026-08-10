@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Motion Studio — حرّك تصميمك · animate your designs</title>
+    <meta
+      name="description"
+      content="حوّل صورك إلى فيديوهات متحركة احترافية داخل المتصفح — Pick a template, add your image, and export a looping video. Runs entirely in your browser."
+    />
+  </head>
+  <body>
+    <!-- Marketing landing page (front door); the studio boots on "Launch". -->
+    <div id="landing"></div>
+
+    <div id="app" class="hidden">
+      <!-- Top bar -->
+      <header class="topbar">
+        <button class="brand" id="brand-home" title="Home">
+          <span class="brand-mark">◆</span>
+          <span class="brand-name">Motion Studio</span>
+        </button>
+        <div class="topbar-actions">
+          <button class="btn" id="btn-account">Sign in</button>
+          <button class="btn" id="btn-lang" title="Toggle language">ع</button>
+          <button class="btn" id="btn-home">Home</button>
+          <button class="btn" id="btn-upload">Upload image</button>
+          <button class="btn" id="btn-mockup">Mockup</button>
+          <button class="btn" id="btn-projects">My projects</button>
+          <button class="btn btn-primary" id="btn-export">Export</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <!-- Left: settings panel (controls + media + background) -->
+        <aside class="panel" id="panel" aria-label="Settings">
+          <div id="panel-controls"></div>
+          <div id="panel-media"></div>
+          <div id="panel-text"></div>
+          <div id="panel-watermark"></div>
+          <div id="panel-background"></div>
+        </aside>
+
+        <!-- Center: canvas stage -->
+        <section class="stage" id="stage">
+          <div class="stage-canvas-wrap" id="stage-canvas-wrap">
+            <canvas id="preview-canvas"></canvas>
+            <div class="stage-hint" id="stage-hint">
+              <p>Drop an image anywhere, or click <strong>Upload image</strong>.</p>
+            </div>
+          </div>
+          <div class="stage-footer">
+            <span id="stage-meta" class="stage-meta"></span>
+          </div>
+        </section>
+
+        <!-- Right: template gallery -->
+        <aside class="gallery" id="gallery" aria-label="Templates"></aside>
+      </main>
+    </div>
+
+    <input id="file-input" type="file" accept="image/*" hidden />
+    <input id="slot-input" type="file" accept="image/*" hidden />
+    <input id="wm-input" type="file" accept="image/*" hidden />
+    <input id="bg-input" type="file" accept="image/*" hidden />
+
+    <!-- Modal host -->
+    <div id="modal-root"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
