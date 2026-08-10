@@ -1,0 +1,12 @@
+{
+  // Deploy the built site as Cloudflare Workers Static Assets.
+  // Cloudflare runs the Build command (npm run build) to produce ./dist, then the
+  // Deploy command (npx wrangler deploy) uploads it using this config.
+  "name": "motionstudio",
+  "compatibility_date": "2024-11-01",
+  "assets": {
+    "directory": "./dist",
+    // Serve index.html for unknown paths (single-page app).
+    "not_found_handling": "single-page-application"
+  }
+}
