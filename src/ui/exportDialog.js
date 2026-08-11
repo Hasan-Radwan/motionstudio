@@ -10,6 +10,7 @@ const QUALITIES = [
   { label: '1080p', value: 1080 },
   { label: '2K', value: 1440 },
   { label: '4K', value: 2160 },
+  { label: '8K', value: 4320 },
 ];
 const FPS_OPTS = [24, 30, 60];
 

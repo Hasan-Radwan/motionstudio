@@ -21,7 +21,7 @@ export const PLANS = {
     name: 'Pro',
     price: 9,
     paddleKey: 'pro',
-    maxQuality: 2160,
+    maxQuality: 4320, // up to 8K
     ownWatermark: true,
     appWatermark: false,
   },
@@ -30,7 +30,7 @@ export const PLANS = {
     name: 'Teams',
     price: 29,
     paddleKey: 'teams',
-    maxQuality: 2160,
+    maxQuality: 4320, // up to 8K
     ownWatermark: true,
     appWatermark: false,
   },

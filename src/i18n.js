@@ -279,6 +279,7 @@ const AR = {
   'Local save': 'حفظ محلي',
   'All templates': 'كل القوالب',
   'Export up to 4K': 'تصدير حتى 4K',
+  'Export up to 8K': 'تصدير حتى 8K',
   'No app watermark': 'بدون علامة التطبيق',
   'Your own watermark': 'علامتك المائية الخاصة',
   'Everything in Pro': 'كل مزايا Pro',

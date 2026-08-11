@@ -13,7 +13,7 @@ import { t } from '../i18n.js';
 
 const FEATURES = {
   free: ['All core templates', 'Export up to 720p', 'App watermark', 'Local save'],
-  pro: ['All templates', 'Export up to 4K', 'No app watermark', 'Your own watermark'],
+  pro: ['All templates', 'Export up to 8K', 'No app watermark', 'Your own watermark'],
   teams: ['Everything in Pro', 'Multiple seats', 'Custom templates', 'Priority support'],
 };
 

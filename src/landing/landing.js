@@ -248,7 +248,7 @@ const COPY = {
           name: 'احترافي',
           price: '9',
           desc: 'لصنّاع المحتوى والمصممين',
-          features: ['كل القوالب', 'تصدير حتى 4K', 'بدون علامة مائية', 'علامتك المائية الخاصة', 'خطوط عربية كاملة'],
+          features: ['كل القوالب', 'تصدير حتى 8K', 'بدون علامة مائية', 'علامتك المائية الخاصة', 'خطوط عربية كاملة'],
           featured: true,
         },
         {
@@ -328,7 +328,7 @@ const COPY = {
           name: 'Pro',
           price: '9',
           desc: 'For creators & designers',
-          features: ['All templates', 'Export up to 4K', 'No app watermark', 'Your own watermark', 'Full Arabic fonts'],
+          features: ['All templates', 'Export up to 8K', 'No app watermark', 'Your own watermark', 'Full Arabic fonts'],
           featured: true,
         },
         {
