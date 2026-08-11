@@ -5,6 +5,97 @@
 
 import './landing.css';
 import { getLang, setLang, onLang } from '../i18n.js';
+import { Renderer } from '../engine/renderer.js';
+import { getTemplate, defaultParams, getPlaceholder } from '../templates/index.js';
+
+// Templates showcased in the live hero preview (cycled automatically).
+const PREVIEW_IDS = ['coverflow', 'ribbonFlow', 'mosaic', 'cube', 'arcCarousel', 'polaroidStack'];
+
+// Live preview lifecycle (recreated on each render / language change).
+let _preview = null;
+let _rotateTimer = null;
+let _observers = [];
+
+function teardownInteractive() {
+  if (_preview) {
+    _preview.stop();
+    _preview = null;
+  }
+  if (_rotateTimer) {
+    clearInterval(_rotateTimer);
+    _rotateTimer = null;
+  }
+  _observers.forEach((o) => o.disconnect());
+  _observers = [];
+}
+
+// Live hero preview: runs the real engine, cycling through showcase templates,
+// with clickable chips to switch. Pauses automatically when off-screen/hidden.
+function setupHeroPreview(root) {
+  const canvas = root.querySelector('.lp-preview-canvas');
+  const chipsWrap = root.querySelector('.lp-preview-chips');
+  if (!canvas || !chipsWrap) return;
+
+  _preview = new Renderer(canvas);
+  _preview
+    .setPlaceholder(getPlaceholder())
+    .setBackground({ type: 'linear', angle: 135, stops: ['#1b1e26', '#0d0e12'] });
+
+  let idx = 0;
+  const ids = PREVIEW_IDS;
+  const apply = (i) => {
+    idx = ((i % ids.length) + ids.length) % ids.length;
+    const tpl = getTemplate(ids[idx]);
+    _preview.setTemplate(tpl).setParams(defaultParams(tpl));
+    [...chipsWrap.children].forEach((el2, ci) => el2.classList.toggle('active', ci === idx));
+  };
+  const startTimer = () => {
+    clearInterval(_rotateTimer);
+    _rotateTimer = setInterval(() => apply(idx + 1), 3500);
+  };
+
+  ids.forEach((id, i) => {
+    const b = document.createElement('button');
+    b.className = 'lp-chip';
+    b.textContent = getTemplate(id).name;
+    b.addEventListener('click', () => {
+      apply(i);
+      startTimer();
+    });
+    chipsWrap.appendChild(b);
+  });
+
+  apply(0);
+  startTimer();
+
+  // Only animate while visible (also pauses when the studio hides the landing).
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!_preview) return;
+      if (e.isIntersecting) _preview.start();
+      else _preview.stop();
+    }
+  });
+  io.observe(canvas);
+  _observers.push(io);
+}
+
+// Reveal sections as they scroll into view (inside the landing scroll container).
+function setupReveal(root) {
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add('lp-in');
+          io.unobserve(e.target);
+        }
+      }
+    },
+    { root, threshold: 0.12 }
+  );
+  root.querySelectorAll('.lp-reveal').forEach((t) => io.observe(t));
+  _observers.push(io);
+}
 
 const COPY = {
   ar: {
@@ -180,6 +271,7 @@ export function initLanding(root, { onLaunch }) {
   function render() {
     const c = COPY[getLang()] || COPY.en;
     root.dir = c.dir;
+    teardownInteractive(); // stop any preview/observers from a previous render
     root.innerHTML = '';
 
     // ---------- nav ----------
@@ -212,16 +304,18 @@ export function initLanding(root, { onLaunch }) {
       <div class="lp-stats">
         ${c.stats.map((s) => `<div class="lp-stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('')}
       </div>`;
+    // Live, interactive preview running the real engine.
     const heroArt = el('div', 'lp-hero-art');
     heroArt.innerHTML = `
-      <div class="lp-card lp-card-a"></div>
-      <div class="lp-card lp-card-b"></div>
-      <div class="lp-card lp-card-c"></div>
-      <div class="lp-glow"></div>`;
+      <div class="lp-glow"></div>
+      <div class="lp-preview-frame">
+        <canvas class="lp-preview-canvas" aria-label="Live preview"></canvas>
+      </div>
+      <div class="lp-preview-chips"></div>`;
     hero.append(heroText, heroArt);
 
     // ---------- about ----------
-    const about = el('section', 'lp-section');
+    const about = el('section', 'lp-section lp-reveal');
     about.id = 'about';
     about.innerHTML = `
       <h2 class="lp-h2">${c.about.title}</h2>
@@ -236,7 +330,7 @@ export function initLanding(root, { onLaunch }) {
       </div>`;
 
     // ---------- how it works ----------
-    const how = el('section', 'lp-section lp-section-alt');
+    const how = el('section', 'lp-section lp-section-alt lp-reveal');
     how.id = 'how';
     how.innerHTML = `
       <h2 class="lp-h2">${c.how.title}</h2>
@@ -251,7 +345,7 @@ export function initLanding(root, { onLaunch }) {
       </div>`;
 
     // ---------- features ----------
-    const features = el('section', 'lp-section');
+    const features = el('section', 'lp-section lp-reveal');
     features.id = 'features';
     features.innerHTML = `
       <h2 class="lp-h2">${c.features.title}</h2>
@@ -265,7 +359,7 @@ export function initLanding(root, { onLaunch }) {
       </div>`;
 
     // ---------- pricing ----------
-    const pricing = el('section', 'lp-section lp-section-alt');
+    const pricing = el('section', 'lp-section lp-section-alt lp-reveal');
     pricing.id = 'pricing';
     pricing.innerHTML = `
       <h2 class="lp-h2">${c.pricing.title}</h2>
@@ -290,7 +384,7 @@ export function initLanding(root, { onLaunch }) {
       <p class="lp-note">${c.pricing.note}</p>`;
 
     // ---------- final CTA + footer ----------
-    const cta = el('section', 'lp-cta-band');
+    const cta = el('section', 'lp-cta-band lp-reveal');
     cta.innerHTML = `
       <h2 class="lp-h2">${c.finalCta.title}</h2>
       <p class="lp-section-lead">${c.finalCta.sub}</p>
@@ -307,6 +401,9 @@ export function initLanding(root, { onLaunch }) {
     root
       .querySelectorAll('#lp-launch-nav, #lp-launch-hero, #lp-launch-final, .lp-plan-cta')
       .forEach((b) => b.addEventListener('click', () => onLaunch()));
+
+    setupHeroPreview(root);
+    setupReveal(root);
   }
 
   render();

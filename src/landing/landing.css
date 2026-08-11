@@ -1,8 +1,16 @@
 /* Landing page — reuses the app's theme tokens (defined in styles/app.css). */
 
 #landing {
-  min-height: 100vh;
+  /* Own scroll container: the global `body { overflow:hidden }` (for the studio)
+     otherwise clips the page, so the mouse wheel can't scroll it. A fixed
+     viewport height + overflow-y makes the landing scroll normally. */
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   background:
     radial-gradient(1200px 600px at 80% -10%, rgba(108, 92, 255, 0.18), transparent 60%),
     radial-gradient(900px 500px at 0% 10%, rgba(255, 92, 157, 0.12), transparent 55%),
@@ -178,11 +186,77 @@
   color: var(--text-mute);
 }
 
-/* hero art — floating cards */
+/* hero art — live interactive preview */
 .lp-hero-art {
   position: relative;
-  height: 340px;
+  height: auto;
 }
+.lp-preview-frame {
+  position: relative;
+  width: 100%;
+}
+.lp-preview-canvas {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+  border: 1px solid var(--border-2);
+  box-shadow: var(--shadow);
+  background: var(--bg-2);
+}
+.lp-preview-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.lp-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-2);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.lp-chip:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.lp-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* scroll-reveal for sections */
+.lp-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.lp-reveal.lp-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* legacy floating-card art (kept for reference; no longer rendered) */
+.lp-hero-art .lp-card {
+  position: absolute;
+  border-radius: 18px;
+  border: 1px solid var(--border-2);
 .lp-hero-art .lp-card {
   position: absolute;
   border-radius: 18px;
