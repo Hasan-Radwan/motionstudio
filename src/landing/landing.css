@@ -286,10 +286,6 @@
   position: absolute;
   border-radius: 18px;
   border: 1px solid var(--border-2);
-.lp-hero-art .lp-card {
-  position: absolute;
-  border-radius: 18px;
-  border: 1px solid var(--border-2);
   box-shadow: var(--shadow);
 }
 .lp-card-a {

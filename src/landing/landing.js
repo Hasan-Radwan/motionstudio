@@ -160,22 +160,27 @@ function setupHeroSpiral(root) {
 function setupReveal(root) {
   const targets = [...root.querySelectorAll('.lp-reveal')];
   const reveal = (el) => el.classList.add('lp-in');
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          reveal(e.target);
-          io.unobserve(e.target);
-        }
-      }
-    },
-    { root, threshold: 0.05, rootMargin: '0px 0px -8% 0px' }
-  );
-  targets.forEach((t) => io.observe(t));
-  _observers.push(io);
-  // Failsafe: guarantee everything becomes visible even if IO doesn't fire.
-  const timer = setTimeout(() => targets.forEach(reveal), 2500);
+  // Failsafe FIRST: content is guaranteed visible shortly even if anything below
+  // throws or the observer never fires.
+  const timer = setTimeout(() => targets.forEach(reveal), 2000);
   _observers.push({ disconnect: () => clearTimeout(timer) });
+  try {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            reveal(e.target);
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { root, threshold: 0.05, rootMargin: '0px 0px -8% 0px' }
+    );
+    targets.forEach((t) => io.observe(t));
+    _observers.push(io);
+  } catch {
+    targets.forEach(reveal);
+  }
 }
 
 const COPY = {
@@ -477,7 +482,11 @@ export function initLanding(root, { onLaunch }) {
       .querySelectorAll('#lp-launch-nav, #lp-launch-hero, #lp-launch-final, .lp-plan-cta')
       .forEach((b) => b.addEventListener('click', () => onLaunch()));
 
-    setupHeroSpiral(root);
+    try {
+      setupHeroSpiral(root);
+    } catch (e) {
+      console.error('hero spiral failed', e);
+    }
     setupReveal(root);
   }
 
