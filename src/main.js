@@ -653,14 +653,12 @@ function onAccountClick() {
 // the language changes.
 function relocalizeStudio() {
   appEl.dir = isRTL() ? 'rtl' : 'ltr';
-  $('btn-upload').textContent = t('Upload image');
-  $('btn-mockup').textContent = t('Mockup');
   $('btn-projects').textContent = t('My projects');
   $('btn-export').textContent = t('Export');
   $('btn-home').textContent = t('Home');
   $('btn-lang').textContent = isRTL() ? 'EN' : 'ع';
   updateAccountButton();
-  hintEl.innerHTML = `<p>${t('Drop an image anywhere, or click')} <strong>${t('Upload image')}</strong>.</p>`;
+  hintEl.innerHTML = `<p>${t('Drop an image anywhere to start.')}</p>`;
   // Rebuild the gallery (category titles) and the data-driven panels.
   gallery = buildGallery(galleryEl, {
     activeId: state.templateId,
@@ -680,11 +678,12 @@ async function boot() {
     onSelect: (tpl) => selectTemplate(tpl),
   });
 
-  // Stage drop / topbar upload / paste all fill the first empty slot.
+  // Stage drop / paste fill the first empty slot (per-slot upload lives in the
+  // media panel). No topbar upload button any more.
   initDropzone({
     stage: stageEl,
     fileInput: $('file-input'),
-    uploadBtn: $('btn-upload'),
+    uploadBtn: null,
     onImage: (img, file) => setSlotImage(firstEmptySlot(), img, file),
   });
 
@@ -709,7 +708,6 @@ async function boot() {
     bgInput.value = '';
   });
 
-  $('btn-mockup').addEventListener('click', openMockupPicker);
   $('btn-projects').addEventListener('click', openProjects);
   $('btn-export').addEventListener('click', () =>
     openExportDialog(renderer, currentTemplate().name)
@@ -751,14 +749,12 @@ async function boot() {
   // panels/gallery already built in the current language (they call t()), so this
   // mainly fixes the static topbar/hint and flips RTL.
   appEl.dir = isRTL() ? 'rtl' : 'ltr';
-  $('btn-upload').textContent = t('Upload image');
-  $('btn-mockup').textContent = t('Mockup');
   $('btn-projects').textContent = t('My projects');
   $('btn-export').textContent = t('Export');
   $('btn-home').textContent = t('Home');
   $('btn-lang').textContent = isRTL() ? 'EN' : 'ع';
   updateAccountButton();
-  hintEl.innerHTML = `<p>${t('Drop an image anywhere, or click')} <strong>${t('Upload image')}</strong>.</p>`;
+  hintEl.innerHTML = `<p>${t('Drop an image anywhere to start.')}</p>`;
 
   // Fetch Arabic web-font glyphs in the background; the RAF preview loop adopts
   // them on font-swap, so Arabic text sharpens up as soon as they arrive.

@@ -43,11 +43,12 @@ export function initDropzone({ stage, fileInput, uploadBtn, onImage }) {
     handleFile(file);
   });
 
-  uploadBtn.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
-    handleFile(fileInput.files?.[0]);
-    fileInput.value = '';
-  });
+  if (uploadBtn) uploadBtn.addEventListener('click', () => fileInput.click());
+  if (fileInput)
+    fileInput.addEventListener('change', () => {
+      handleFile(fileInput.files?.[0]);
+      fileInput.value = '';
+    });
 
   // paste from clipboard
   window.addEventListener('paste', (e) => {
