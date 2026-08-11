@@ -5,96 +5,177 @@
 
 import './landing.css';
 import { getLang, setLang, onLang } from '../i18n.js';
-import { Renderer } from '../engine/renderer.js';
-import { getTemplate, defaultParams, getPlaceholder } from '../templates/index.js';
 
-// Templates showcased in the live hero preview (cycled automatically).
-const PREVIEW_IDS = ['coverflow', 'ribbonFlow', 'mosaic', 'cube', 'arcCarousel', 'polaroidStack'];
+const TAU = Math.PI * 2;
 
-// Live preview lifecycle (recreated on each render / language change).
-let _preview = null;
-let _rotateTimer = null;
+// Interactive lifecycle (recreated on each render / language change).
+let _heroStop = null;
 let _observers = [];
 
 function teardownInteractive() {
-  if (_preview) {
-    _preview.stop();
-    _preview = null;
-  }
-  if (_rotateTimer) {
-    clearInterval(_rotateTimer);
-    _rotateTimer = null;
+  if (_heroStop) {
+    _heroStop();
+    _heroStop = null;
   }
   _observers.forEach((o) => o.disconnect());
   _observers = [];
 }
 
-// Live hero preview: runs the real engine, cycling through showcase templates,
-// with clickable chips to switch. Pauses automatically when off-screen/hidden.
-function setupHeroPreview(root) {
-  const canvas = root.querySelector('.lp-preview-canvas');
-  const chipsWrap = root.querySelector('.lp-preview-chips');
-  if (!canvas || !chipsWrap) return;
+// Original spiral-vortex hero background: soft rounded gradient cards drift along
+// an Archimedean spiral from the outer edge toward the centre, rotating to follow
+// the curve and fading in/out at the ends. Pure Canvas2D, DPR-aware, and pauses
+// when off-screen. Returns a stop() teardown.
+function startHeroSpiral(canvas) {
+  const ctx = canvas.getContext('2d');
+  const parent = canvas.parentElement;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  let w = 0;
+  let h = 0;
+  let raf = 0;
+  let running = true;
+  let t = 0;
+  let last = 0;
 
-  _preview = new Renderer(canvas);
-  _preview
-    .setPlaceholder(getPlaceholder())
-    .setBackground({ type: 'linear', angle: 135, stops: ['#1b1e26', '#0d0e12'] });
+  // Elegant, on-brand gradient pairs (stable per card index).
+  const PALETTE = [
+    ['#6c5cff', '#c86dff'],
+    ['#ff7a45', '#ff477e'],
+    ['#1f9c6f', '#57c7d4'],
+    ['#8a7dff', '#6c5cff'],
+    ['#ff5c9d', '#ffd166'],
+    ['#3ad1c6', '#6c5cff'],
+  ];
+  const COUNT = 18;
+  const TURNS = 3;
 
-  let idx = 0;
-  const ids = PREVIEW_IDS;
-  const apply = (i) => {
-    idx = ((i % ids.length) + ids.length) % ids.length;
-    const tpl = getTemplate(ids[idx]);
-    _preview.setTemplate(tpl).setParams(defaultParams(tpl));
-    [...chipsWrap.children].forEach((el2, ci) => el2.classList.toggle('active', ci === idx));
+  const resize = () => {
+    w = parent.clientWidth || 800;
+    h = parent.clientHeight || 600;
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
   };
-  const startTimer = () => {
-    clearInterval(_rotateTimer);
-    _rotateTimer = setInterval(() => apply(idx + 1), 3500);
+  resize();
+  const ro = new ResizeObserver(resize);
+  ro.observe(parent);
+
+  const roundRect = (c, x, y, rw, rh, r) => {
+    const rr = Math.min(r, rw / 2, rh / 2);
+    c.beginPath();
+    c.moveTo(x + rr, y);
+    c.arcTo(x + rw, y, x + rw, y + rh, rr);
+    c.arcTo(x + rw, y + rh, x, y + rh, rr);
+    c.arcTo(x, y + rh, x, y, rr);
+    c.arcTo(x, y, x + rw, y, rr);
+    c.closePath();
   };
 
-  ids.forEach((id, i) => {
-    const b = document.createElement('button');
-    b.className = 'lp-chip';
-    b.textContent = getTemplate(id).name;
-    b.addEventListener('click', () => {
-      apply(i);
-      startTimer();
-    });
-    chipsWrap.appendChild(b);
-  });
+  const frame = (now) => {
+    if (!running) return;
+    const dt = last ? (now - last) / 1000 : 0;
+    last = now;
+    t = (t + Math.min(dt, 0.05) * 0.05) % 1; // slow, unobtrusive drift
 
-  apply(0);
-  startTimer();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
 
-  // Only animate while visible (also pauses when the studio hides the landing).
+    const cx = w / 2;
+    const cy = h / 2;
+    const R = 0.62 * Math.max(w, h);
+    const cardW = Math.min(w, h) * 0.16;
+    const fade = 0.14;
+
+    const cards = [];
+    for (let i = 0; i < COUNT; i++) {
+      const p = (((i / COUNT + t) % 1) + 1) % 1; // 0 outer .. 1 centre
+      cards.push({ p, pal: PALETTE[i % PALETTE.length] });
+    }
+    cards.sort((a, b) => a.p - b.p); // outer first, centre cards drawn on top
+
+    for (const { p, pal } of cards) {
+      const ang = p * TURNS * TAU + t * TAU;
+      const rad = R * (1 - p);
+      const x = cx + rad * Math.cos(ang);
+      const y = cy + rad * Math.sin(ang);
+      const s = 0.3 + 0.7 * (rad / R); // smaller toward the centre
+      let alpha = 1;
+      if (p < fade) alpha = p / fade;
+      else if (p > 1 - fade) alpha = (1 - p) / fade;
+      if (alpha <= 0.01) continue;
+
+      const cw = cardW * s;
+      const ch = cw * 1.28;
+      const g = ctx.createLinearGradient(-cw / 2, -ch / 2, cw / 2, ch / 2);
+      g.addColorStop(0, pal[0]);
+      g.addColorStop(1, pal[1]);
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(ang + Math.PI / 2); // follow the spiral tangent
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur = cardW * 0.22 * s;
+      ctx.shadowOffsetY = cardW * 0.06 * s;
+      roundRect(ctx, -cw / 2, -ch / 2, cw, ch, cw * 0.14);
+      ctx.fillStyle = g;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+
+  // Pause the loop while the hero is off-screen (or the studio hides the landing).
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
-      if (!_preview) return;
-      if (e.isIntersecting) _preview.start();
-      else _preview.stop();
+      if (e.isIntersecting && !running) {
+        running = true;
+        last = 0;
+        raf = requestAnimationFrame(frame);
+      } else if (!e.isIntersecting) {
+        running = false;
+        cancelAnimationFrame(raf);
+      }
     }
   });
   io.observe(canvas);
-  _observers.push(io);
+
+  return () => {
+    running = false;
+    cancelAnimationFrame(raf);
+    ro.disconnect();
+    io.disconnect();
+  };
 }
 
-// Reveal sections as they scroll into view (inside the landing scroll container).
+function setupHeroSpiral(root) {
+  const canvas = root.querySelector('.lp-hero-canvas');
+  if (canvas) _heroStop = startHeroSpiral(canvas);
+}
+
+// Reveal sections as they scroll into view (inside the landing scroll container),
+// with a safety timer so content is never left hidden if the observer misfires.
 function setupReveal(root) {
+  const targets = [...root.querySelectorAll('.lp-reveal')];
+  const reveal = (el) => el.classList.add('lp-in');
   const io = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
-          e.target.classList.add('lp-in');
+          reveal(e.target);
           io.unobserve(e.target);
         }
       }
     },
-    { root, threshold: 0.12 }
+    { root, threshold: 0.05, rootMargin: '0px 0px -8% 0px' }
   );
-  root.querySelectorAll('.lp-reveal').forEach((t) => io.observe(t));
+  targets.forEach((t) => io.observe(t));
   _observers.push(io);
+  // Failsafe: guarantee everything becomes visible even if IO doesn't fire.
+  const timer = setTimeout(() => targets.forEach(reveal), 2500);
+  _observers.push({ disconnect: () => clearTimeout(timer) });
 }
 
 const COPY = {
@@ -289,30 +370,24 @@ export function initLanding(root, { onLaunch }) {
         <button class="lp-btn lp-btn-primary" id="lp-launch-nav">${c.nav.launch}</button>
       </div>`;
 
-    // ---------- hero ----------
+    // ---------- hero ---------- (full-bleed spiral vortex + centred content)
     const hero = el('header', 'lp-hero');
     hero.id = 'top';
-    const heroText = el('div', 'lp-hero-text');
-    heroText.innerHTML = `
-      <span class="lp-badge">${c.hero.badge}</span>
-      <h1 class="lp-h1">${c.hero.title}</h1>
-      <p class="lp-lead">${c.hero.sub}</p>
-      <div class="lp-hero-cta">
-        <button class="lp-btn lp-btn-primary lp-btn-lg" id="lp-launch-hero">${c.hero.ctaPrimary}</button>
-        <a class="lp-btn lp-btn-ghost lp-btn-lg" href="#how">${c.hero.ctaSecondary}</a>
-      </div>
-      <div class="lp-stats">
-        ${c.stats.map((s) => `<div class="lp-stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('')}
+    hero.innerHTML = `
+      <canvas class="lp-hero-canvas" aria-hidden="true"></canvas>
+      <div class="lp-hero-scrim"></div>
+      <div class="lp-hero-center">
+        <span class="lp-badge">${c.hero.badge}</span>
+        <h1 class="lp-h1">${c.hero.title}</h1>
+        <p class="lp-lead">${c.hero.sub}</p>
+        <div class="lp-hero-cta">
+          <button class="lp-btn lp-btn-primary lp-btn-lg" id="lp-launch-hero">${c.hero.ctaPrimary}</button>
+          <a class="lp-btn lp-btn-ghost lp-btn-lg" href="#how">${c.hero.ctaSecondary}</a>
+        </div>
+        <div class="lp-stats">
+          ${c.stats.map((s) => `<div class="lp-stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('')}
+        </div>
       </div>`;
-    // Live, interactive preview running the real engine.
-    const heroArt = el('div', 'lp-hero-art');
-    heroArt.innerHTML = `
-      <div class="lp-glow"></div>
-      <div class="lp-preview-frame">
-        <canvas class="lp-preview-canvas" aria-label="Live preview"></canvas>
-      </div>
-      <div class="lp-preview-chips"></div>`;
-    hero.append(heroText, heroArt);
 
     // ---------- about ----------
     const about = el('section', 'lp-section lp-reveal');
@@ -402,7 +477,7 @@ export function initLanding(root, { onLaunch }) {
       .querySelectorAll('#lp-launch-nav, #lp-launch-hero, #lp-launch-final, .lp-plan-cta')
       .forEach((b) => b.addEventListener('click', () => onLaunch()));
 
-    setupHeroPreview(root);
+    setupHeroSpiral(root);
     setupReveal(root);
   }
 
