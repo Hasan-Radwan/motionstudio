@@ -6,7 +6,7 @@
 
 import { openModal } from './modal.js';
 import { PLANS, PLAN_ORDER, currentPlan, setPlan } from '../account/account.js';
-import { openCheckout, onCheckoutComplete } from '../billing/paddle.js';
+import { openCheckout, onCheckoutComplete, previewPrices } from '../billing/paddle.js';
 import { PADDLE, paddleConfigured } from '../billing/paddleConfig.js';
 import { currentUser } from '../auth/auth.js';
 import { openAuthModal } from './authModal.js';
@@ -23,6 +23,7 @@ export function openPlansModal() {
     render(body) {
       let period = 'monthly'; // 'monthly' | 'yearly'
       let pendingPlan = null;
+      let priceMap = {}; // { priceId: "US$9.00" } fetched from Paddle
 
       const off = onCheckoutComplete((data) => {
         const planId = data.plan || pendingPlan;
@@ -69,9 +70,12 @@ export function openPlansModal() {
             'plan-card' + (id === 'pro' ? ' featured' : '') + (id === cur ? ' current' : '');
 
           const per = period === 'yearly' ? t('/ yr') : t('/ mo');
+          const real = priceMap[proPriceId()]; // real localized price from Paddle
           const price = isFree
             ? `<span class="plan-free">${t('Free')}</span>`
-            : `<span class="plan-cur">$</span>${proPrice()}<span class="plan-per">${per}</span>`;
+            : real
+              ? `${real}<span class="plan-per">${per}</span>`
+              : `<span class="plan-cur">$</span>${proPrice()}<span class="plan-per">${per}</span>`;
 
           card.innerHTML = `
             <h3>${plan.name}</h3>
@@ -115,6 +119,12 @@ export function openPlansModal() {
         ? t('Secure checkout by Paddle.')
         : t('Demo mode — add your Paddle keys to enable real checkout.');
       body.append(toggle, grid, note);
+
+      // Fetch the real, localized prices from Paddle so the cards match checkout.
+      previewPrices([PADDLE.prices.pro_monthly, PADDLE.prices.pro_yearly]).then((m) => {
+        priceMap = m;
+        renderCards();
+      });
     },
   });
 }

@@ -51,6 +51,30 @@ export async function loadPaddle() {
   return _loading;
 }
 
+// Fetch the REAL, localized formatted prices for the given Price IDs from Paddle
+// (so the displayed price always matches the checkout page). Returns a map
+// { priceId: "US$9.00" }. Empty when Paddle isn't configured.
+export async function previewPrices(priceIds) {
+  const ids = (priceIds || []).filter(Boolean);
+  if (!paddleConfigured() || !ids.length) return {};
+  try {
+    const Paddle = await loadPaddle();
+    const res = await Paddle.PricePreview({
+      items: ids.map((priceId) => ({ priceId, quantity: 1 })),
+    });
+    const out = {};
+    for (const li of res?.data?.details?.lineItems || []) {
+      const id = li?.price?.id;
+      const total = li?.formattedTotals?.total ?? li?.formattedTotals?.subtotal;
+      if (id && total) out[id] = total;
+    }
+    return out;
+  } catch (e) {
+    console.warn('Paddle PricePreview failed:', e);
+    return {};
+  }
+}
+
 // Open checkout for a specific Paddle Price ID. `planId` is passed through to the
 // mock completion event so callers can grant the right plan. Returns true if a
 // REAL checkout opened, false if we ran the mock.
