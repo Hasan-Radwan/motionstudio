@@ -37,13 +37,14 @@ function startHeroSpiral(canvas) {
   let last = 0;
 
   // Elegant, on-brand gradient pairs (stable per card index).
+  // Rotion App brand gradient family (blue → green / cyan).
   const PALETTE = [
-    ['#6c5cff', '#c86dff'],
-    ['#ff7a45', '#ff477e'],
-    ['#1f9c6f', '#57c7d4'],
-    ['#8a7dff', '#6c5cff'],
-    ['#ff5c9d', '#ffd166'],
-    ['#3ad1c6', '#6c5cff'],
+    ['#2563eb', '#00e5a0'],
+    ['#3b82f6', '#22d3ee'],
+    ['#00e5a0', '#2563eb'],
+    ['#1d4ed8', '#38bdf8'],
+    ['#0ea5e9', '#00e5a0'],
+    ['#2563eb', '#38bdf8'],
   ];
   const COUNT = 18;
   const TURNS = 3;
@@ -201,7 +202,7 @@ const COPY = {
       ['100%', 'يعمل محلياً وبخصوصية'],
     ],
     about: {
-      title: 'ما هو Motion Studio؟',
+      title: 'ما هو Rotion؟',
       body: 'أداة تصميم حركة تعمل بالكامل في متصفحك: لا تثبيت، ولا حساب، ولا رفع لصورك إلى أي خادم. مبنية للمصممين وصنّاع المحتوى الذين يريدون تحويل صورة ثابتة أو شعار إلى فيديو جذّاب للسوشيال ميديا في دقائق.',
       points: [
         ['🔒', 'خصوصية كاملة', 'كل المعالجة تحدث على جهازك؛ صورك لا تغادره أبداً.'],
@@ -262,7 +263,7 @@ const COPY = {
       note: '* الأسعار هنا مبدئية للعرض — عدّلها حسب خطتك التجارية.',
     },
     finalCta: { title: 'جاهز لتحريك تصميمك؟', sub: 'ابدأ الآن مجاناً — بلا تسجيل.', btn: 'افتح الاستوديو' },
-    footer: '© 2026 Motion Studio — يعمل بالكامل في متصفحك.',
+    footer: '© 2026 Rotion App — يعمل بالكامل في متصفحك.',
   },
   en: {
     dir: 'ltr',
@@ -281,7 +282,7 @@ const COPY = {
       ['100%', 'local & private'],
     ],
     about: {
-      title: 'What is Motion Studio?',
+      title: 'What is Rotion?',
       body: 'A motion-design tool that runs entirely in your browser: no install, no account, nothing uploaded to any server. Built for designers and creators who want to turn a still image or logo into an eye-catching social video in minutes.',
       points: [
         ['🔒', 'Fully private', 'All processing happens on your device — your images never leave it.'],
@@ -342,7 +343,7 @@ const COPY = {
       note: '* Prices shown are placeholders — edit to match your business plan.',
     },
     finalCta: { title: 'Ready to animate your design?', sub: 'Start now for free — no signup.', btn: 'Open the studio' },
-    footer: '© 2026 Motion Studio — runs entirely in your browser.',
+    footer: '© 2026 Rotion App — runs entirely in your browser.',
   },
 };
 
@@ -363,7 +364,7 @@ export function initLanding(root, { onLaunch }) {
     // ---------- nav ----------
     const nav = el('nav', 'lp-nav');
     nav.innerHTML = `
-      <a class="lp-brand" href="#top"><span class="lp-brand-mark">◆</span> Motion Studio</a>
+      <a class="lp-brand" href="#top"><img class="lp-brand-icon" src="/favicon.svg" alt="" width="26" height="26" /> Rotion</a>
       <div class="lp-nav-links">
         <a href="#about">${c.nav.about}</a>
         <a href="#how">${c.nav.how}</a>

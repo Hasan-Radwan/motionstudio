@@ -1,18 +1,19 @@
 :root {
-  --bg: #0d0e12;
-  --bg-2: #14161c;
-  --bg-3: #1b1e26;
-  --panel: #171922;
-  --border: #262a35;
-  --border-2: #323744;
-  --text: #e8eaf0;
-  --text-dim: #9aa0ae;
-  --text-mute: #6b7180;
-  --accent: #6c5cff;
-  --accent-2: #8a7dff;
-  --accent-glow: rgba(108, 92, 255, 0.35);
+  /* Rotion App brand palette: navy base #0A1622, blue #2563EB → green #00E5A0 */
+  --bg: #0a1622;
+  --bg-2: #0e1c2b;
+  --bg-3: #14273a;
+  --panel: #0e1a28;
+  --border: #1d3145;
+  --border-2: #294056;
+  --text: #e8eef5;
+  --text-dim: #93a4b8;
+  --text-mute: #647588;
+  --accent: #2563eb;
+  --accent-2: #00e5a0;
+  --accent-glow: rgba(37, 99, 235, 0.35);
   --danger: #ff5c7a;
-  --ok: #34d19d;
+  --ok: #00e5a0;
   --radius: 12px;
   --radius-sm: 8px;
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
@@ -71,8 +72,16 @@ button {
   font-size: 18px;
   filter: drop-shadow(0 0 8px var(--accent-glow));
 }
+.brand-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
 .brand-name {
   font-size: 15px;
+  font-weight: 800;
 }
 
 .topbar-actions {
