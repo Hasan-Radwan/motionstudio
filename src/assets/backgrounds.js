@@ -8,11 +8,11 @@ export const BACKGROUNDS = [
   { id: 'dark', name: 'Charcoal', type: 'solid', color: '#0e0f13' },
   { id: 'light', name: 'Paper', type: 'solid', color: '#f4f5f7' },
   {
-    id: 'grad-violet',
-    name: 'Violet',
+    id: 'grad-brand',
+    name: 'Rotion',
     type: 'linear',
     angle: 135,
-    stops: ['#6c5cff', '#c86dff', '#ff8fb1'],
+    stops: ['#2563eb', '#0ea5e9', '#00e5a0'],
   },
   {
     id: 'grad-ocean',
@@ -46,7 +46,7 @@ export const BACKGROUNDS = [
     id: 'mesh-aurora',
     name: 'Aurora',
     type: 'mesh',
-    colors: ['#6c5cff', '#ff5c9d', '#3ad1c6', '#12131a'],
+    colors: ['#2563eb', '#00e5a0', '#38bdf8', '#0a1622'],
   },
   {
     id: 'mesh-peach',

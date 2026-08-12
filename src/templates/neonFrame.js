@@ -15,7 +15,7 @@ export const controls = [
   { key: 'radius', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 14, unit: '%' },
 ];
 
-const HUES = ['#6c5cff', '#c86dff', '#ff5c9d', '#3ad1c6', '#ffd166', '#6c5cff'];
+const HUES = ['#2563eb', '#38bdf8', '#00e5a0', '#22d3ee', '#2563eb'];
 
 // A framed image ringed by a rotating multicolour glow — a premium ad / logo
 // look. The conic gradient spins one full turn per loop (seamless).
@@ -55,7 +55,7 @@ export function render(ctx, t, p, { image, w, h }) {
   roundedRectPath(ctx, x, y, fw, fh, r);
   ctx.lineWidth = lw;
   ctx.strokeStyle = stroke;
-  ctx.shadowColor = 'rgba(140,120,255,0.85)';
+  ctx.shadowColor = 'rgba(37,99,235,0.85)';
   ctx.shadowBlur = (min * p.glow) / 100;
   ctx.stroke();
   ctx.stroke(); // second pass intensifies the glow

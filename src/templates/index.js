@@ -89,9 +89,9 @@ export function getPlaceholder() {
   c.height = 750;
   const ctx = c.getContext('2d');
   const g = ctx.createLinearGradient(0, 0, c.width, c.height);
-  g.addColorStop(0, '#6c5cff');
-  g.addColorStop(0.5, '#a06bff');
-  g.addColorStop(1, '#ff6b9d');
+  g.addColorStop(0, '#2563EB');
+  g.addColorStop(0.5, '#0ea5e9');
+  g.addColorStop(1, '#00E5A0');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, c.width, c.height);
   // a few UI-ish shapes so templates have structure to show
