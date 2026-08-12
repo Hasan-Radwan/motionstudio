@@ -51,11 +51,10 @@ export async function loadPaddle() {
   return _loading;
 }
 
-// Open checkout for a plan. `plan` is a plan object with a `paddleKey` naming its
-// entry in PADDLE.prices (e.g. 'pro'). Returns true if a REAL checkout opened,
-// false if we ran the mock (caller can then optimistically grant the plan).
-export async function openCheckout(plan, { email } = {}) {
-  const priceId = plan.paddleKey ? PADDLE.prices[plan.paddleKey] : null;
+// Open checkout for a specific Paddle Price ID. `planId` is passed through to the
+// mock completion event so callers can grant the right plan. Returns true if a
+// REAL checkout opened, false if we ran the mock.
+export async function openCheckout({ priceId, planId, email } = {}) {
   if (paddleConfigured() && priceId) {
     const Paddle = await loadPaddle();
     Paddle.Checkout.open({
@@ -71,6 +70,6 @@ export async function openCheckout(plan, { email } = {}) {
   }
   // Mock: no real payment — simulate a completed checkout so the UI can proceed.
   await new Promise((r) => setTimeout(r, 300));
-  _completeHandlers.forEach((fn) => fn({ name: 'checkout.completed', mock: true, plan: plan.id }));
+  _completeHandlers.forEach((fn) => fn({ name: 'checkout.completed', mock: true, plan: planId }));
   return false;
 }

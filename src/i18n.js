@@ -266,6 +266,9 @@ const AR = {
   'Switch to Free': 'التحويل للمجاني',
   Free: 'مجاني',
   '/ mo': '/ شهرياً',
+  '/ yr': '/ سنوياً',
+  Monthly: 'شهري',
+  Yearly: 'سنوي',
   'Secure checkout by Paddle.': 'دفع آمن عبر Paddle.',
   'Demo mode — add your Paddle keys to enable real checkout.':
     'وضع تجريبي — أضِف مفاتيح Paddle لتفعيل الدفع الحقيقي.',

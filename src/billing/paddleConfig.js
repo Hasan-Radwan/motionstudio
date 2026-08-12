@@ -10,10 +10,10 @@
 
 export const PADDLE = {
   environment: 'sandbox', // 'sandbox' | 'production'
-  token: '', // TODO: paste your Paddle client-side token
+  token: 'test_c12a6d5e8d6a66477537a9c2cdd', // client-side token (public, sandbox)
   prices: {
-    pro: '', // TODO: pri_... for the Pro plan
-    teams: '', // TODO: pri_... for the Teams plan
+    pro_monthly: 'pri_01kztvf231geaxheap975b4vet',
+    pro_yearly: 'pri_01kzv1fgj6grqjt2gz8xs6vjqb',
   },
 };
 

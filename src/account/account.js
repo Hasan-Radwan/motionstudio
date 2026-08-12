@@ -19,24 +19,17 @@ export const PLANS = {
   pro: {
     id: 'pro',
     name: 'Pro',
-    price: 9,
-    paddleKey: 'pro',
-    maxQuality: 4320, // up to 8K
-    ownWatermark: true,
-    appWatermark: false,
-  },
-  teams: {
-    id: 'teams',
-    name: 'Teams',
-    price: 29,
-    paddleKey: 'teams',
+    priceMonthly: 9,
+    priceYearly: 90,
+    paddleKeyMonthly: 'pro_monthly',
+    paddleKeyYearly: 'pro_yearly',
     maxQuality: 4320, // up to 8K
     ownWatermark: true,
     appWatermark: false,
   },
 };
 
-export const PLAN_ORDER = ['free', 'pro', 'teams'];
+export const PLAN_ORDER = ['free', 'pro'];
 
 const KEY = 'ms-plan:'; // + userId
 const listeners = new Set();
