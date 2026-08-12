@@ -198,7 +198,7 @@ const COPY = {
     },
     stats: [
       ['+41', 'قالب حركة احترافي'],
-      ['4K', 'تصدير MP4 / WebM'],
+      ['8K', 'تصدير MP4 / WebM'],
       ['100%', 'يعمل محلياً وبخصوصية'],
     ],
     about: {
@@ -278,7 +278,7 @@ const COPY = {
     },
     stats: [
       ['41+', 'pro motion templates'],
-      ['4K', 'MP4 / WebM export'],
+      ['8K', 'MP4 / WebM export'],
       ['100%', 'local & private'],
     ],
     about: {
