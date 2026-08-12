@@ -5,6 +5,8 @@
 
 import './landing.css';
 import { getLang, setLang, onLang } from '../i18n.js';
+import { previewPrices } from '../billing/paddle.js';
+import { PADDLE, paddleConfigured } from '../billing/paddleConfig.js';
 
 const TAU = Math.PI * 2;
 
@@ -182,6 +184,30 @@ function setupReveal(root) {
   } catch {
     targets.forEach(reveal);
   }
+}
+
+// Replace the static Pro price with the real, localized Paddle price — but only
+// once the visitor scrolls to the pricing section (so Paddle.js loads lazily).
+function setupLivePricing(root, perLabel) {
+  if (!paddleConfigured()) return;
+  const pricing = root.querySelector('#pricing');
+  const priceEl = root.querySelector('.lp-plan[data-tier="pro"] .lp-plan-price');
+  if (!pricing || !priceEl) return;
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        io.disconnect();
+        previewPrices([PADDLE.prices.pro_monthly]).then((m) => {
+          const real = m[PADDLE.prices.pro_monthly];
+          if (real) priceEl.innerHTML = `${real}<span class="lp-plan-per">${perLabel}</span>`;
+        });
+      }
+    },
+    { root }
+  );
+  io.observe(pricing);
+  _observers.push(io);
 }
 
 const COPY = {
@@ -435,7 +461,7 @@ export function initLanding(root, { onLaunch }) {
         ${c.pricing.tiers
           .map(
             (tr) => `
-          <div class="lp-plan${tr.featured ? ' lp-plan-featured' : ''}">
+          <div class="lp-plan${tr.featured ? ' lp-plan-featured' : ''}" data-tier="${tr.price === '0' ? 'free' : 'pro'}">
             ${tr.featured ? `<span class="lp-plan-tag">${c.pricing.popular}</span>` : ''}
             <h3 class="lp-plan-name">${tr.name}</h3>
             <div class="lp-plan-price"><span class="lp-plan-cur">$</span>${tr.price}<span class="lp-plan-per">${c.pricing.perMonth}</span></div>
@@ -475,6 +501,7 @@ export function initLanding(root, { onLaunch }) {
       console.error('hero spiral failed', e);
     }
     setupReveal(root);
+    setupLivePricing(root, c.pricing.perMonth);
   }
 
   render();
