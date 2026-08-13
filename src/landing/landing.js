@@ -218,7 +218,7 @@ const COPY = {
     hero: {
       badge: '✦ استوديو موشن في متصفحك',
       title: 'حوّل صورك إلى فيديوهات متحركة احترافية',
-      sub: 'اختر قالباً، أضف صورك، عدّل بحرية، وصدّر فيديو حلقة سلس بجودة تصل إلى 4K — كل ذلك داخل المتصفح دون أي رفع لخوادم.',
+      sub: 'اختر قالباً، أضف صورك، عدّل بحرية، وصدّر فيديو حلقة سلس بجودة تصل إلى 8K — كل ذلك داخل المتصفح دون أي رفع لخوادم.',
       ctaPrimary: 'ابدأ مجاناً',
       ctaSecondary: 'شاهد كيف يعمل',
     },
@@ -291,7 +291,7 @@ const COPY = {
     hero: {
       badge: '✦ A motion studio in your browser',
       title: 'Turn your images into professional motion videos',
-      sub: 'Pick a template, add your images, customize freely, and export a seamless looping video up to 4K — entirely in your browser, nothing uploaded.',
+      sub: 'Pick a template, add your images, customize freely, and export a seamless looping video up to 8K — entirely in your browser, nothing uploaded.',
       ctaPrimary: 'Start free',
       ctaSecondary: 'See how it works',
     },
