@@ -539,6 +539,23 @@
   font-size: 13px;
   border-top: 1px solid var(--border);
 }
+.lp-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 22px;
+  margin-bottom: 14px;
+}
+.lp-legal a {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.lp-legal a:hover {
+  color: var(--accent-2);
+}
+.lp-copy {
+  margin: 0;
+}
 
 /* ---------- responsive ---------- */
 @media (max-width: 860px) {

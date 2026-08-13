@@ -282,6 +282,12 @@ const COPY = {
       note: '* الأسعار هنا مبدئية للعرض — عدّلها حسب خطتك التجارية.',
     },
     finalCta: { title: 'جاهز لتحريك تصميمك؟', sub: 'ابدأ الآن مجاناً — بلا تسجيل.', btn: 'افتح الاستوديو' },
+    legal: {
+      terms: 'شروط الاستخدام',
+      privacy: 'سياسة الخصوصية',
+      refund: 'سياسة الاسترداد',
+      contact: 'تواصل معنا',
+    },
     footer: '© 2026 Rotion App — يعمل بالكامل في متصفحك.',
   },
   en: {
@@ -355,6 +361,12 @@ const COPY = {
       note: '* Prices shown are placeholders — edit to match your business plan.',
     },
     finalCta: { title: 'Ready to animate your design?', sub: 'Start now for free — no signup.', btn: 'Open the studio' },
+    legal: {
+      terms: 'Terms of Service',
+      privacy: 'Privacy Policy',
+      refund: 'Refund Policy',
+      contact: 'Contact',
+    },
     footer: '© 2026 Rotion App — runs entirely in your browser.',
   },
 };
@@ -482,7 +494,16 @@ export function initLanding(root, { onLaunch }) {
       <h2 class="lp-h2">${c.finalCta.title}</h2>
       <p class="lp-section-lead">${c.finalCta.sub}</p>
       <button class="lp-btn lp-btn-primary lp-btn-lg" id="lp-launch-final">${c.finalCta.btn}</button>`;
-    const footer = el('footer', 'lp-footer', c.footer);
+    // Footer + legal links (also required for payment-provider approval).
+    const footer = el('footer', 'lp-footer');
+    footer.innerHTML = `
+      <nav class="lp-legal">
+        <a href="/terms">${c.legal.terms}</a>
+        <a href="/privacy">${c.legal.privacy}</a>
+        <a href="/refund">${c.legal.refund}</a>
+        <a href="mailto:graphicspeed@gmail.com">${c.legal.contact}</a>
+      </nav>
+      <p class="lp-copy">${c.footer}</p>`;
 
     root.append(nav, hero, about, how, features, pricing, cta, footer);
 
