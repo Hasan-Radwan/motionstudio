@@ -18,6 +18,6 @@
   ],
   // Public Google OAuth client ID (used server-side to verify sign-in tokens).
   "vars": {
-    "GOOGLE_CLIENT_ID": ""
+    "GOOGLE_CLIENT_ID": "294268681567-l10jimo722ojekr9q6pkoj9psl8pfsm4.apps.googleusercontent.com"
   }
 }

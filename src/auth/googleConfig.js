@@ -9,7 +9,8 @@
 // GOOGLE_CLIENT_ID (wrangler.jsonc), which the server uses to verify tokens.
 // No client secret is needed for ID-token sign-in.
 
-export const GOOGLE_CLIENT_ID = ''; // e.g. 1234567890-abc.apps.googleusercontent.com
+export const GOOGLE_CLIENT_ID =
+  '294268681567-l10jimo722ojekr9q6pkoj9psl8pfsm4.apps.googleusercontent.com';
 
 export function googleConfigured() {
   return !!GOOGLE_CLIENT_ID;
