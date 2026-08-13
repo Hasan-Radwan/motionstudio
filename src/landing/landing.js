@@ -501,7 +501,7 @@ export function initLanding(root, { onLaunch }) {
         <a href="/terms">${c.legal.terms}</a>
         <a href="/privacy">${c.legal.privacy}</a>
         <a href="/refund">${c.legal.refund}</a>
-        <a href="mailto:graphicspeed@gmail.com">${c.legal.contact}</a>
+        <a href="/contact">${c.legal.contact}</a>
       </nav>
       <p class="lp-copy">${c.footer}</p>`;
 

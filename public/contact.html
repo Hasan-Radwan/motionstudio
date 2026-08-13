@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/legal.css" />
+    <title>اتصل بنا · Contact — Rotion App</title>
+    <meta name="description" content="تواصل مع فريق Rotion App — Contact the Rotion App team." />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26" /> Rotion</a>
+      <div class="langs">
+        <button id="btn-ar" class="active">ع</button>
+        <button id="btn-en">EN</button>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <!-- ==================== ARABIC ==================== -->
+      <section data-lang="ar">
+        <h1>اتصل بنا</h1>
+        <p class="lead">
+          يسعدنا سماع رأيك أو مساعدتك في أي استفسار حول <strong>Rotion App</strong> — الحساب،
+          الاشتراك، أو الدعم التقني.
+        </p>
+
+        <div class="box">
+          <p>
+            <strong>البريد الإلكتروني للدعم:</strong><br />
+            <a href="mailto:support@rotionapp.com">support@rotionapp.com</a>
+          </p>
+          <p style="margin-bottom: 0">زمن الردّ المعتاد: خلال يومَي عمل.</p>
+        </div>
+
+        <h2>للاستفسارات المالية والاسترداد</h2>
+        <p>
+          راجع <a href="/refund">سياسة الاسترداد</a>. تُدار المدفوعات عبر
+          <strong>Paddle</strong> (البائع المسجّل)، ويمكنك أيضاً التواصل معه مباشرة عبر الرابط
+          الموجود في بريد الفاتورة.
+        </p>
+
+        <h2>الصفحات القانونية</h2>
+        <p>
+          <a href="/terms">شروط الاستخدام</a> ·
+          <a href="/privacy">سياسة الخصوصية</a> ·
+          <a href="/refund">سياسة الاسترداد</a>
+        </p>
+      </section>
+
+      <!-- ==================== ENGLISH ==================== -->
+      <section data-lang="en" class="hidden">
+        <h1>Contact us</h1>
+        <p class="lead">
+          We'd love to hear from you or help with any question about <strong>Rotion App</strong> —
+          account, subscription, or technical support.
+        </p>
+
+        <div class="box">
+          <p>
+            <strong>Support email:</strong><br />
+            <a href="mailto:support@rotionapp.com">support@rotionapp.com</a>
+          </p>
+          <p style="margin-bottom: 0">Typical response time: within 2 business days.</p>
+        </div>
+
+        <h2>Billing &amp; refunds</h2>
+        <p>
+          See our <a href="/refund">Refund Policy</a>. Payments are handled by
+          <strong>Paddle</strong> (Merchant of Record); you can also contact them directly via the
+          link in your invoice email.
+        </p>
+
+        <h2>Legal</h2>
+        <p>
+          <a href="/terms">Terms of Service</a> ·
+          <a href="/privacy">Privacy Policy</a> ·
+          <a href="/refund">Refund Policy</a>
+        </p>
+      </section>
+    </div>
+
+    <footer class="bot">
+      <a href="/">Rotion App</a> ·
+      <a href="/terms">شروط الاستخدام / Terms</a> ·
+      <a href="/privacy">سياسة الخصوصية / Privacy</a> ·
+      <a href="/refund">سياسة الاسترداد / Refunds</a> ·
+      <a href="/contact">اتصل بنا / Contact</a>
+    </footer>
+
+    <script>
+      (function () {
+        var ar = document.querySelector('[data-lang="ar"]');
+        var en = document.querySelector('[data-lang="en"]');
+        var bAr = document.getElementById('btn-ar');
+        var bEn = document.getElementById('btn-en');
+        function set(lang) {
+          var isAr = lang === 'ar';
+          ar.classList.toggle('hidden', !isAr);
+          en.classList.toggle('hidden', isAr);
+          bAr.classList.toggle('active', isAr);
+          bEn.classList.toggle('active', !isAr);
+          document.documentElement.lang = lang;
+          document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+          try { localStorage.setItem('ms-lang', lang); } catch (e) {}
+        }
+        bAr.addEventListener('click', function () { set('ar'); });
+        bEn.addEventListener('click', function () { set('en'); });
+        var saved = 'ar';
+        try { saved = localStorage.getItem('ms-lang') || 'ar'; } catch (e) {}
+        set(saved);
+      })();
+    </script>
+  </body>
+</html>
