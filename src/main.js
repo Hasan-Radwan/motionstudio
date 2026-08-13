@@ -21,7 +21,7 @@ import { setCardShape } from './engine/canvasUtils.js';
 import { initLanding } from './landing/landing.js';
 import { t, isRTL, toggleLang, onLang } from './i18n.js';
 import { onAuth, currentUser, signOut, isSignedIn } from './auth/auth.js';
-import { currentPlan, onPlan } from './account/account.js';
+import { currentPlan, onPlan, syncEntitlement } from './account/account.js';
 import { openAuthModal } from './ui/authModal.js';
 import { openPlansModal } from './ui/plansModal.js';
 import { setProjectScope } from './store/projects.js';
@@ -720,9 +720,11 @@ async function boot() {
   onAuth((user) => {
     setProjectScope(user?.id || '');
     updateAccountButton();
+    if (user?.email) syncEntitlement(user.email); // adopt server-confirmed plan
   });
   onPlan(() => updateAccountButton());
   setProjectScope(currentUser()?.id || '');
+  if (currentUser()?.email) syncEntitlement(currentUser().email);
   // Language changes (from here or the landing) re-localize the studio if booted.
   onLang(() => {
     if (studioBooted) relocalizeStudio();

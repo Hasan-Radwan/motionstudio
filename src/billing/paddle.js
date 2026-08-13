@@ -84,6 +84,8 @@ export async function openCheckout({ priceId, planId, email } = {}) {
     Paddle.Checkout.open({
       items: [{ priceId, quantity: 1 }],
       customer: email ? { email } : undefined,
+      // Rides on the webhook events so the server can map the subscription to us.
+      customData: email ? { email } : undefined,
       settings: {
         displayMode: 'overlay',
         theme: 'dark',

@@ -63,6 +63,24 @@ export function qualityAllowed(px) {
   return px <= currentPlan().maxQuality;
 }
 
+// Fetch the authoritative plan from the server (Paddle webhook → KV) and apply it.
+// Upgrade-only: if the server reports a paid plan we adopt it; we don't downgrade
+// the local (optimistic) state here, so a freshly-completed checkout isn't wiped
+// before the webhook lands. Fails silently when the API isn't deployed yet.
+export async function syncEntitlement(email) {
+  if (!email) return;
+  try {
+    const r = await fetch(`/api/entitlement?email=${encodeURIComponent(email)}`, {
+      cache: 'no-store',
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d && d.plan && d.plan !== 'free' && PLANS[d.plan]) setPlan(d.plan);
+  } catch {
+    /* API not available yet — keep local state */
+  }
+}
+
 // Re-load the plan whenever the signed-in user changes (guest → free).
 onAuth((user) => load(user?.id || null));
 load(currentUser()?.id || null);
