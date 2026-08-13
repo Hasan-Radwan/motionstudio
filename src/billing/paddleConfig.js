@@ -9,11 +9,11 @@
 // live on a server — see NOTES at the bottom.
 
 export const PADDLE = {
-  environment: 'sandbox', // 'sandbox' | 'production'
-  token: 'test_c12a6d5e8d6a66477537a9c2cdd', // client-side token (public, sandbox)
+  environment: 'production', // 'sandbox' | 'production'
+  token: 'live_a40c4d6775f53e7d1a68aaed10b', // client-side token (public, live)
   prices: {
-    pro_monthly: 'pri_01kztvf231geaxheap975b4vet',
-    pro_yearly: 'pri_01kzv1fgj6grqjt2gz8xs6vjqb',
+    pro_monthly: 'pri_01kzx846h1a2gbk899zpwr6cmz',
+    pro_yearly: 'pri_01kzx85yg8ctytb16ayfy90ha9',
   },
 };
 
