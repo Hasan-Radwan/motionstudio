@@ -88,6 +88,64 @@ async function handleWebhook(request, env) {
   return new Response('ok', { status: 200 });
 }
 
+// ---- Google Sign-In: verify the ID token (JWT, RS256) against Google's keys ----
+function b64urlToBytes(s) {
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = s.length % 4 ? 4 - (s.length % 4) : 0;
+  const bin = atob(s + '='.repeat(pad));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+const b64urlToStr = (s) => new TextDecoder().decode(b64urlToBytes(s));
+
+async function verifyGoogleIdToken(idToken, clientId) {
+  const parts = String(idToken || '').split('.');
+  if (parts.length !== 3) return null;
+  const [h, p, sig] = parts;
+  let header, payload;
+  try {
+    header = JSON.parse(b64urlToStr(h));
+    payload = JSON.parse(b64urlToStr(p));
+  } catch {
+    return null;
+  }
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.aud !== clientId) return null;
+  if (!['accounts.google.com', 'https://accounts.google.com'].includes(payload.iss)) return null;
+  if (payload.exp && payload.exp < now) return null;
+  if (payload.email_verified === false) return null;
+
+  // Fetch Google's public keys and verify the RS256 signature.
+  const certs = await fetch('https://www.googleapis.com/oauth2/v3/certs').then((r) => r.json());
+  const jwk = (certs.keys || []).find((k) => k.kid === header.kid);
+  if (!jwk) return null;
+  const key = await crypto.subtle.importKey(
+    'jwk',
+    jwk,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+  const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64urlToBytes(sig), enc.encode(`${h}.${p}`));
+  if (!ok) return null;
+  return { email: (payload.email || '').toLowerCase(), name: payload.name || '' };
+}
+
+async function handleGoogleAuth(request, env) {
+  const clientId = env.GOOGLE_CLIENT_ID;
+  if (!clientId) return json({ error: 'not_configured' }, 400);
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'bad_json' }, 400);
+  }
+  const profile = await verifyGoogleIdToken(body?.credential, clientId);
+  if (!profile || !profile.email) return json({ error: 'invalid_token' }, 401);
+  return json({ email: profile.email, name: profile.name });
+}
+
 async function handleEntitlement(url, env) {
   const email = (url.searchParams.get('email') || '').toLowerCase();
   if (!email || !env.SUBS) return json({ plan: 'free', status: null });
@@ -104,6 +162,9 @@ export default {
     }
     if (url.pathname === '/api/entitlement' && request.method === 'GET') {
       return handleEntitlement(url, env);
+    }
+    if (url.pathname === '/api/auth/google' && request.method === 'POST') {
+      return handleGoogleAuth(request, env);
     }
     // Everything else → the static site (SPA fallback handled by assets config).
     return env.ASSETS.fetch(request);

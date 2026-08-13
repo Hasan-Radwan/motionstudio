@@ -257,6 +257,8 @@ const AR = {
   Email: 'البريد الإلكتروني',
   Password: 'كلمة المرور',
   'Local demo accounts — no real server yet.': 'حسابات تجريبية محلية — لا خادم فعلي بعد.',
+  or: 'أو',
+  'Google sign-in failed. Please try again.': 'فشل تسجيل الدخول بجوجل. حاول مجدداً.',
   'Signed in as': 'مسجّل الدخول كـ',
   Plan: 'الباقة',
   Upgrade: 'ترقية',

@@ -15,5 +15,9 @@
   // KV store for subscription state (sub:<email> -> { plan, status }).
   "kv_namespaces": [
     { "binding": "SUBS", "id": "0b66cf5aa8fe4f98afc1e6148d6b47db" }
-  ]
+  ],
+  // Public Google OAuth client ID (used server-side to verify sign-in tokens).
+  "vars": {
+    "GOOGLE_CLIENT_ID": ""
+  }
 }

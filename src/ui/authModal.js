@@ -2,7 +2,8 @@
 // On success it closes and calls onDone(user).
 
 import { openModal } from './modal.js';
-import { signIn, signUp, AUTH_ERRORS } from '../auth/auth.js';
+import { signIn, signUp, signInWithProfile, AUTH_ERRORS } from '../auth/auth.js';
+import { renderGoogleButton, verifyGoogleToken, googleConfigured } from '../auth/google.js';
 import { t, getLang } from '../i18n.js';
 
 export function openAuthModal({ onDone, startTab = 'signin' } = {}) {
@@ -42,7 +43,29 @@ export function openAuthModal({ onDone, startTab = 'signin' } = {}) {
       note.textContent = t('Local demo accounts — no real server yet.');
 
       form.append(nameField.wrap, emailField.wrap, passField.wrap, err, submit, note);
-      body.append(tabs, form);
+
+      // Google Sign-In (rendered above the email form when configured).
+      if (googleConfigured()) {
+        const gWrap = document.createElement('div');
+        gWrap.className = 'google-signin';
+        const divider = document.createElement('div');
+        divider.className = 'auth-divider';
+        divider.innerHTML = `<span>${t('or')}</span>`;
+        renderGoogleButton(gWrap, async (idToken) => {
+          err.textContent = '';
+          try {
+            const profile = await verifyGoogleToken(idToken);
+            const user = await signInWithProfile(profile);
+            close();
+            onDone && onDone(user);
+          } catch {
+            err.textContent = t('Google sign-in failed. Please try again.');
+          }
+        });
+        body.append(tabs, gWrap, divider, form);
+      } else {
+        body.append(tabs, form);
+      }
 
       function sync() {
         tabSignin.classList.toggle('active', mode === 'signin');

@@ -99,6 +99,25 @@ export function signOut() {
   emit();
 }
 
+// Sign in via a verified external profile (e.g. Google). No password; the user is
+// created in the local store on first sign-in and keyed by email like any other.
+export async function signInWithProfile({ email, name }) {
+  email = String(email || '').trim().toLowerCase();
+  if (!email) throw new Error('auth/missing-fields');
+  const users = localProvider._users();
+  if (!users[email]) {
+    users[email] = { id: email, email, name: name || email.split('@')[0], provider: 'google' };
+    localProvider._save(users);
+  } else if (name && !users[email].name) {
+    users[email].name = name;
+    localProvider._save(users);
+  }
+  localStorage.setItem(SESSION, email);
+  _user = { id: email, email, name: users[email].name };
+  emit();
+  return _user;
+}
+
 // Human-readable messages for the known error codes (used by the auth modal).
 export const AUTH_ERRORS = {
   'auth/missing-fields': { en: 'Please fill in all fields.', ar: 'يرجى تعبئة كل الحقول.' },
