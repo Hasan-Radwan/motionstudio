@@ -85,6 +85,7 @@ const AR = {
   // text panel
   Text: 'النص',
   'Add text': 'أضف نصاً',
+  'Upload font': 'رفع خط',
   'Remove this text': 'حذف هذا النص',
   'Add text (optional)…': 'أضف نصاً (اختياري)…',
   Font: 'الخط',

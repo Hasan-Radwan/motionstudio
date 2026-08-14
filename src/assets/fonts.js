@@ -17,13 +17,28 @@ export const FONTS = [
 
 export const DEFAULT_FONT = FONTS[0];
 
+// User-uploaded fonts, registered at runtime (see fontLoader.js). Each:
+// { id, name, stack, custom: true }.
+let CUSTOM = [];
+
+// Built-in + user fonts, for the Font picker.
+export function getAllFonts() {
+  return [...FONTS, ...CUSTOM];
+}
+
+// Register an already-loaded custom font family so the picker + renderer see it.
+export function registerCustomFont({ id, name, family }) {
+  if (CUSTOM.some((f) => f.id === id)) return;
+  CUSTOM.push({ id, name, stack: `"${family}", sans-serif`, custom: true });
+}
+
 export function resolveFontStack(id) {
-  const f = FONTS.find((x) => x.id === id) || DEFAULT_FONT;
+  const f = getAllFonts().find((x) => x.id === id) || DEFAULT_FONT;
   return f.stack;
 }
 
 // Whether a font family is a right-to-left (Arabic) face.
 export function isRtlFont(id) {
-  const f = FONTS.find((x) => x.id === id);
+  const f = getAllFonts().find((x) => x.id === id);
   return !!(f && f.rtl);
 }

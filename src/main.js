@@ -16,6 +16,7 @@ import { buildBackgroundPanel } from './ui/backgroundPanel.js';
 import { buildTextPanel } from './ui/textPanel.js';
 import { buildWatermarkPanel } from './ui/watermarkPanel.js';
 import { DEFAULT_FONT } from './assets/fonts.js';
+import { loadFontFromBlob } from './assets/fontLoader.js';
 import { initDropzone, loadImageFromBlob } from './ui/dropzone.js';
 import { setCardShape } from './engine/canvasUtils.js';
 import { initLanding } from './landing/landing.js';
@@ -51,6 +52,7 @@ const textEl = $('panel-text');
 const wmEl = $('panel-watermark');
 const wmInput = $('wm-input');
 const bgInput = $('bg-input');
+const fontInput = $('font-input');
 const stageEl = $('stage');
 const hintEl = $('stage-hint');
 const metaEl = $('stage-meta');
@@ -68,6 +70,8 @@ const state = {
   slotCount: 1,
   // global card shape applied by card-based templates
   cardShape: 'original',
+  // user-uploaded fonts: { id, name, family, blob }
+  customFonts: [],
   // optional text overlays (one or more independent layers)
   texts: [makeText()],
   // optional logo watermark (img/blob filled when the user adds a logo)
@@ -134,6 +138,7 @@ function scheduleAutosave() {
       duration: renderer.duration,
       slotCount: state.slotCount,
       cardShape: state.cardShape,
+      customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
       texts: state.texts,
       watermark: serializeWatermark(state.watermark),
       watermarkBlob: state.watermark.blob || null,
@@ -379,7 +384,21 @@ function renderText() {
       renderText();
       scheduleAutosave();
     },
+    onUploadFont: () => fontInput.click(),
   });
+}
+
+// Register an uploaded font file, then make the new font available in the picker.
+async function receiveFont(file) {
+  if (!file) return;
+  try {
+    const { id, name, family } = await loadFontFromBlob(file, file.name);
+    state.customFonts.push({ id, name, family, blob: file });
+    renderText(); // rebuild so the Font picker shows it
+    scheduleAutosave();
+  } catch (e) {
+    console.error('Font load failed', e);
+  }
 }
 
 // ---------- Watermark (logo) editor ----------
@@ -467,6 +486,7 @@ function openProjects() {
           duration: renderer.duration,
           slotCount: state.slotCount,
           cardShape: state.cardShape,
+          customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
           texts: state.texts,
           watermark: serializeWatermark(state.watermark),
           watermarkBlob: state.watermark.blob || null,
@@ -575,6 +595,19 @@ async function restoreState(rec) {
   // Restore the global card shape.
   state.cardShape = rec.cardShape || 'original';
   setCardShape(state.cardShape);
+
+  // Re-register any uploaded fonts (keeping their stable family names) so text
+  // layers referencing them render again.
+  state.customFonts = [];
+  for (const f of rec.customFonts || []) {
+    if (!f?.blob) continue;
+    try {
+      await loadFontFromBlob(f.blob, f.name, f.family);
+      state.customFonts.push({ id: f.id, name: f.name, family: f.family, blob: f.blob });
+    } catch (e) {
+      console.warn('Could not restore font', f.name, e);
+    }
+  }
 
   if (rec.aspect) renderer.setAspect(rec.aspect);
   if (rec.duration) renderer.setDuration(rec.duration);
@@ -706,6 +739,13 @@ async function boot() {
     const file = bgInput.files?.[0];
     if (file) receiveBackgroundImage(file);
     bgInput.value = '';
+  });
+
+  // Custom font picker.
+  fontInput.addEventListener('change', () => {
+    const file = fontInput.files?.[0];
+    if (file) receiveFont(file);
+    fontInput.value = '';
   });
 
   $('btn-projects').addEventListener('click', openProjects);

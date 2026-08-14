@@ -1237,3 +1237,5 @@ select,
   .stage { min-height: 42vh; }
   .tpl-card { flex-basis: 124px; width: 124px; }
 }
+
+.text-font-btn { margin-top: 8px; }

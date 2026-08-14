@@ -4,7 +4,7 @@
 // past the first can be removed. Partial edits report via onChange(index, patch)
 // and never rebuild the panel, so the textarea keeps focus while typing.
 
-import { FONTS } from '../assets/fonts.js';
+import { getAllFonts } from '../assets/fonts.js';
 import { t } from '../i18n.js';
 
 const WEIGHTS = [
@@ -124,7 +124,7 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
   ta.addEventListener('input', () => fields.classList.toggle('hidden', !ta.value));
 
   fields.appendChild(
-    selectField(t('Font'), FONTS.map((f) => ({ value: f.id, label: f.name })), text.font, (v) =>
+    selectField(t('Font'), getAllFonts().map((f) => ({ value: f.id, label: f.name })), text.font, (v) =>
       patch({ font: v })
     )
   );
@@ -159,7 +159,7 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
   return layer;
 }
 
-export function buildTextPanel(root, { texts, onChange, onAdd, onRemove }) {
+export function buildTextPanel(root, { texts, onChange, onAdd, onRemove, onUploadFont }) {
   root.innerHTML = '';
   root.appendChild(sectionTitle(t('Text')));
 
@@ -177,4 +177,12 @@ export function buildTextPanel(root, { texts, onChange, onAdd, onRemove }) {
   add.innerHTML = `<span class="text-add-icon">＋</span><span>${t('Add text')}</span>`;
   add.addEventListener('click', () => onAdd());
   root.appendChild(add);
+
+  // "Upload font" — register a user font file for use on any text layer.
+  const font = document.createElement('button');
+  font.type = 'button';
+  font.className = 'text-add-btn text-font-btn';
+  font.innerHTML = `<span class="text-add-icon">⬆</span><span>${t('Upload font')}</span>`;
+  font.addEventListener('click', () => onUploadFont && onUploadFont());
+  root.appendChild(font);
 }

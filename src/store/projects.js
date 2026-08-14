@@ -46,6 +46,7 @@ export async function saveProject(state, existingKey) {
     duration: state.duration,
     slotCount: state.slotCount || imageBlobs.length || 1,
     cardShape: state.cardShape || 'original',
+    customFonts: state.customFonts || null,
     texts: state.texts || (state.text ? [state.text] : null),
     watermark: state.watermark || null,
     watermarkBlob: state.watermarkBlob || null,
