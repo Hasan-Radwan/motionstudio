@@ -15,6 +15,8 @@ import { buildMediaPanel } from './ui/mediaPanel.js';
 import { buildBackgroundPanel } from './ui/backgroundPanel.js';
 import { buildTextPanel } from './ui/textPanel.js';
 import { buildWatermarkPanel } from './ui/watermarkPanel.js';
+import { buildAudioPanel } from './ui/audioPanel.js';
+import { audioAllowed } from './account/account.js';
 import { DEFAULT_FONT } from './assets/fonts.js';
 import { loadFontFromBlob } from './assets/fontLoader.js';
 import { initDropzone, loadImageFromBlob } from './ui/dropzone.js';
@@ -53,6 +55,9 @@ const wmEl = $('panel-watermark');
 const wmInput = $('wm-input');
 const bgInput = $('bg-input');
 const fontInput = $('font-input');
+const audioEl = $('panel-audio');
+const audioInput = $('audio-input');
+const previewAudio = $('preview-audio');
 const stageEl = $('stage');
 const hintEl = $('stage-hint');
 const metaEl = $('stage-meta');
@@ -72,6 +77,8 @@ const state = {
   cardShape: 'original',
   // user-uploaded fonts: { id, name, family, blob }
   customFonts: [],
+  // optional audio track (Pro): { blob, name, volume, url }
+  audio: { blob: null, name: '', volume: 100, url: null },
   // optional text overlays (one or more independent layers)
   texts: [makeText()],
   // optional logo watermark (img/blob filled when the user adds a logo)
@@ -139,6 +146,7 @@ function scheduleAutosave() {
       slotCount: state.slotCount,
       cardShape: state.cardShape,
       customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
+      audio: { name: state.audio.name, volume: state.audio.volume, blob: state.audio.blob },
       texts: state.texts,
       watermark: serializeWatermark(state.watermark),
       watermarkBlob: state.watermark.blob || null,
@@ -433,6 +441,80 @@ async function receiveWatermarkLogo(file) {
   scheduleAutosave();
 }
 
+// ---------- Audio (Pro) ----------
+let audioPlaying = false;
+
+function renderAudio() {
+  buildAudioPanel(audioEl, {
+    audio: state.audio,
+    playing: audioPlaying,
+    onPick: () => audioInput.click(),
+    onClear: clearAudio,
+    onChange: (patch) => {
+      state.audio = { ...state.audio, ...patch };
+      applyAudioVolume();
+      scheduleAutosave();
+    },
+    onTogglePlay: () => {
+      if (audioPlaying) previewAudio.pause();
+      else previewAudio.play().catch(() => {});
+    },
+    onUpgrade: openPlansModal,
+  });
+}
+
+function applyAudioVolume() {
+  previewAudio.volume = Math.max(0, Math.min(1, (state.audio.volume ?? 100) / 100));
+}
+
+// Point the preview <audio> at the current track (or clear it).
+function applyAudioSource() {
+  if (state.audio.url) {
+    if (previewAudio.src !== state.audio.url) previewAudio.src = state.audio.url;
+    applyAudioVolume();
+  } else {
+    previewAudio.removeAttribute('src');
+    previewAudio.load();
+  }
+}
+
+async function receiveAudio(file) {
+  if (!file || !file.type.startsWith('audio/')) return;
+  if (!audioAllowed()) {
+    openPlansModal();
+    return;
+  }
+  if (state.audio.url) URL.revokeObjectURL(state.audio.url);
+  const url = URL.createObjectURL(file);
+  state.audio = { blob: file, name: file.name, volume: state.audio.volume ?? 100, url };
+  applyAudioSource();
+  previewAudio.play().catch(() => {});
+  renderAudio();
+  scheduleAutosave();
+}
+
+function clearAudio() {
+  previewAudio.pause();
+  if (state.audio.url) URL.revokeObjectURL(state.audio.url);
+  state.audio = { blob: null, name: '', volume: state.audio.volume ?? 100, url: null };
+  applyAudioSource();
+  renderAudio();
+  scheduleAutosave();
+}
+
+previewAudioBindings();
+function previewAudioBindings() {
+  // keep the panel play/pause button in sync with actual playback state
+  previewAudio.addEventListener('play', () => {
+    audioPlaying = true;
+    renderAudio();
+  });
+  previewAudio.addEventListener('pause', () => {
+    audioPlaying = false;
+    renderAudio();
+  });
+}
+
 // ---------- Mockup picker ----------
 function openMockupPicker() {
   openModal({
@@ -487,6 +569,7 @@ function openProjects() {
           slotCount: state.slotCount,
           cardShape: state.cardShape,
           customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
+          audio: { name: state.audio.name, volume: state.audio.volume, blob: state.audio.blob },
           texts: state.texts,
           watermark: serializeWatermark(state.watermark),
           watermarkBlob: state.watermark.blob || null,
@@ -591,6 +674,16 @@ async function restoreState(rec) {
   }
   renderer.setWatermark(state.watermark);
   renderWatermark();
+
+  // Restore the audio track (recreate its object URL from the saved blob).
+  if (state.audio.url) URL.revokeObjectURL(state.audio.url);
+  const ra = rec.audio;
+  state.audio =
+    ra && ra.blob
+      ? { blob: ra.blob, name: ra.name || 'audio', volume: ra.volume ?? 100, url: URL.createObjectURL(ra.blob) }
+      : { blob: null, name: '', volume: ra?.volume ?? 100, url: null };
+  applyAudioSource();
+  renderAudio();
 
   // Restore the global card shape.
   state.cardShape = rec.cardShape || 'original';
@@ -701,6 +794,7 @@ function relocalizeStudio() {
   renderText();
   renderWatermark();
   renderBackground();
+  renderAudio();
   updateMeta();
 }
 
@@ -748,9 +842,18 @@ async function boot() {
     fontInput.value = '';
   });
 
+  // Audio picker.
+  audioInput.addEventListener('change', () => {
+    const file = audioInput.files?.[0];
+    if (file) receiveAudio(file);
+    audioInput.value = '';
+  });
+
   $('btn-projects').addEventListener('click', openProjects);
   $('btn-export').addEventListener('click', () =>
-    openExportDialog(renderer, currentTemplate().name)
+    openExportDialog(renderer, currentTemplate().name, {
+      audio: audioAllowed() && state.audio.blob ? { blob: state.audio.blob, volume: state.audio.volume } : null,
+    })
   );
   $('btn-home').addEventListener('click', goHome);
   $('brand-home').addEventListener('click', goHome);
@@ -762,7 +865,10 @@ async function boot() {
     updateAccountButton();
     if (user?.email) syncEntitlement(user.email); // adopt server-confirmed plan
   });
-  onPlan(() => updateAccountButton());
+  onPlan(() => {
+    updateAccountButton();
+    renderAudio(); // audio panel gate depends on the plan
+  });
   setProjectScope(currentUser()?.id || '');
   if (currentUser()?.email) syncEntitlement(currentUser().email);
   // Language changes (from here or the landing) re-localize the studio if booted.
@@ -782,6 +888,7 @@ async function boot() {
   renderBackground();
   renderText();
   renderWatermark();
+  renderAudio();
   fitCanvas();
   // Keep the preview fitted as the stage area changes (window resize, panels).
   new ResizeObserver(fitCanvas).observe(stageWrapEl);
@@ -833,6 +940,7 @@ function goHome() {
   appEl.classList.add('hidden');
   landingEl.classList.remove('hidden');
   renderer.stop();
+  previewAudio.pause();
   window.scrollTo(0, 0);
 }
 

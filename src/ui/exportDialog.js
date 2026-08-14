@@ -33,7 +33,7 @@ function dims(aspect, quality) {
   return { w: Math.round(w / 2) * 2, h: Math.round(h / 2) * 2 };
 }
 
-export function openExportDialog(renderer, templateName) {
+export function openExportDialog(renderer, templateName, { audio = null } = {}) {
   openModal({
     title: t('Export video'),
     render(body, close) {
@@ -179,6 +179,7 @@ export function openExportDialog(renderer, templateName) {
             duration: state.duration,
             format: state.format,
             transparent,
+            audio,
             onProgress: (p) => {
               fill.style.width = `${Math.round(p * 100)}%`;
               pct.textContent = `${Math.round(p * 100)}%`;

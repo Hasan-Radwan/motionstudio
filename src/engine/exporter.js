@@ -40,6 +40,7 @@ export async function exportVideo({
   duration = 4,
   format = 'mp4', // 'mp4' | 'webm'
   transparent = false,
+  audio = null, // { blob, volume } — muxed as a looped track (WebCodecs path only)
   onProgress = () => {},
 }) {
   // even dimensions required by most codecs
@@ -67,6 +68,7 @@ export async function exportVideo({
         totalFrames,
         format,
         transparent,
+        audio,
         onProgress,
       });
     } catch (err) {
@@ -92,10 +94,28 @@ async function encodeWithWebCodecs({
   totalFrames,
   format,
   transparent,
+  audio,
   onProgress,
 }) {
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d', { alpha: true });
+
+  // Pre-encode the audio (if any) BEFORE building the muxer, so the muxer can be
+  // configured with the right audio params. Failure degrades to video-only.
+  let audioTrack = null;
+  if (audio && audio.blob) {
+    try {
+      audioTrack = await preEncodeAudio({
+        blob: audio.blob,
+        volume: audio.volume,
+        format,
+        duration: totalFrames / fps,
+      });
+    } catch (err) {
+      console.warn('Audio encode failed — exporting without audio:', err);
+      audioTrack = null;
+    }
+  }
 
   let muxer, codec, muxerCodecName;
   if (format === 'webm') {
@@ -116,6 +136,13 @@ async function encodeWithWebCodecs({
         frameRate: fps,
         alpha: !!transparent,
       },
+      ...(audioTrack && {
+        audio: {
+          codec: 'A_OPUS',
+          numberOfChannels: audioTrack.numberOfChannels,
+          sampleRate: audioTrack.sampleRate,
+        },
+      }),
     });
   } else {
     codec = await firstSupportedCodec(
@@ -128,6 +155,13 @@ async function encodeWithWebCodecs({
     muxer = new Mp4Muxer({
       target: new Mp4Target(),
       video: { codec: 'avc', width, height },
+      ...(audioTrack && {
+        audio: {
+          codec: 'aac',
+          numberOfChannels: audioTrack.numberOfChannels,
+          sampleRate: audioTrack.sampleRate,
+        },
+      }),
       fastStart: 'in-memory',
     });
   }
@@ -168,10 +202,77 @@ async function encodeWithWebCodecs({
   }
 
   await encoder.flush();
+
+  // Mux the pre-encoded audio chunks (muxers sort by timestamp on finalize).
+  if (audioTrack) {
+    for (const { chunk, meta } of audioTrack.chunks) muxer.addAudioChunk(chunk, meta);
+  }
+
   muxer.finalize();
   const { buffer } = muxer.target;
   const mime = format === 'webm' ? 'video/webm' : 'video/mp4';
   return new Blob([buffer], { type: mime });
+}
+
+// Decode an audio blob, loop/trim it to `duration` seconds (with volume gain),
+// and encode it to AAC (mp4) or Opus (webm). Returns { numberOfChannels,
+// sampleRate, chunks:[{chunk, meta}] } or throws.
+async function preEncodeAudio({ blob, volume = 100, format, duration }) {
+  if (typeof AudioEncoder === 'undefined' || typeof AudioData === 'undefined') {
+    throw new Error('AudioEncoder unavailable');
+  }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const sampleRate = 48000; // normalize so AAC + Opus both work
+  const actx = new AC({ sampleRate });
+  let buf;
+  try {
+    buf = await actx.decodeAudioData(await blob.arrayBuffer());
+  } finally {
+    actx.close?.();
+  }
+
+  const channels = Math.min(2, buf.numberOfChannels || 1);
+  const gain = Math.max(0, Math.min(1, (volume ?? 100) / 100));
+  const totalFrames = Math.round(duration * sampleRate);
+  const srcLen = buf.length;
+  const src = [];
+  for (let c = 0; c < channels; c++) src.push(buf.getChannelData(Math.min(c, buf.numberOfChannels - 1)));
+
+  const chunks = [];
+  const codec = format === 'webm' ? 'opus' : 'mp4a.40.2';
+  const encoder = new AudioEncoder({
+    output: (chunk, meta) => chunks.push({ chunk, meta }),
+    error: (e) => {
+      throw e;
+    },
+  });
+  encoder.configure({ codec, sampleRate, numberOfChannels: channels, bitrate: 128_000 });
+
+  const block = 2048; // frames per AudioData
+  const usPerFrame = 1_000_000 / sampleRate;
+  for (let pos = 0; pos < totalFrames; pos += block) {
+    const n = Math.min(block, totalFrames - pos);
+    const data = new Float32Array(n * channels); // planar layout
+    for (let c = 0; c < channels; c++) {
+      const ch = src[c];
+      const off = c * n;
+      for (let i = 0; i < n; i++) data[off + i] = ch[(pos + i) % srcLen] * gain;
+    }
+    const frame = new AudioData({
+      format: 'f32-planar',
+      sampleRate,
+      numberOfFrames: n,
+      numberOfChannels: channels,
+      timestamp: Math.round(pos * usPerFrame),
+      data,
+    });
+    encoder.encode(frame);
+    frame.close();
+    if (encoder.encodeQueueSize > 8) await new Promise((r) => setTimeout(r, 0));
+  }
+  await encoder.flush();
+  encoder.close();
+  return { numberOfChannels: channels, sampleRate, chunks };
 }
 
 async function encodeWithMediaRecorder({

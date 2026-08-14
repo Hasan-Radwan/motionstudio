@@ -15,6 +15,7 @@ export const PLANS = {
     maxQuality: 720, // export cap (px, shorter side)
     ownWatermark: false, // may use their own logo watermark
     appWatermark: true, // forced app credit watermark
+    audio: false, // music/audio upload
   },
   pro: {
     id: 'pro',
@@ -26,8 +27,14 @@ export const PLANS = {
     maxQuality: 4320, // up to 8K
     ownWatermark: true,
     appWatermark: false,
+    audio: true,
   },
 };
+
+// Whether the current plan may upload/use audio.
+export function audioAllowed() {
+  return !!currentPlan().audio;
+}
 
 export const PLAN_ORDER = ['free', 'pro'];
 

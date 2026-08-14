@@ -1239,3 +1239,27 @@ select,
 }
 
 .text-font-btn { margin-top: 8px; }
+
+/* ---------- Audio panel ---------- */
+.audio-lock {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--accent);
+  background: var(--accent-glow); color: var(--accent-2); font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+}
+.audio-add-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--border-2);
+  background: transparent; color: var(--text-dim); font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+}
+.audio-add-btn:hover { color: var(--accent-2); border-color: var(--accent); background: var(--accent-glow); }
+.audio-add-icon { font-size: 15px; line-height: 1; }
+.audio-note { margin: 8px 0 0; }
+.audio-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.audio-play {
+  width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 8px;
+  border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 12px;
+}
+.audio-play:hover { border-color: var(--accent); }
+.audio-name { flex: 1; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
