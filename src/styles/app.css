@@ -1127,3 +1127,113 @@ select,
 @media (max-width: 720px) {
   .plans-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Mobile / tablet-portrait layout (≤ 820px)
+   The desktop 3-column workspace stacks into a single scrollable
+   column: preview on top, a horizontal template strip, then the
+   settings panel.
+   ============================================================ */
+@media (max-width: 820px) {
+  html,
+  body {
+    height: auto;
+    overflow: auto;
+    -webkit-text-size-adjust: 100%;
+  }
+  #app {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Topbar: wrap actions, compact buttons */
+  .topbar {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .topbar-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .btn {
+    padding: 8px 11px;
+    font-size: 12.5px;
+  }
+
+  /* Stack the workspace */
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+
+  /* Preview first, with a comfortable height */
+  .stage {
+    order: 1;
+    min-height: 46vh;
+  }
+  .stage-canvas-wrap {
+    padding: 14px;
+  }
+  .stage-footer {
+    padding: 0 14px;
+  }
+
+  /* Template gallery → horizontal scrolling strip */
+  .gallery {
+    order: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 10px;
+    padding: 12px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+  .gallery-group-title {
+    display: none;
+  }
+  .tpl-card {
+    flex: 0 0 138px;
+    width: 138px;
+    margin-bottom: 0;
+    scroll-snap-align: start;
+  }
+
+  /* Settings panel → full-width, flows with the page (no inner scroll) */
+  .panel {
+    order: 3;
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    overflow: visible;
+    padding: 16px;
+  }
+
+  /* Export dialog: stack the two-up rows */
+  .modal-row {
+    flex-direction: column;
+  }
+}
+
+/* Extra tightening for small phones */
+@media (max-width: 420px) {
+  .brand-name { display: none; }
+  .btn {
+    padding: 7px 9px;
+    font-size: 12px;
+  }
+  .stage { min-height: 42vh; }
+  .tpl-card { flex-basis: 124px; width: 124px; }
+}
