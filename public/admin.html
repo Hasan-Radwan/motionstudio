@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/legal.css" />
+    <title>لوحة التحكم · Rotion Admin</title>
+    <style>
+      .adm-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
+      .adm-login { max-width: 380px; margin: 60px auto; }
+      .adm-login input {
+        width: 100%; height: 42px; padding: 0 12px; margin: 10px 0; border-radius: 8px;
+        border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 15px;
+      }
+      .adm-btn {
+        width: 100%; height: 42px; border: none; border-radius: 8px; cursor: pointer;
+        background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #fff; font-weight: 700; font-size: 15px;
+      }
+      .adm-tabs { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
+      .adm-tab {
+        padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-2);
+        background: var(--bg-2); color: var(--text-dim); cursor: pointer; font-size: 14px; font-family: inherit;
+      }
+      .adm-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .adm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+      .adm-stat { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+      .adm-stat b { display: block; font-size: 30px; font-weight: 900; }
+      .adm-stat span { color: var(--text-dim); font-size: 13px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th, td { padding: 10px 8px; text-align: right; border-bottom: 1px solid var(--border); }
+      th { color: var(--text-mute); font-weight: 600; }
+      .pill { padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+      .pill.pro { background: rgba(0,229,160,.16); color: var(--accent-2); }
+      .pill.free { background: var(--bg-3); color: var(--text-dim); }
+      .row-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 12px; cursor: pointer; }
+      .adm-search { width: 100%; max-width: 320px; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); margin-bottom: 14px; }
+      .field { margin-bottom: 14px; }
+      .field label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 5px; }
+      .field input, .field textarea, .field select {
+        width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-2);
+        background: var(--bg-3); color: var(--text); font-size: 14px; font-family: inherit;
+      }
+      .adm-msg { color: var(--ok); font-size: 13px; min-height: 18px; }
+      .adm-err { color: var(--danger); font-size: 13px; min-height: 18px; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26" /> Rotion Admin</a>
+      <div class="langs"><button id="signout" class="row-btn hidden">خروج</button></div>
+    </header>
+
+    <!-- Login -->
+    <div class="adm-wrap adm-login" id="login">
+      <h1 style="font-size:24px">لوحة التحكم</h1>
+      <p class="muted">أدخل مفتاح المشرف للدخول.</p>
+      <input id="key" type="password" placeholder="Admin key" autocomplete="off" />
+      <button class="adm-btn" id="enter">دخول</button>
+      <p class="adm-err" id="loginErr"></p>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="adm-wrap hidden" id="dash">
+      <div class="adm-tabs">
+        <button class="adm-tab active" data-tab="overview">نظرة عامة</button>
+        <button class="adm-tab" data-tab="users">المستخدمون</button>
+        <button class="adm-tab" data-tab="content">محتوى الصفحة</button>
+        <button class="adm-tab" data-tab="plans">الباقات والأسعار</button>
+      </div>
+
+      <section id="tab-overview">
+        <div class="adm-stats">
+          <div class="adm-stat"><b id="s-total">–</b><span>إجمالي المستخدمين</span></div>
+          <div class="adm-stat"><b id="s-pro">–</b><span>مشتركو Pro</span></div>
+          <div class="adm-stat"><b id="s-free">–</b><span>مجاني</span></div>
+        </div>
+        <p class="muted">تُبنى قائمة المستخدمين تلقائياً عند تسجيل الدخول.</p>
+      </section>
+
+      <section id="tab-users" class="hidden">
+        <input class="adm-search" id="userSearch" placeholder="بحث بالبريد أو الاسم…" />
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>البريد</th><th>الاسم</th><th>المصدر</th><th>الباقة</th><th>آخر ظهور</th><th>إجراء</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-content" class="hidden">
+        <p class="muted">تعديل عناوين الصفحة الرئيسية (يُطبَّق فوراً على الزوّار).</p>
+        <div class="field"><label>عنوان Hero (عربي)</label><input id="c-heroTitleAr" /></div>
+        <div class="field"><label>وصف Hero (عربي)</label><textarea id="c-heroSubAr" rows="2"></textarea></div>
+        <div class="field"><label>Hero title (English)</label><input id="c-heroTitleEn" /></div>
+        <div class="field"><label>Hero subtitle (English)</label><textarea id="c-heroSubEn" rows="2"></textarea></div>
+        <button class="adm-btn" id="saveContent" style="max-width:200px">حفظ</button>
+        <p class="adm-msg" id="contentMsg"></p>
+      </section>
+
+      <section id="tab-plans" class="hidden">
+        <div class="field"><label>الباقة المميّزة (Featured)</label>
+          <select id="c-featured"><option value="pro">Pro</option><option value="free">Free</option></select>
+        </div>
+        <div class="field"><label>إظهار الباقة المجانية</label>
+          <select id="c-showFree"><option value="true">نعم</option><option value="false">لا</option></select>
+        </div>
+        <button class="adm-btn" id="savePlans" style="max-width:200px">حفظ</button>
+        <p class="adm-msg" id="plansMsg"></p>
+        <p class="muted" style="margin-top:16px">
+          💡 أسعار الاشتراك الفعلية تُدار في <strong>Paddle</strong> (مصدر الحقيقة). هنا تتحكم في العرض والإبراز فقط.
+          لتغيير السعر: عدّله في Paddle، ويظهر تلقائياً على الموقع.
+        </p>
+      </section>
+    </div>
+
+    <script>
+      const KEY_STORE = 'rotion-admin-key';
+      let adminKey = sessionStorage.getItem(KEY_STORE) || '';
+      const $ = (id) => document.getElementById(id);
+      const api = (path, opts = {}) =>
+        fetch(path, { ...opts, headers: { 'x-admin-key': adminKey, 'content-type': 'application/json', ...(opts.headers || {}) } });
+
+      async function tryLogin(key) {
+        adminKey = key;
+        const r = await api('/api/admin/stats');
+        if (r.status === 401) return false;
+        sessionStorage.setItem(KEY_STORE, key);
+        return true;
+      }
+
+      function showDash() {
+        $('login').classList.add('hidden');
+        $('dash').classList.remove('hidden');
+        $('signout').classList.remove('hidden');
+        loadStats();
+        loadUsers();
+        loadConfig();
+      }
+
+      $('enter').addEventListener('click', async () => {
+        $('loginErr').textContent = '';
+        const ok = await tryLogin($('key').value.trim());
+        if (ok) showDash();
+        else $('loginErr').textContent = 'مفتاح غير صحيح.';
+      });
+      $('key').addEventListener('keydown', (e) => e.key === 'Enter' && $('enter').click());
+      $('signout').addEventListener('click', () => { sessionStorage.removeItem(KEY_STORE); location.reload(); });
+
+      // tabs
+      document.querySelectorAll('.adm-tab').forEach((b) =>
+        b.addEventListener('click', () => {
+          document.querySelectorAll('.adm-tab').forEach((x) => x.classList.remove('active'));
+          b.classList.add('active');
+          ['overview', 'users', 'content', 'plans'].forEach((t) =>
+            $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab)
+          );
+        })
+      );
+
+      async function loadStats() {
+        const d = await (await api('/api/admin/stats')).json();
+        $('s-total').textContent = d.totalUsers ?? 0;
+        $('s-pro').textContent = d.proUsers ?? 0;
+        $('s-free').textContent = d.freeUsers ?? 0;
+      }
+
+      let allUsers = [];
+      async function loadUsers() {
+        const d = await (await api('/api/admin/users')).json();
+        allUsers = d.users || [];
+        renderUsers();
+      }
+      function renderUsers() {
+        const q = $('userSearch').value.toLowerCase();
+        const rows = allUsers
+          .filter((u) => !q || (u.email + ' ' + (u.name || '')).toLowerCase().includes(q))
+          .map((u) => {
+            const date = u.lastSeen ? new Date(u.lastSeen).toLocaleDateString() : '–';
+            const toPlan = u.plan === 'pro' ? 'free' : 'pro';
+            const action = u.plan === 'pro' ? 'إلغاء Pro' : 'منح Pro';
+            return `<tr>
+              <td>${u.email}</td><td>${u.name || '–'}</td><td>${u.provider}</td>
+              <td><span class="pill ${u.plan}">${u.plan}${u.manual ? ' ✎' : ''}</span></td>
+              <td>${date}</td>
+              <td><button class="row-btn" data-email="${u.email}" data-plan="${toPlan}">${action}</button></td>
+            </tr>`;
+          })
+          .join('');
+        $('usersBody').innerHTML = rows || '<tr><td colspan="6" class="muted">لا مستخدمون بعد.</td></tr>';
+        $('usersBody').querySelectorAll('.row-btn').forEach((b) =>
+          b.addEventListener('click', async () => {
+            b.disabled = true;
+            await api('/api/admin/set-plan', { method: 'POST', body: JSON.stringify({ email: b.dataset.email, plan: b.dataset.plan }) });
+            await loadUsers();
+            loadStats();
+          })
+        );
+      }
+      $('userSearch').addEventListener('input', renderUsers);
+
+      let config = {};
+      async function loadConfig() {
+        config = await (await fetch('/api/config')).json();
+        $('c-heroTitleAr').value = config.heroTitleAr || '';
+        $('c-heroSubAr').value = config.heroSubAr || '';
+        $('c-heroTitleEn').value = config.heroTitleEn || '';
+        $('c-heroSubEn').value = config.heroSubEn || '';
+        $('c-featured').value = config.featured || 'pro';
+        $('c-showFree').value = String(config.showFree !== false);
+      }
+      async function saveConfig(msgId) {
+        config = {
+          ...config,
+          heroTitleAr: $('c-heroTitleAr').value,
+          heroSubAr: $('c-heroSubAr').value,
+          heroTitleEn: $('c-heroTitleEn').value,
+          heroSubEn: $('c-heroSubEn').value,
+          featured: $('c-featured').value,
+          showFree: $('c-showFree').value === 'true',
+        };
+        const r = await api('/api/admin/config', { method: 'PUT', body: JSON.stringify(config) });
+        $(msgId).textContent = r.ok ? 'تم الحفظ ✓' : 'فشل الحفظ';
+        setTimeout(() => ($(msgId).textContent = ''), 2500);
+      }
+      $('saveContent').addEventListener('click', () => saveConfig('contentMsg'));
+      $('savePlans').addEventListener('click', () => saveConfig('plansMsg'));
+
+      // auto-login if key stored
+      if (adminKey) tryLogin(adminKey).then((ok) => (ok ? showDash() : sessionStorage.removeItem(KEY_STORE)));
+    </script>
+  </body>
+</html>

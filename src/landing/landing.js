@@ -186,6 +186,23 @@ function setupReveal(root) {
   }
 }
 
+// Apply admin-edited site config (from /api/config): override the hero title /
+// subtitle when set. Silent when the API or config isn't available.
+function setupSiteConfig(root, lang) {
+  fetch('/api/config')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((cfg) => {
+      if (!cfg) return;
+      const title = lang === 'ar' ? cfg.heroTitleAr : cfg.heroTitleEn;
+      const sub = lang === 'ar' ? cfg.heroSubAr : cfg.heroSubEn;
+      const h1 = root.querySelector('.lp-h1');
+      const lead = root.querySelector('.lp-hero-center .lp-lead');
+      if (title && h1) h1.textContent = title;
+      if (sub && lead) lead.textContent = sub;
+    })
+    .catch(() => {});
+}
+
 // Replace the static Pro price with the real, localized Paddle price — but only
 // once the visitor scrolls to the pricing section (so Paddle.js loads lazily).
 function setupLivePricing(root, perLabel) {
@@ -523,6 +540,7 @@ export function initLanding(root, { onLaunch }) {
     }
     setupReveal(root);
     setupLivePricing(root, c.pricing.perMonth);
+    setupSiteConfig(root, getLang());
   }
 
   render();

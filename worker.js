@@ -154,18 +154,128 @@ async function handleEntitlement(url, env) {
   return json({ plan: data?.plan || 'free', status: data?.status || null });
 }
 
+// ---- User directory (built as people sign in) ----
+async function handleTrackUser(request, env) {
+  if (!env.SUBS) return json({ ok: false });
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'bad_json' }, 400);
+  }
+  const email = (body?.email || '').toLowerCase();
+  if (!email) return json({ error: 'no_email' }, 400);
+  const key = 'user:' + email;
+  const now = Date.now();
+  const existing = await env.SUBS.get(key);
+  const rec = existing ? JSON.parse(existing) : { email, firstSeen: now };
+  if (body.name) rec.name = body.name;
+  if (body.provider) rec.provider = body.provider;
+  rec.lastSeen = now;
+  await env.SUBS.put(key, JSON.stringify(rec));
+  return json({ ok: true });
+}
+
+// ---- Public site config (editable from the admin dashboard) ----
+async function handleGetConfig(env) {
+  if (!env.SUBS) return json({});
+  const raw = await env.SUBS.get('config:site');
+  return json(raw ? JSON.parse(raw) : {});
+}
+
+// ---- Admin API (gated by the ADMIN_KEY secret via x-admin-key header) ----
+function adminOk(request, env) {
+  return !!env.ADMIN_KEY && request.headers.get('x-admin-key') === env.ADMIN_KEY;
+}
+
+async function handleAdminUsers(request, env) {
+  if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
+  if (!env.SUBS) return json({ users: [] });
+  const list = await env.SUBS.list({ prefix: 'user:', limit: 1000 });
+  const users = [];
+  for (const k of list.keys) {
+    const rec = JSON.parse((await env.SUBS.get(k.name)) || '{}');
+    const subRaw = await env.SUBS.get('sub:' + (rec.email || ''));
+    const sub = subRaw ? JSON.parse(subRaw) : null;
+    users.push({
+      email: rec.email,
+      name: rec.name || '',
+      provider: rec.provider || 'local',
+      firstSeen: rec.firstSeen || null,
+      lastSeen: rec.lastSeen || null,
+      plan: sub?.plan || 'free',
+      status: sub?.status || null,
+      manual: !!sub?.manual,
+    });
+  }
+  users.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+  return json({ users });
+}
+
+async function handleAdminStats(request, env) {
+  if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
+  if (!env.SUBS) return json({});
+  const users = await env.SUBS.list({ prefix: 'user:', limit: 1000 });
+  const subs = await env.SUBS.list({ prefix: 'sub:', limit: 1000 });
+  let pro = 0;
+  for (const k of subs.keys) {
+    const s = JSON.parse((await env.SUBS.get(k.name)) || '{}');
+    if (s.plan === 'pro') pro++;
+  }
+  const total = users.keys.length;
+  return json({ totalUsers: total, proUsers: pro, freeUsers: Math.max(0, total - pro) });
+}
+
+async function handleAdminSetPlan(request, env) {
+  if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'bad_json' }, 400);
+  }
+  const email = (body?.email || '').toLowerCase();
+  const plan = body?.plan;
+  if (!email || !['free', 'pro'].includes(plan)) return json({ error: 'bad_input' }, 400);
+  await env.SUBS.put(
+    'sub:' + email,
+    JSON.stringify({
+      plan,
+      status: plan === 'pro' ? 'active' : 'canceled',
+      manual: true,
+      updatedAt: Date.now(),
+    })
+  );
+  return json({ ok: true });
+}
+
+async function handleAdminConfig(request, env) {
+  if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'bad_json' }, 400);
+  }
+  await env.SUBS.put('config:site', JSON.stringify(body || {}));
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/paddle/webhook' && request.method === 'POST') {
-      return handleWebhook(request, env);
-    }
-    if (url.pathname === '/api/entitlement' && request.method === 'GET') {
-      return handleEntitlement(url, env);
-    }
-    if (url.pathname === '/api/auth/google' && request.method === 'POST') {
-      return handleGoogleAuth(request, env);
-    }
+    const { pathname } = url;
+    const m = request.method;
+    if (pathname === '/api/paddle/webhook' && m === 'POST') return handleWebhook(request, env);
+    if (pathname === '/api/entitlement' && m === 'GET') return handleEntitlement(url, env);
+    if (pathname === '/api/auth/google' && m === 'POST') return handleGoogleAuth(request, env);
+    if (pathname === '/api/user/track' && m === 'POST') return handleTrackUser(request, env);
+    if (pathname === '/api/config' && m === 'GET') return handleGetConfig(env);
+    // admin
+    if (pathname === '/api/admin/users' && m === 'GET') return handleAdminUsers(request, env);
+    if (pathname === '/api/admin/stats' && m === 'GET') return handleAdminStats(request, env);
+    if (pathname === '/api/admin/set-plan' && m === 'POST') return handleAdminSetPlan(request, env);
+    if (pathname === '/api/admin/config' && m === 'PUT') return handleAdminConfig(request, env);
     // Everything else → the static site (SPA fallback handled by assets config).
     return env.ASSETS.fetch(request);
   },

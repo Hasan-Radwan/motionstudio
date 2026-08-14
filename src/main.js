@@ -730,6 +730,16 @@ async function restoreState(rec) {
 }
 
 // ---------- Account ----------
+// Record the signed-in user in the server directory (for the admin dashboard).
+function trackUser(user) {
+  if (!user?.email) return;
+  fetch('/api/user/track', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email: user.email, name: user.name, provider: user.provider || 'local' }),
+  }).catch(() => {});
+}
+
 function updateAccountButton() {
   const btn = $('btn-account');
   if (!btn) return;
@@ -863,14 +873,20 @@ async function boot() {
   onAuth((user) => {
     setProjectScope(user?.id || '');
     updateAccountButton();
-    if (user?.email) syncEntitlement(user.email); // adopt server-confirmed plan
+    if (user?.email) {
+      syncEntitlement(user.email); // adopt server-confirmed plan
+      trackUser(user); // add to the admin user directory
+    }
   });
   onPlan(() => {
     updateAccountButton();
     renderAudio(); // audio panel gate depends on the plan
   });
   setProjectScope(currentUser()?.id || '');
-  if (currentUser()?.email) syncEntitlement(currentUser().email);
+  if (currentUser()?.email) {
+    syncEntitlement(currentUser().email);
+    trackUser(currentUser());
+  }
   // Language changes (from here or the landing) re-localize the studio if booted.
   onLang(() => {
     if (studioBooted) relocalizeStudio();
