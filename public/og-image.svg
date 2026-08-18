@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1622" />
+      <stop offset="1" stop-color="#0e1c2b" />
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563EB" />
+      <stop offset="1" stop-color="#00E5A0" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="1000" cy="120" r="360" fill="#2563EB" opacity="0.16" />
+  <circle cx="180" cy="560" r="300" fill="#00E5A0" opacity="0.12" />
+
+  <!-- R mark -->
+  <g transform="translate(96,150)">
+    <rect width="140" height="140" rx="32" fill="#0e1c2b" stroke="#294056" />
+    <path d="M28 58 h44" stroke="url(#brand)" stroke-width="7" stroke-linecap="round" opacity="0.5" />
+    <text x="74" y="94" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="86" fill="url(#brand)">R</text>
+  </g>
+
+  <text x="270" y="228" font-family="Arial, sans-serif" font-weight="900" font-size="68" fill="#e8eef5">Rotion App</text>
+  <text x="270" y="286" font-family="Arial, sans-serif" font-weight="700" font-size="30" fill="#00E5A0">Motion made simple</text>
+
+  <text x="96" y="420" font-family="Arial, sans-serif" font-weight="800" font-size="52" fill="#e8eef5">حوّل صورك إلى فيديوهات متحركة</text>
+  <text x="96" y="486" font-family="Arial, sans-serif" font-weight="500" font-size="30" fill="#93a4b8">41+ قالب · دعم عربي RTL · تصدير حتى 8K · داخل المتصفح</text>
+
+  <rect x="96" y="536" width="1008" height="3" fill="url(#brand)" opacity="0.7" />
+  <text x="96" y="586" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#647588">rotionapp.com</text>
+</svg>
