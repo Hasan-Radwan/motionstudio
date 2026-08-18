@@ -43,14 +43,16 @@ import * as ribbonFlow from './ribbonFlow.js';
 import * as splitScreen from './splitScreen.js';
 import * as cinematic from './cinematic.js';
 import * as polaroidStack from './polaroidStack.js';
+import * as radialWheel from './radialWheel.js';
+import * as storyFeed from './storyFeed.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
   cardTilt3d, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
-  orbit, spiral, globe, haloGlobe, orbWall, // Orbit
+  orbit, spiral, globe, haloGlobe, orbWall, radialWheel, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
-  slideshow, featureStream, splitScreen, // Slideshow & Story
+  slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
   grid, wave, mosaic, driftTiles, // Grid
   marquee, totem, // Ticker & Marquee
   spotlight, pan, zoomBlur, cinematic, // Spotlight & Focus
