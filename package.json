@@ -6,7 +6,7 @@
   "description": "Browser-based motion design studio — pick a template, drop an image, export a looping video. Fully client-side.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
     "deploy": "vite build && npx wrangler@latest pages deploy dist --project-name motion-studio"
   },
@@ -19,6 +19,7 @@
     "webm-muxer": "^5.0.3"
   },
   "devDependencies": {
+    "linkedom": "^0.18.13",
     "vite": "^5.4.10"
   }
 }

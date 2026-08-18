@@ -1,42 +1,47 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#0A1622" />
 
-    <title>Rotion App — حرّك تصميمك · Motion made simple</title>
+    <title>Rotion App — Motion made simple</title>
     <meta
       name="description"
-      content="Rotion App: أداة تصميم حركة في المتصفح — اختر قالباً من 41+ قالب، أضف صورك، وصدّر فيديو متحرك حتى 8K. دعم عربي RTL كامل، بلا رفع لأي خادم. Turn images into pro motion videos in your browser."
+      content="Rotion App: a browser-based motion-design tool — pick from 41+ templates, add your images, and export a looping video up to 8K. Full Arabic RTL support, nothing uploaded to any server."
     />
     <meta
       name="keywords"
-      content="تصميم حركة, موشن جرافيك, فيديو متحرك, قوالب موشن, تحريك الصور, motion design, animated video, motion templates, Arabic motion, RTL"
+      content="motion design, animated video, motion templates, Arabic motion, RTL video, تصميم حركة, موشن جرافيك, فيديو متحرك, قوالب موشن"
     />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="https://rotionapp.com/" />
+    <!-- Bilingual routing: this document is the English default; /ar is the Arabic
+         equivalent (see scripts/prerender.mjs). x-default points to English. -->
+    <link rel="alternate" hreflang="en" href="https://rotionapp.com/" />
+    <link rel="alternate" hreflang="ar" href="https://rotionapp.com/ar" />
+    <link rel="alternate" hreflang="x-default" href="https://rotionapp.com/" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Rotion App" />
-    <meta property="og:title" content="Rotion App — حرّك تصميمك · Motion made simple" />
+    <meta property="og:title" content="Rotion App — Motion made simple" />
     <meta
       property="og:description"
-      content="أداة تصميم حركة في المتصفح: اختر قالباً، أضف صورك، وصدّر فيديو متحرك حتى 8K. دعم عربي RTL كامل."
+      content="A browser-based motion-design tool: pick a template, add your images, and export a looping video up to 8K. Full Arabic RTL support."
     />
     <meta property="og:url" content="https://rotionapp.com/" />
     <meta property="og:image" content="https://rotionapp.com/og-image.svg" />
-    <meta property="og:locale" content="ar_AR" />
-    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_AR" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Rotion App — حرّك تصميمك · Motion made simple" />
+    <meta name="twitter:title" content="Rotion App — Motion made simple" />
     <meta
       name="twitter:description"
-      content="أداة تصميم حركة في المتصفح: اختر قالباً، أضف صورك، وصدّر فيديو متحرك حتى 8K."
+      content="A browser-based motion-design tool: pick a template, add your images, and export a looping video up to 8K."
     />
     <meta name="twitter:image" content="https://rotionapp.com/og-image.svg" />
 
@@ -63,7 +68,7 @@
             "operatingSystem": "Web browser",
             "browserRequirements": "Requires a modern browser (Chrome, Edge)",
             "description": "Browser-based motion-design tool: pick a template, add your images, and export a looping video up to 8K. Full Arabic RTL support. Runs entirely in the browser — nothing uploaded.",
-            "inLanguage": ["ar", "en"],
+            "inLanguage": ["en", "ar"],
             "publisher": { "@id": "https://rotionapp.com/#org" },
             "featureList": [
               "41+ motion templates",
@@ -97,34 +102,34 @@
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "ما هو Rotion App؟",
+                "name": "What is Rotion App?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Rotion App أداة تصميم حركة تعمل بالكامل في متصفحك: تختار قالباً، تضيف صورك، وتصدّر فيديو متحرك. كل المعالجة تتم على جهازك دون رفع صورك لأي خادم."
+                  "text": "Rotion App is a motion-design tool that runs entirely in your browser: pick a template, add your images, and export an animated video. All processing happens on your device — your images are never uploaded to a server."
                 }
               },
               {
                 "@type": "Question",
-                "name": "هل يدعم اللغة العربية؟",
+                "name": "Does it support Arabic?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "نعم، Rotion App يدعم الكتابة العربية RTL بالكامل مع خطوط عربية احترافية مثل Cairo وTajawal."
+                  "text": "Yes — Rotion App has full Arabic RTL text support with professional Arabic fonts such as Cairo and Tajawal."
                 }
               },
               {
                 "@type": "Question",
-                "name": "ما أقصى دقة للتصدير؟",
+                "name": "What's the maximum export resolution?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "الباقة المجانية تصدّر حتى 720p، وباقة Pro تصدّر حتى 8K بصيغتي MP4 وWebM."
+                  "text": "The Free plan exports up to 720p, and the Pro plan exports up to 8K in MP4 or WebM."
                 }
               },
               {
                 "@type": "Question",
-                "name": "هل الأداة مجانية؟",
+                "name": "Is it free to use?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "توجد باقة مجانية دائمة، وباقة Pro بسعر 9 دولارات شهرياً تفتح التصدير 8K وإزالة العلامة والمزيد."
+                  "text": "There's a permanently free plan, and a Pro plan at $9/month that unlocks 8K export, watermark removal, and more."
                 }
               }
             ]
@@ -137,14 +142,15 @@
     <!-- Crawlable fallback for engines that don't execute JavaScript. -->
     <noscript>
       <div style="max-width: 760px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; color: #e8eef5; background: #0a1622">
-        <h1>Rotion App — حرّك تصميمك · Motion made simple</h1>
-        <p>
-          Rotion App أداة تصميم حركة تعمل بالكامل في متصفحك: اختر قالباً من أكثر من 41 قالباً، أضف
-          صورك، وصدّر فيديو متحرك حتى دقة 8K — بدعم عربي RTL كامل، ودون رفع أي صورة إلى خادم.
-        </p>
+        <h1>Rotion App — Motion made simple</h1>
         <p>
           Rotion App is a browser-based motion-design tool: pick a template, add your images, and
           export a looping video up to 8K. Full Arabic RTL support. Runs entirely in your browser.
+        </p>
+        <p>
+          Rotion App أداة تصميم حركة تعمل بالكامل في متصفحك: اختر قالباً من أكثر من 41 قالباً، أضف
+          صورك، وصدّر فيديو متحرك حتى دقة 8K — بدعم عربي RTL كامل، ودون رفع أي صورة إلى خادم.
+          (<a href="/ar" style="color: #00e5a0">بالعربية</a>)
         </p>
         <p>
           <a href="/terms" style="color: #00e5a0">Terms</a> ·

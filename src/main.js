@@ -22,7 +22,7 @@ import { loadFontFromBlob } from './assets/fontLoader.js';
 import { initDropzone, loadImageFromBlob } from './ui/dropzone.js';
 import { setCardShape } from './engine/canvasUtils.js';
 import { initLanding } from './landing/landing.js';
-import { t, isRTL, toggleLang, onLang } from './i18n.js';
+import { t, isRTL, toggleLang, onLang, setLang } from './i18n.js';
 import { onAuth, currentUser, signOut, isSignedIn } from './auth/auth.js';
 import { currentPlan, onPlan, syncEntitlement } from './account/account.js';
 import { openAuthModal } from './ui/authModal.js';
@@ -932,13 +932,21 @@ async function boot() {
   }
 }
 
-// ---------- Landing ↔ Studio navigation ----------
+// ---------- Landing ↔ Studio routing ----------
+// Three real, bookmarkable URLs on one Worker/one JS bundle:
+//   /     — English marketing (pre-rendered, primary/default language)
+//   /ar   — Arabic marketing (pre-rendered)
+//   /app  — the studio (client-rendered SPA, not indexed)
+// Landing→studio is a soft transition (pushState, no reload) for speed; studio→
+// home is also soft, rebuilding the landing markup only if its language no
+// longer matches the studio's current language (e.g. user switched language
+// while inside the studio).
 const landingEl = $('landing');
 const appEl = $('app');
 let studioBooted = false;
+let landingLang = location.pathname.startsWith('/ar') ? 'ar' : 'en';
 
-// Enter the studio: reveal it and boot once (lazy), or just resume the loop.
-function enterStudio() {
+function showStudio() {
   landingEl.classList.add('hidden');
   appEl.classList.remove('hidden');
   window.scrollTo(0, 0);
@@ -951,13 +959,36 @@ function enterStudio() {
   }
 }
 
-// Return to the landing page and pause the preview loop to save cycles.
-function goHome() {
+function showLanding(lang) {
   appEl.classList.add('hidden');
   landingEl.classList.remove('hidden');
   renderer.stop();
   previewAudio.pause();
   window.scrollTo(0, 0);
+  if (lang !== landingLang) {
+    landingLang = lang;
+    initLanding(landingEl, landingLang, { onLaunch: enterStudio });
+  }
 }
 
-initLanding(landingEl, { onLaunch: enterStudio });
+// Called by the landing page's CTA buttons.
+function enterStudio() {
+  setLang(landingLang); // carry the marketing page's language into the studio
+  if (location.pathname !== '/app') history.pushState({ view: 'app' }, '', '/app');
+  showStudio();
+}
+
+// Called by the studio's Home button.
+function goHome() {
+  const target = isRTL() ? '/ar' : '/';
+  if (location.pathname !== target) history.pushState({ view: 'landing' }, '', target);
+  showLanding(isRTL() ? 'ar' : 'en');
+}
+
+window.addEventListener('popstate', () => {
+  if (location.pathname === '/app') showStudio();
+  else showLanding(location.pathname.startsWith('/ar') ? 'ar' : 'en');
+});
+
+initLanding(landingEl, landingLang, { onLaunch: enterStudio });
+if (location.pathname === '/app') showStudio();

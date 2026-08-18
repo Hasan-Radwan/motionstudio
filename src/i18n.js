@@ -1,13 +1,15 @@
-// Tiny language-state store + translator shared across the site. Holds the
-// current language ('ar' | 'en'), persists it, and notifies subscribers on
-// change so the landing page AND the studio can re-render. Arabic is the default.
+// Tiny language-state store + translator for the STUDIO (the marketing pages at
+// `/` [English] and `/ar` [Arabic] are separate pre-rendered documents and don't
+// use this — see landing/copy.js). Holds the studio's current language
+// ('ar' | 'en'), persists it, and notifies subscribers on change so the studio UI
+// re-localizes. English is the default (matching the site's primary language).
 //
 // Translation model: the KEY is the English source string. In English we return
 // the key as-is; in Arabic we look it up in AR and fall back to the English key
 // when a translation is missing — so untranslated strings degrade gracefully.
 
 const KEY = 'ms-lang';
-let lang = localStorage.getItem(KEY) || 'ar';
+let lang = localStorage.getItem(KEY) || 'en';
 const listeners = new Set();
 
 export function getLang() {

@@ -23,9 +23,9 @@
   <text x="270" y="228" font-family="Arial, sans-serif" font-weight="900" font-size="68" fill="#e8eef5">Rotion App</text>
   <text x="270" y="286" font-family="Arial, sans-serif" font-weight="700" font-size="30" fill="#00E5A0">Motion made simple</text>
 
-  <text x="96" y="420" font-family="Arial, sans-serif" font-weight="800" font-size="52" fill="#e8eef5">Turn images into motion videos</text>
-  <text x="96" y="486" font-family="Arial, sans-serif" font-weight="500" font-size="30" fill="#93a4b8">41+ templates · Arabic RTL · Export up to 8K · In your browser</text>
+  <text x="1104" y="420" text-anchor="end" font-family="Arial, sans-serif" font-weight="800" font-size="52" fill="#e8eef5">حوّل صورك إلى فيديوهات متحركة</text>
+  <text x="1104" y="486" text-anchor="end" font-family="Arial, sans-serif" font-weight="500" font-size="30" fill="#93a4b8">41+ قالب · دعم عربي RTL · تصدير حتى 8K · داخل المتصفح</text>
 
   <rect x="96" y="536" width="1008" height="3" fill="url(#brand)" opacity="0.7" />
-  <text x="96" y="586" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#647588">rotionapp.com</text>
+  <text x="1104" y="586" text-anchor="end" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#647588">rotionapp.com/ar</text>
 </svg>
