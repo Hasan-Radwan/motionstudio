@@ -183,23 +183,6 @@ function setupReveal(root) {
   }
 }
 
-// Apply admin-edited site config (from /api/config): override the hero title /
-// subtitle when set. Silent when the API or config isn't available.
-function setupSiteConfig(root, lang) {
-  fetch('/api/config')
-    .then((r) => (r.ok ? r.json() : null))
-    .then((cfg) => {
-      if (!cfg) return;
-      const title = lang === 'ar' ? cfg.heroTitleAr : cfg.heroTitleEn;
-      const sub = lang === 'ar' ? cfg.heroSubAr : cfg.heroSubEn;
-      const h1 = root.querySelector('.lp-h1');
-      const lead = root.querySelector('.lp-hero-center .lp-lead');
-      if (title && h1) h1.textContent = title;
-      if (sub && lead) lead.textContent = sub;
-    })
-    .catch(() => {});
-}
-
 // Replace the static Pro price with the real, localized Paddle price — but only
 // once the visitor scrolls to the pricing section (so Paddle.js loads lazily).
 function setupLivePricing(root, perLabel) {
@@ -244,13 +227,27 @@ function wireInteractivity(root, lang, c, onLaunch) {
   }
   setupReveal(root);
   setupLivePricing(root, c.pricing.perMonth);
-  setupSiteConfig(root, lang);
 }
 
 // `lang` is fixed for the page's lifetime — English at `/`, Arabic at `/ar` are
 // separate documents now (no in-place language switching; the nav language link
 // navigates to the sibling URL, which is a real, pre-rendered, indexable page).
 export function initLanding(root, lang, { onLaunch }) {
-  const { c } = buildMarkup(root, lang);
-  wireInteractivity(root, lang, c, onLaunch);
+  const render = (overrides) => {
+    const { c } = buildMarkup(root, lang, document, overrides);
+    wireInteractivity(root, lang, c, onLaunch);
+  };
+  // Instant first paint from the built-in copy — identical to the pre-rendered
+  // HTML, so there's no flash.
+  render(null);
+  // Then live-patch with admin content overrides (KV via /api/config): re-render
+  // once, but only if this language actually has overrides. The build-time
+  // prerender bakes the same overrides into the static HTML, so this mostly keeps
+  // things fresh between deploys.
+  fetch('/api/config')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((cfg) => {
+      if (cfg && cfg[lang] && Object.keys(cfg[lang]).length) render(cfg[lang]);
+    })
+    .catch(() => {});
 }

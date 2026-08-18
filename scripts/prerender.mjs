@@ -9,6 +9,13 @@
 // Both documents share the same JS/CSS bundle, so the client "hydrates" by
 // simply re-running the identical render logic — no reconciliation needed, the
 // content is already correct on first paint for crawlers that don't run JS.
+//
+// It also bakes in any live admin overrides (hero/about/features/plan-feature
+// text edited from /admin, stored in Cloudflare KV) by fetching /api/config
+// from the live site before rendering — so the STATIC HTML crawlers see matches
+// what a real visitor sees, not just the build-time defaults. If the site isn't
+// reachable yet (first-ever deploy, offline dev build) this fails silently and
+// falls back to the defaults in copy.js — never blocks the build.
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -22,12 +29,32 @@ const indexPath = join(distDir, 'index.html');
 
 const sourceHtml = readFileSync(indexPath, 'utf8');
 
+// Fetch admin-authored content overrides from the live site. Returns null (→
+// callers fall back to copy.js defaults) on any failure or timeout.
+async function fetchOverrides() {
+  const url = process.env.SITE_CONFIG_URL || 'https://rotionapp.com/api/config';
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && typeof data === 'object' ? data : null;
+  } catch {
+    return null; // not live yet / offline build / network hiccup — use defaults
+  }
+}
+
+const config = await fetchOverrides();
+console.log(config ? '✓ Loaded live admin content overrides' : '· No admin overrides (using copy.js defaults)');
+
 // ---------- English (primary, at /) ----------
 {
   const { document } = parseHTML(sourceHtml);
   const landing = document.getElementById('landing');
   if (!landing) throw new Error('prerender: #landing not found in dist/index.html');
-  buildMarkup(landing, 'en', document);
+  buildMarkup(landing, 'en', document, config?.en);
   writeFileSync(indexPath, '<!doctype html>\n' + document.documentElement.outerHTML);
   console.log('✓ Pre-rendered English → dist/index.html');
 }
@@ -127,7 +154,7 @@ const sourceHtml = readFileSync(indexPath, 'utf8');
 
   const landing = document.getElementById('landing');
   if (!landing) throw new Error('prerender: #landing not found while building Arabic variant');
-  buildMarkup(landing, 'ar', document);
+  buildMarkup(landing, 'ar', document, config?.ar);
 
   const arDir = join(distDir, 'ar');
   mkdirSync(arDir, { recursive: true });
