@@ -226,7 +226,9 @@ function wireInteractivity(root, lang, c, onLaunch) {
     console.error('hero spiral failed', e);
   }
   setupReveal(root);
-  setupLivePricing(root, c.pricing.perMonth);
+  // Only swap in the real Paddle price when the admin hasn't opted for a fixed
+  // displayed price (pricing.showLivePrice === false).
+  if (c.pricing.showLivePrice !== false) setupLivePricing(root, c.pricing.perMonth);
   setupFaq(root);
 }
 

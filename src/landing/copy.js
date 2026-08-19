@@ -57,6 +57,10 @@ export const COPY = {
       perMonth: '/ mo',
       popular: 'Most popular',
       cta: 'Get started',
+      // When true, the Pro price is replaced at runtime with the real localized
+      // price from Paddle (PricePreview). Set false (from the admin dashboard) to
+      // show the fixed `price` values below instead.
+      showLivePrice: true,
       tiers: [
         {
           name: 'Free',
@@ -67,7 +71,7 @@ export const COPY = {
         },
         {
           name: 'Pro',
-          price: '9',
+          price: '12',
           desc: 'For creators & designers',
           features: ['All templates', 'Export up to 8K', 'No app watermark', 'Your own watermark', 'Custom font upload'],
           featured: true,
@@ -148,6 +152,7 @@ export const COPY = {
       perMonth: '/ شهرياً',
       popular: 'الأكثر رواجاً',
       cta: 'ابدأ الآن',
+      showLivePrice: true,
       tiers: [
         {
           name: 'مجاني',
@@ -158,7 +163,7 @@ export const COPY = {
         },
         {
           name: 'احترافي',
-          price: '9',
+          price: '12',
           desc: 'لصنّاع المحتوى والمصممين',
           features: ['كل القوالب', 'تصدير حتى 8K', 'بدون علامة مائية', 'علامتك المائية الخاصة', 'رفع خطوط مخصّصة'],
           featured: true,

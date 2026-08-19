@@ -133,6 +133,14 @@
         <div class="field"><label>إظهار الباقة المجانية على الصفحة</label>
           <select id="c-showFree"><option value="true">نعم</option><option value="false">لا</option></select>
         </div>
+
+        <h3 style="margin:18px 0 8px">السعر المعروض · Displayed price</h3>
+        <div class="field"><label>عرض السعر الحقيقي من Paddle تلقائياً</label>
+          <select id="c-showLivePrice"><option value="true">نعم (تلقائي، مطابق للدفع)</option><option value="false">لا (استخدم السعر الثابت أدناه)</option></select>
+        </div>
+        <div class="field"><label>سعر الباقة المجانية (عادةً 0)</label><input id="c-priceFree" placeholder="0" /></div>
+        <div class="field"><label>سعر باقة Pro (يُعرض عند إيقاف السعر التلقائي)</label><input id="c-pricePro" placeholder="12" /></div>
+
         <button class="adm-btn" id="savePlans" style="max-width:200px">حفظ</button>
         <p class="adm-msg" id="plansMsg"></p>
         <p class="muted" style="margin-top:16px">
@@ -310,6 +318,9 @@
         if (!config.ar) config.ar = {};
         $('c-featured').value = config.featured || 'pro';
         $('c-showFree').value = String(config.showFree !== false);
+        $('c-showLivePrice').value = String(config.showLivePrice !== false);
+        $('c-priceFree').value = config.priceFree || '';
+        $('c-pricePro').value = config.pricePro || '';
         writeForm();
       }
 
@@ -317,11 +328,24 @@
         captureForm();
         config.featured = $('c-featured').value;
         config.showFree = $('c-showFree').value === 'true';
-        // Mirror the display toggles into each language's pricing so mergeCopy
-        // (which merges per-language) applies them on both / and /ar.
+        config.showLivePrice = $('c-showLivePrice').value === 'true';
+        config.priceFree = $('c-priceFree').value.trim();
+        config.pricePro = $('c-pricePro').value.trim();
+        // Mirror the display toggles + prices into each language's pricing so
+        // mergeCopy (which merges per-language) applies them on both / and /ar.
+        // Prices are merged INTO the tiers so per-tier features aren't clobbered.
         for (const l of ['en', 'ar']) {
           config[l] = config[l] || {};
-          config[l].pricing = { ...(config[l].pricing || {}), featured: config.featured, showFree: config.showFree };
+          const pricing = { ...(config[l].pricing || {}) };
+          pricing.featured = config.featured;
+          pricing.showFree = config.showFree;
+          pricing.showLivePrice = config.showLivePrice;
+          const tiers = Array.isArray(pricing.tiers) ? pricing.tiers.map((t) => ({ ...(t || {}) })) : [];
+          const setTierPrice = (i, val) => { tiers[i] = { ...(tiers[i] || {}), price: val }; };
+          setTierPrice(0, config.priceFree); // '' → mergeCopy falls back to the base price
+          setTierPrice(1, config.pricePro);
+          pricing.tiers = tiers;
+          config[l].pricing = pricing;
         }
         const r = await api('/api/admin/config', { method: 'PUT', body: JSON.stringify(config) });
         $(msgId).textContent = r.ok ? 'تم الحفظ ✓ (يظهر فوراً؛ ويثبُت في HTML عند النشر التالي)' : 'فشل الحفظ';

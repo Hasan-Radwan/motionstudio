@@ -51,13 +51,18 @@ export function mergeCopy(base, overrides) {
 function mergePricing(base, over) {
   let tiers = base.tiers.map((tier, i) => ({
     ...tier,
+    // Displayed price string (admin-editable). Empty override keeps the base.
+    price: str(tier.price, over?.tiers?.[i]?.price),
     features: arr(tier.features, over?.tiers?.[i]?.features),
   }));
-  // featured: 'free' | 'pro' — move the highlight badge.
+  // featured: 'free' | 'pro' — move the highlight badge. Compare against the BASE
+  // tier price so an admin price edit doesn't change which tier is "free"/"pro".
   if (over?.featured === 'free' || over?.featured === 'pro') {
-    tiers = tiers.map((t) => ({ ...t, featured: (t.price === '0' ? 'free' : 'pro') === over.featured }));
+    tiers = tiers.map((t, i) => ({ ...t, featured: (base.tiers[i].price === '0' ? 'free' : 'pro') === over.featured }));
   }
-  // showFree === false — hide the Free tier entirely.
-  if (over?.showFree === false) tiers = tiers.filter((t) => t.price !== '0');
-  return { ...base, tiers };
+  // showFree === false — hide the Free tier entirely (keyed off the base price).
+  if (over?.showFree === false) tiers = tiers.filter((t, i) => base.tiers[i].price !== '0');
+  // showLivePrice — whether the client swaps in the real Paddle price at runtime.
+  const showLivePrice = typeof over?.showLivePrice === 'boolean' ? over.showLivePrice : base.showLivePrice;
+  return { ...base, tiers, showLivePrice };
 }

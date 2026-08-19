@@ -78,9 +78,13 @@ export function qualityAllowed(px) {
 }
 
 // Fetch the authoritative plan from the server (Paddle webhook → KV) and apply it.
-// Upgrade-only: if the server reports a paid plan we adopt it; we don't downgrade
-// the local (optimistic) state here, so a freshly-completed checkout isn't wiped
-// before the webhook lands. Fails silently when the API isn't deployed yet.
+// - Upgrade: adopt a server-confirmed paid plan.
+// - Downgrade: drop to Free immediately when the server reports an ENDED
+//   subscription (status canceled/paused/past_due). We key the downgrade off
+//   `status`, not merely plan==='free', so a freshly-completed checkout whose
+//   webhook hasn't landed yet (status null or 'active') is never wiped before it's
+//   confirmed pro.
+// Fails silently when the API isn't deployed yet.
 export async function syncEntitlement(email) {
   if (!email) return;
   try {
@@ -89,7 +93,13 @@ export async function syncEntitlement(email) {
     });
     if (!r.ok) return;
     const d = await r.json();
-    if (d && d.plan && d.plan !== 'free' && PLANS[d.plan]) setPlan(d.plan);
+    if (!d) return;
+    if (d.plan && d.plan !== 'free' && PLANS[d.plan]) {
+      setPlan(d.plan);
+      return;
+    }
+    const ended = d.status === 'canceled' || d.status === 'paused' || d.status === 'past_due';
+    if (ended && isPaid()) setPlan('free');
   } catch {
     /* API not available yet — keep local state */
   }

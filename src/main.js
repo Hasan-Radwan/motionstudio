@@ -895,6 +895,13 @@ async function boot() {
     syncEntitlement(currentUser().email);
     trackUser(currentUser());
   }
+  // Re-check entitlement when the tab regains focus, so a cancellation (made
+  // elsewhere) drops Pro in this open session without needing a full reload.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && currentUser()?.email) {
+      syncEntitlement(currentUser().email);
+    }
+  });
   // Language changes (from here or the landing) re-localize the studio if booted.
   onLang(() => {
     if (studioBooted) relocalizeStudio();
