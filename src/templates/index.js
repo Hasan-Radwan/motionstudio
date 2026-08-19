@@ -45,11 +45,12 @@ import * as cinematic from './cinematic.js';
 import * as polaroidStack from './polaroidStack.js';
 import * as radialWheel from './radialWheel.js';
 import * as storyFeed from './storyFeed.js';
+import * as carousel3d from './carousel3d.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
-  cardTilt3d, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
+  cardTilt3d, carousel3d, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
   orbit, spiral, globe, haloGlobe, orbWall, radialWheel, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
