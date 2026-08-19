@@ -91,6 +91,7 @@ const AR = {
   Audio: 'الصوت',
   Volume: 'مستوى الصوت',
   'Upgrade to Pro to add audio': 'رقِّ إلى Pro لإضافة صوت',
+  'Upgrade to Pro to add fonts': 'رقِّ إلى Pro لإضافة خطوط',
   'Upload audio': 'رفع صوت',
   'No audio yet. Click Upload audio above.': 'لا صوت بعد. اضغط «رفع صوت» أعلاه.',
   'Plays in preview and is included in the export.': 'يُشغَّل في المعاينة ويُدمَج في التصدير.',

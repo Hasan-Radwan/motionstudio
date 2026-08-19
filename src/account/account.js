@@ -16,6 +16,7 @@ export const PLANS = {
     ownWatermark: false, // may use their own logo watermark
     appWatermark: true, // forced app credit watermark
     audio: false, // music/audio upload
+    fonts: false, // custom font upload
   },
   pro: {
     id: 'pro',
@@ -28,12 +29,18 @@ export const PLANS = {
     ownWatermark: true,
     appWatermark: false,
     audio: true,
+    fonts: true,
   },
 };
 
 // Whether the current plan may upload/use audio.
 export function audioAllowed() {
   return !!currentPlan().audio;
+}
+
+// Whether the current plan may upload/use custom fonts.
+export function fontsAllowed() {
+  return !!currentPlan().fonts;
 }
 
 export const PLAN_ORDER = ['free', 'pro'];

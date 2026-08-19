@@ -5,6 +5,7 @@
 // and never rebuild the panel, so the textarea keeps focus while typing.
 
 import { getAllFonts } from '../assets/fonts.js';
+import { fontsAllowed } from '../account/account.js';
 import { t } from '../i18n.js';
 
 const WEIGHTS = [
@@ -159,7 +160,7 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
   return layer;
 }
 
-export function buildTextPanel(root, { texts, onChange, onAdd, onRemove, onUploadFont }) {
+export function buildTextPanel(root, { texts, onChange, onAdd, onRemove, onUploadFont, onUpgrade }) {
   root.innerHTML = '';
   root.appendChild(sectionTitle(t('Text')));
 
@@ -178,11 +179,18 @@ export function buildTextPanel(root, { texts, onChange, onAdd, onRemove, onUploa
   add.addEventListener('click', () => onAdd());
   root.appendChild(add);
 
-  // "Upload font" — register a user font file for use on any text layer.
+  // "Upload font" — register a user font file for use on any text layer. Custom
+  // fonts are a Pro feature: free users see a lock that opens the upgrade prompt.
   const font = document.createElement('button');
   font.type = 'button';
-  font.className = 'text-add-btn text-font-btn';
-  font.innerHTML = `<span class="text-add-icon">⬆</span><span>${t('Upload font')}</span>`;
-  font.addEventListener('click', () => onUploadFont && onUploadFont());
+  if (fontsAllowed()) {
+    font.className = 'text-add-btn text-font-btn';
+    font.innerHTML = `<span class="text-add-icon">⬆</span><span>${t('Upload font')}</span>`;
+    font.addEventListener('click', () => onUploadFont && onUploadFont());
+  } else {
+    font.className = 'text-add-btn text-font-btn text-font-locked';
+    font.innerHTML = `🔒 <span>${t('Upgrade to Pro to add fonts')}</span>`;
+    font.addEventListener('click', () => onUpgrade && onUpgrade());
+  }
   root.appendChild(font);
 }

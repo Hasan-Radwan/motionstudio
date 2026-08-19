@@ -16,7 +16,7 @@ import { buildBackgroundPanel } from './ui/backgroundPanel.js';
 import { buildTextPanel } from './ui/textPanel.js';
 import { buildWatermarkPanel } from './ui/watermarkPanel.js';
 import { buildAudioPanel } from './ui/audioPanel.js';
-import { audioAllowed } from './account/account.js';
+import { audioAllowed, fontsAllowed } from './account/account.js';
 import { DEFAULT_FONT } from './assets/fonts.js';
 import { loadFontFromBlob } from './assets/fontLoader.js';
 import { initDropzone, loadImageFromBlob } from './ui/dropzone.js';
@@ -392,13 +392,21 @@ function renderText() {
       renderText();
       scheduleAutosave();
     },
-    onUploadFont: () => fontInput.click(),
+    onUploadFont: () => {
+      if (!fontsAllowed()) return openPlansModal();
+      fontInput.click();
+    },
+    onUpgrade: openPlansModal,
   });
 }
 
 // Register an uploaded font file, then make the new font available in the picker.
 async function receiveFont(file) {
   if (!file) return;
+  if (!fontsAllowed()) {
+    openPlansModal();
+    return;
+  }
   try {
     const { id, name, family } = await loadFontFromBlob(file, file.name);
     state.customFonts.push({ id, name, family, blob: file });
