@@ -22,6 +22,18 @@ export function drawImageCover(ctx, img, x, y, w, h) {
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
+// Draw an image as a full-frame cover backdrop, over-scanned by a margin so an
+// optional blur never reveals transparent edges. Assumes the frame origin is
+// (0,0). `blurPx` 0 = sharp. Used by templates that echo a card's photo behind it.
+export function coverBleed(ctx, img, w, h, blurPx = 0) {
+  if (!img || !img.width) return;
+  const m = Math.max(blurPx * 2.5, Math.max(w, h) * 0.04);
+  ctx.save();
+  if (blurPx > 0) ctx.filter = `blur(${blurPx}px)`;
+  drawImageCover(ctx, img, -m, -m, w + m * 2, h + m * 2);
+  ctx.restore();
+}
+
 // Draw an image scaled to CONTAIN the rect (whole image visible, letterboxed).
 export function drawImageContain(ctx, img, x, y, w, h) {
   if (!img || !img.width) return;

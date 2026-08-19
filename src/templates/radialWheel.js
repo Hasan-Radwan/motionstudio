@@ -1,4 +1,4 @@
-import { drawCard, cornerR, withAlpha, drawImageCover } from '../engine/canvasUtils.js';
+import { drawCard, cornerR, withAlpha, coverBleed } from '../engine/canvasUtils.js';
 import { TAU } from '../engine/easing.js';
 
 export const meta = {
@@ -31,17 +31,6 @@ export const controls = [
   { key: 'blur', type: 'range', label: 'Backdrop blur', min: 0, max: 40, step: 1, default: 18, unit: 'px' },
   { key: 'dim', type: 'range', label: 'Backdrop dim', min: 0, max: 80, step: 1, default: 42, unit: '%' },
 ];
-
-// Draw a full-bleed cover image, slightly over-scanned so a blur filter never
-// reveals transparent edges. Used for the photo backdrop.
-function coverBleed(ctx, img, w, h, blurPx) {
-  if (!img || !img.width) return;
-  const m = Math.max(blurPx * 2.5, Math.max(w, h) * 0.04);
-  ctx.save();
-  if (blurPx > 0) ctx.filter = `blur(${blurPx}px)`;
-  drawImageCover(ctx, img, -m, -m, w + m * 2, h + m * 2);
-  ctx.restore();
-}
 
 // Cards fixed to the rim of a tilted wheel that spins a whole number of turns per
 // loop (so it's seamless). Each card TUMBLES with the rim (its rotation follows

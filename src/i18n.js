@@ -180,6 +180,8 @@ const AR = {
   'Position Y': 'الموضع الرأسي',
   Clockwise: 'مع عقارب الساعة',
   'Counter-clockwise': 'عكس عقارب الساعة',
+  'Scroll up': 'تمرير للأعلى',
+  'Scroll down': 'تمرير للأسفل',
   'Photo backdrop': 'خلفية بالصورة',
   'Backdrop blur': 'ضبابية الخلفية',
   'Backdrop dim': 'تعتيم الخلفية',
