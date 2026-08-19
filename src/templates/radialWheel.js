@@ -13,7 +13,7 @@ export const controls = [
   { key: 'radius', type: 'range', label: 'Wheel size', min: 24, max: 48, step: 1, default: 38, unit: '%' },
   { key: 'size', type: 'range', label: 'Card size', min: 12, max: 34, step: 1, default: 22, unit: '%' },
   { key: 'tilt', type: 'range', label: 'Perspective', min: 30, max: 95, step: 1, default: 62, unit: '%' },
-  { key: 'turns', type: 'range', label: 'Turns', min: 1, max: 3, step: 1, default: 1 },
+  { key: 'turns', type: 'range', label: 'Turns', min: 0.25, max: 3, step: 0.25, default: 1 },
   {
     key: 'direction',
     type: 'select',
@@ -63,21 +63,31 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const cardW = (w * p.size) / 100;
   const cardH = cardW / imgR;
   const step = TAU / count;
-  const base = t * TAU * Math.round(p.turns) * dir;
+  // Fractional turns are allowed (e.g. 0.25–0.75) for a slower spin; whole turns
+  // still loop perfectly seamlessly. No rounding here so the choice takes effect.
+  const base = t * TAU * p.turns * dir;
 
-  // ---- photo backdrop (front card's image, cross-fading as the wheel turns) ----
+  // ---- photo backdrop (locked to the frontmost card's image) ----
   if (p.backdrop) {
     // Continuous "front slot": the (fractional) card index whose angle sits at the
     // front of the wheel (a = +π/2, where the card is nearest / lowest on screen).
+    // The two cards bracketing that slot are i0 (below) and i1 (above); the actual
+    // frontmost card flips from i0 to i1 as `frac` passes 0.5.
     const f = (Math.PI / 2 - base) / step;
     const fLoop = ((f % count) + count) % count;
     const i0 = Math.floor(fLoop);
     const frac = fLoop - i0;
     const i1 = (i0 + 1) % count;
+    // Hold on the frontmost card's image, then swap quickly around the hand-off
+    // (frac≈0.5) with a short smoothstep cross-fade — so the backdrop always shows
+    // the SAME image as the card currently at the front of the wheel.
+    const band = 0.22;
+    const x = Math.min(1, Math.max(0, (frac - (0.5 - band)) / (2 * band)));
+    const wUp = x * x * (3 - 2 * x); // 0 while i0 is front, →1 as i1 takes the front
     ctx.save();
     coverBleed(ctx, imageAt(i0), w, h, p.blur);
-    if (frac > 0.001) {
-      ctx.globalAlpha = frac; // cross-fade toward the incoming front card
+    if (wUp > 0.001) {
+      ctx.globalAlpha = wUp; // cross-fade toward the incoming front card
       coverBleed(ctx, imageAt(i1), w, h, p.blur);
     }
     ctx.restore();
