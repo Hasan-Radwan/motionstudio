@@ -46,12 +46,14 @@ import * as polaroidStack from './polaroidStack.js';
 import * as radialWheel from './radialWheel.js';
 import * as storyFeed from './storyFeed.js';
 import * as carousel3d from './carousel3d.js';
+import * as carousel3d2 from './carousel3d2.js';
+import * as proximity from './proximity.js';
 import * as stagger from './stagger.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
-  cardTilt3d, carousel3d, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
+  cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
   orbit, spiral, globe, haloGlobe, orbWall, radialWheel, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
@@ -59,7 +61,7 @@ export const TEMPLATES = [
   marquee, totem, // Ticker & Marquee
   spotlight, pan, zoomBlur, cinematic, // Spotlight & Focus
   revealWipe, iris, blinds, stagger, // Reveal & Wipe
-  stackScatter, fan, cascade, depthDive, polaroidStack, // Stack & Scatter
+  stackScatter, fan, cascade, depthDive, polaroidStack, proximity, // Stack & Scatter
   isometric, isoTiles, // Isometric
 ].map((m) => ({ ...m.meta, controls: m.controls, render: m.render }));
 
