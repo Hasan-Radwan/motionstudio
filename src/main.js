@@ -10,6 +10,7 @@ import {
   mediaConfig,
 } from './templates/index.js';
 import { buildGallery } from './ui/templateGallery.js';
+import { buildTimeline } from './ui/timeline.js';
 import { buildPanel } from './ui/controlsPanel.js';
 import { buildMediaPanel } from './ui/mediaPanel.js';
 import { buildBackgroundPanel } from './ui/backgroundPanel.js';
@@ -923,6 +924,7 @@ async function boot() {
   fitCanvas();
   // Keep the preview fitted as the stage area changes (window resize, panels).
   new ResizeObserver(fitCanvas).observe(stageWrapEl);
+  buildTimeline($('stage-timeline'), renderer); // play/pause + scrubber under the stage
   renderer.start();
 
   // Apply the current language to the studio chrome + layout direction. The

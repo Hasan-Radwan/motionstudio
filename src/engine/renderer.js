@@ -37,8 +37,10 @@ export class Renderer {
     this.aspect = '16:9';
     this.duration = 4; // seconds per loop
     this._raf = null;
-    this._start = 0;
-    this._onFrame = null; // optional callback(t) for UI
+    this.t = 0; // current normalized loop time [0,1)
+    this._playing = true; // whether time advances (timeline play/pause)
+    this._last = null; // last rAF timestamp
+    this._onFrame = null; // optional callback(t, playing) for UI (timeline)
     this.resizeToAspect();
   }
 
@@ -267,22 +269,60 @@ export class Renderer {
     return this.background && this.background.type === 'transparent';
   }
 
+  // The rAF loop runs continuously while the studio is open so the preview always
+  // reflects live edits — but the loop TIME only advances while `_playing`, so the
+  // timeline can pause/scrub on a frozen frame that still updates as you edit.
   _tick = (now) => {
-    if (!this._start) this._start = now;
-    const elapsed = (now - this._start) / 1000;
-    const t = (elapsed % this.duration) / this.duration;
-    this.drawScene(this.ctx, this.canvas.width, this.canvas.height, t);
-    if (this._onFrame) this._onFrame(t);
+    if (this._last == null) this._last = now;
+    const dt = (now - this._last) / 1000;
+    this._last = now;
+    if (this._playing) {
+      this.t = (this.t + dt / this.duration) % 1;
+      if (this.t < 0) this.t += 1;
+    }
+    this.drawScene(this.ctx, this.canvas.width, this.canvas.height, this.t);
+    if (this._onFrame) this._onFrame(this.t, this._playing);
     this._raf = requestAnimationFrame(this._tick);
   };
 
+  // Start/stop own the rAF lifecycle (studio open/close). Play/pause/seek drive the
+  // timeline without tearing down the loop.
   start() {
     if (this._raf) return;
-    this._start = 0;
+    this._playing = true;
+    this._last = null;
     this._raf = requestAnimationFrame(this._tick);
   }
   stop() {
     if (this._raf) cancelAnimationFrame(this._raf);
     this._raf = null;
+    this._last = null;
+  }
+  play() {
+    this._playing = true;
+    this._last = null;
+    if (!this._raf) this._raf = requestAnimationFrame(this._tick);
+    if (this._onFrame) this._onFrame(this.t, true);
+  }
+  pause() {
+    this._playing = false;
+    if (this._onFrame) this._onFrame(this.t, false);
+  }
+  toggle() {
+    if (this._playing) this.pause();
+    else this.play();
+  }
+  // Jump to a normalized time [0,1). Repaints immediately when the loop is stopped.
+  seek(t) {
+    this.t = ((t % 1) + 1) % 1;
+    this._last = null;
+    if (!this._raf) this.drawScene(this.ctx, this.canvas.width, this.canvas.height, this.t);
+    if (this._onFrame) this._onFrame(this.t, this._playing);
+  }
+  isPlaying() {
+    return !!this._playing;
+  }
+  getTime() {
+    return this.t;
   }
 }
