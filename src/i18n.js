@@ -175,6 +175,14 @@ const AR = {
 
   // control labels (templates)
   Corners: 'الزوايا',
+  'Wheel size': 'حجم العجلة',
+  'Position X': 'الموضع الأفقي',
+  'Position Y': 'الموضع الرأسي',
+  Clockwise: 'مع عقارب الساعة',
+  'Counter-clockwise': 'عكس عقارب الساعة',
+  'Photo backdrop': 'خلفية بالصورة',
+  'Backdrop blur': 'ضبابية الخلفية',
+  'Backdrop dim': 'تعتيم الخلفية',
   'Card size': 'حجم الكارت',
   Cards: 'البطاقات',
   Gap: 'الفجوة',
