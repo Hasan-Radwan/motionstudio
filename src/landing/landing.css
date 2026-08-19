@@ -571,3 +571,60 @@
   .lp-pricing { grid-template-columns: 1fr; }
   .lp-plan-featured { transform: none; }
 }
+
+/* ---------- FAQ accordion ---------- */
+.lp-faq {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lp-faq-item {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.lp-faq-item.open {
+  border-color: var(--border-2);
+}
+.lp-faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: start;
+}
+.lp-faq-ic {
+  flex: none;
+  color: var(--accent-2);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+}
+.lp-faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.lp-faq-item.open .lp-faq-a {
+  max-height: 600px;
+}
+.lp-faq-a p {
+  margin: 0;
+  padding: 0 22px 20px;
+  color: var(--text-dim);
+  line-height: 1.75;
+  font-size: 15px;
+}

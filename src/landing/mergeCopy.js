@@ -40,6 +40,11 @@ export function mergeCopy(base, overrides) {
       items: arr(base.features.items, o.features?.items),
     },
     pricing: mergePricing(base.pricing, o.pricing),
+    faq: {
+      ...base.faq,
+      title: str(base.faq.title, o.faq?.title),
+      items: arr(base.faq.items, o.faq?.items),
+    },
   };
 }
 

@@ -35,6 +35,7 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
       <a href="#how">${c.nav.how}</a>
       <a href="#features">${c.nav.features}</a>
       <a href="#pricing">${c.nav.pricing}</a>
+      <a href="#faq">${c.nav.faq}</a>
     </div>
     <div class="lp-nav-actions">
       <a class="lp-lang" id="lp-lang" href="${c.langHref}" title="${lang === 'ar' ? 'English' : 'العربية'}">${c.langBtn}</a>
@@ -132,6 +133,25 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
     </div>
     <p class="lp-note">${c.pricing.note}</p>`;
 
+  // ---------- FAQ ---------- (accordion; first item open by default)
+  const faq = make('section', 'lp-section lp-reveal');
+  faq.id = 'faq';
+  faq.innerHTML = `
+    <h2 class="lp-h2">${c.faq.title}</h2>
+    <div class="lp-faq">
+      ${c.faq.items
+        .map(
+          (it, i) => `
+        <div class="lp-faq-item${i === 0 ? ' open' : ''}">
+          <button class="lp-faq-q" type="button" aria-expanded="${i === 0 ? 'true' : 'false'}">
+            <span>${it[0]}</span><span class="lp-faq-ic" aria-hidden="true">${i === 0 ? '−' : '+'}</span>
+          </button>
+          <div class="lp-faq-a"><p>${it[1]}</p></div>
+        </div>`
+        )
+        .join('')}
+    </div>`;
+
   // ---------- final CTA + footer ----------
   const cta = make('section', 'lp-cta-band lp-reveal');
   cta.innerHTML = `
@@ -149,6 +169,6 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
     </nav>
     <p class="lp-copy">${c.footer}</p>`;
 
-  root.append(nav, hero, about, how, features, pricing, cta, footer);
+  root.append(nav, hero, about, how, features, pricing, faq, cta, footer);
   return { c };
 }

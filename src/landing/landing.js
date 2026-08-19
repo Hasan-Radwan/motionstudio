@@ -227,6 +227,20 @@ function wireInteractivity(root, lang, c, onLaunch) {
   }
   setupReveal(root);
   setupLivePricing(root, c.pricing.perMonth);
+  setupFaq(root);
+}
+
+// FAQ accordion: toggle each item open/closed on click (multiple may be open).
+function setupFaq(root) {
+  root.querySelectorAll('.lp-faq-q').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.lp-faq-item');
+      const open = item.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const ic = btn.querySelector('.lp-faq-ic');
+      if (ic) ic.textContent = open ? '−' : '+';
+    });
+  });
 }
 
 // `lang` is fixed for the page's lifetime — English at `/`, Arabic at `/ar` are

@@ -118,6 +118,10 @@
         <div class="field"><label>مميزات الباقة المجانية (سطر لكل ميزة)</label><textarea class="cf" data-path="pricing.tiers.0.features" data-arr="lines" rows="4"></textarea></div>
         <div class="field"><label>مميزات باقة Pro (سطر لكل ميزة)</label><textarea class="cf" data-path="pricing.tiers.1.features" data-arr="lines" rows="5"></textarea></div>
 
+        <h3 style="margin:18px 0 8px">الأسئلة الشائعة · FAQ</h3>
+        <div class="field"><label>العنوان</label><input class="cf" data-path="faq.title" /></div>
+        <div class="field"><label>الأسئلة (سطر لكل سؤال: السؤال | الجواب)</label><textarea class="cf" data-path="faq.items" data-arr="pair" rows="8"></textarea></div>
+
         <button class="adm-btn" id="saveContent" style="max-width:220px">حفظ محتوى الصفحة</button>
         <p class="adm-msg" id="contentMsg"></p>
       </section>
@@ -251,6 +255,14 @@
         (rows || []).map((r) => (Array.isArray(r) ? r.join(' | ') : r)).join('\n');
       const parseLines = (text) => text.split('\n').map((l) => l.trim()).filter(Boolean);
       const stringifyLines = (rows) => (rows || []).join('\n');
+      // FAQ: "question | answer" (answer may itself contain no pipe; split on first).
+      const parsePair = (text) =>
+        text.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+          const i = l.indexOf('|');
+          return i < 0 ? [l, ''] : [l.slice(0, i).trim(), l.slice(i + 1).trim()];
+        });
+      const stringifyPair = (rows) =>
+        (rows || []).map((r) => (Array.isArray(r) ? r.join(' | ') : r)).join('\n');
 
       // Read the visible form into config[clang]; drop empties so they fall back.
       function captureForm() {
@@ -261,6 +273,7 @@
           if (!raw) return;
           let val;
           if (el.dataset.arr === 'triple') val = parseTriple(raw);
+          else if (el.dataset.arr === 'pair') val = parsePair(raw);
           else if (el.dataset.arr === 'lines') val = parseLines(raw);
           else val = raw;
           setPath(lang, path, val);
@@ -275,6 +288,7 @@
           const v = getPath(lang, el.dataset.path);
           if (v == null) { el.value = ''; return; }
           if (el.dataset.arr === 'triple') el.value = stringifyTriple(v);
+          else if (el.dataset.arr === 'pair') el.value = stringifyPair(v);
           else if (el.dataset.arr === 'lines') el.value = stringifyLines(v);
           else el.value = v;
         });

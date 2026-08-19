@@ -6,7 +6,7 @@
 export const COPY = {
   en: {
     dir: 'ltr',
-    nav: { about: 'About', how: 'How it works', features: 'Features', pricing: 'Pricing', launch: 'Launch' },
+    nav: { about: 'About', how: 'How it works', features: 'Features', pricing: 'Pricing', faq: 'FAQ', launch: 'Launch' },
     langBtn: 'ع',
     langHref: '/ar',
     hero: {
@@ -75,6 +75,17 @@ export const COPY = {
       ],
       note: '* Prices shown are placeholders — edit to match your business plan.',
     },
+    faq: {
+      title: 'Frequently asked questions',
+      items: [
+        ['What is Rotion?', 'Rotion is a browser-based motion-design tool: pick a template, add your images, tweak a few settings, and export an animated video. No timeline keyframing or design software required — everything runs on your own device.'],
+        ['Do I need design or animation experience?', 'Not at all. Start from a ready-made template, drop in your images or logo, adjust the sliders, and export. It is built for anyone.'],
+        ['Can I try it before I subscribe?', 'Yes. The Free plan lets you use the core templates and export up to 720p, forever. Upgrade to Pro whenever you need 8K, no watermark, custom fonts and more.'],
+        ['Which browsers and devices does it work on?', 'Rotion runs in modern browsers (Chrome and Edge recommended) on desktop and mobile. Since exporting is intensive, high resolutions work best on a capable device.'],
+        ['Do I need to download or install anything?', 'No. Rotion runs entirely in your browser — nothing to install. Your projects are saved locally and restored automatically.'],
+        ['Can I cancel my subscription anytime?', 'Yes. You can cancel Pro at any time and keep access until the end of your paid period. See the Refund Policy for details.'],
+      ],
+    },
     finalCta: { title: 'Ready to animate your design?', sub: 'Start now for free — no signup.', btn: 'Open the studio' },
     legal: {
       terms: 'Terms of Service',
@@ -86,7 +97,7 @@ export const COPY = {
   },
   ar: {
     dir: 'rtl',
-    nav: { about: 'نبذة', how: 'كيف يعمل', features: 'المميزات', pricing: 'الأسعار', launch: 'ابدأ الآن' },
+    nav: { about: 'نبذة', how: 'كيف يعمل', features: 'المميزات', pricing: 'الأسعار', faq: 'الأسئلة', launch: 'ابدأ الآن' },
     langBtn: 'EN',
     langHref: '/',
     hero: {
@@ -154,6 +165,17 @@ export const COPY = {
         },
       ],
       note: '* الأسعار هنا مبدئية للعرض — عدّلها حسب خطتك التجارية.',
+    },
+    faq: {
+      title: 'الأسئلة الشائعة',
+      items: [
+        ['ما هو Rotion؟', 'Rotion أداة تصميم حركة تعمل في متصفحك: اختر قالباً، أضف صورك، اضبط بعض الإعدادات، وصدّر فيديو متحركاً. بلا خطوط زمنية أو برامج تصميم — كل شيء يجري على جهازك.'],
+        ['هل أحتاج خبرة في التصميم أو التحريك؟', 'لا. ابدأ من قالب جاهز، أضف صورك أو شعارك، اضبط المنزلقات، وصدّر. مصمّم لأي شخص.'],
+        ['هل يمكنني التجربة قبل الاشتراك؟', 'نعم. الباقة المجانية تتيح استخدام القوالب الأساسية والتصدير حتى 720p للأبد. رقِّ إلى Pro متى احتجت 8K وإزالة العلامة والخطوط المخصّصة والمزيد.'],
+        ['ما المتصفحات والأجهزة المدعومة؟', 'يعمل Rotion في المتصفحات الحديثة (يُفضّل Chrome وEdge) على الحاسوب والجوال. وبما أن التصدير ثقيل، تعمل الدقّات العالية بأفضل شكل على جهاز قوي.'],
+        ['هل أحتاج تنزيل أو تثبيت شيء؟', 'لا. يعمل Rotion بالكامل في متصفحك — لا شيء للتثبيت. مشاريعك تُحفظ محلياً وتُستعاد تلقائياً.'],
+        ['هل يمكنني إلغاء الاشتراك في أي وقت؟', 'نعم. يمكنك إلغاء Pro في أي وقت ويبقى وصولك حتى نهاية الفترة المدفوعة. راجع سياسة الاسترداد للتفاصيل.'],
+      ],
     },
     finalCta: { title: 'جاهز لتحريك تصميمك؟', sub: 'ابدأ الآن مجاناً — بلا تسجيل.', btn: 'افتح الاستوديو' },
     legal: {
