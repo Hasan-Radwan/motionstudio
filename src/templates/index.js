@@ -46,6 +46,7 @@ import * as polaroidStack from './polaroidStack.js';
 import * as radialWheel from './radialWheel.js';
 import * as storyFeed from './storyFeed.js';
 import * as carousel3d from './carousel3d.js';
+import * as stagger from './stagger.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
@@ -57,7 +58,7 @@ export const TEMPLATES = [
   grid, wave, mosaic, driftTiles, // Grid
   marquee, totem, // Ticker & Marquee
   spotlight, pan, zoomBlur, cinematic, // Spotlight & Focus
-  revealWipe, iris, blinds, // Reveal & Wipe
+  revealWipe, iris, blinds, stagger, // Reveal & Wipe
   stackScatter, fan, cascade, depthDive, polaroidStack, // Stack & Scatter
   isometric, isoTiles, // Isometric
 ].map((m) => ({ ...m.meta, controls: m.controls, render: m.render }));
