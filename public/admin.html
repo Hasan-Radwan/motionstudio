@@ -8,312 +8,548 @@
     <link rel="stylesheet" href="/legal.css" />
     <title>لوحة التحكم · Rotion Admin</title>
     <style>
-      .adm-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 20px 80px; }
-      .adm-login { max-width: 380px; margin: 60px auto; }
-      .adm-login input {
-        width: 100%; height: 42px; padding: 0 12px; margin: 10px 0; border-radius: 8px;
-        border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 15px;
+      /* Tokens not defined by legal.css — set here so the dashboard renders fully. */
+      :root {
+        --adm-nav: 232px;
+        --bg-3: #132234;
+        --border-2: #26405a;
+        --ok: #00e5a0;
+        --danger: #ff6b6b;
       }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      .muted { color: var(--text-mute); }
+
+      /* ---------- login ---------- */
+      .adm-login { max-width: 380px; margin: 8vh auto; padding: 0 20px; }
+      .adm-login h1 { font-size: 24px; margin: 0 0 6px; }
+      .adm-input {
+        width: 100%; height: 44px; padding: 0 14px; border-radius: 10px;
+        border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text);
+        font-size: 15px; font-family: inherit; outline: none; transition: border-color .15s;
+      }
+      .adm-input:focus { border-color: var(--accent); }
       .adm-btn {
-        width: 100%; height: 42px; border: none; border-radius: 8px; cursor: pointer;
-        background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #fff; font-weight: 700; font-size: 15px;
+        height: 44px; border: none; border-radius: 10px; cursor: pointer; padding: 0 18px;
+        background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: #04140e;
+        font-weight: 800; font-size: 15px; font-family: inherit; transition: filter .15s, opacity .15s;
       }
-      .adm-tabs { display: flex; gap: 8px; margin: 20px 0; flex-wrap: wrap; }
-      .adm-tab {
-        padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border-2);
-        background: var(--bg-2); color: var(--text-dim); cursor: pointer; font-size: 14px; font-family: inherit;
+      .adm-btn:hover { filter: brightness(1.06); }
+      .adm-btn:disabled { opacity: .55; cursor: default; }
+      .adm-btn-ghost {
+        background: var(--bg-3); color: var(--text); border: 1px solid var(--border-2);
       }
-      .adm-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-      .adm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-      .adm-stat { background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
-      .adm-stat b { display: block; font-size: 30px; font-weight: 900; }
-      .adm-stat span { color: var(--text-dim); font-size: 13px; }
-      table { width: 100%; border-collapse: collapse; font-size: 13px; }
-      th, td { padding: 10px 8px; text-align: right; border-bottom: 1px solid var(--border); }
-      th { color: var(--text-mute); font-weight: 600; }
-      .pill { padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-      .pill.pro { background: rgba(0,229,160,.16); color: var(--accent-2); }
-      .pill.free { background: var(--bg-3); color: var(--text-dim); }
-      .row-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 12px; cursor: pointer; }
-      .adm-search { width: 100%; max-width: 320px; height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); margin-bottom: 14px; }
+
+      /* ---------- shell ---------- */
+      .adm-shell { display: grid; grid-template-columns: var(--adm-nav) 1fr; min-height: 100vh; }
+      .adm-nav {
+        border-inline-start: 1px solid var(--border); background: var(--bg-2);
+        padding: 18px 12px; position: sticky; top: 0; align-self: start; height: 100vh;
+        display: flex; flex-direction: column; gap: 4px;
+      }
+      .adm-brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 16px; padding: 6px 8px 16px; }
+      .adm-brand img { width: 24px; height: 24px; }
+      .adm-navbtn {
+        display: flex; align-items: center; gap: 10px; width: 100%; text-align: start;
+        padding: 10px 12px; border-radius: 10px; border: 1px solid transparent; cursor: pointer;
+        background: transparent; color: var(--text-dim); font: inherit; font-size: 14px; transition: background .12s, color .12s;
+      }
+      .adm-navbtn .ico { width: 20px; text-align: center; font-size: 15px; }
+      .adm-navbtn:hover { background: var(--bg-3); color: var(--text); }
+      .adm-navbtn.active { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+      .adm-nav-spacer { flex: 1; }
+      .adm-nav-foot { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+      .adm-nav-foot a, .adm-nav-foot button { font-size: 13px; }
+
+      .adm-main { padding: 26px 28px 96px; max-width: 940px; }
+      .adm-h { margin: 0 0 2px; font-size: 22px; font-weight: 800; }
+      .adm-sub { color: var(--text-mute); font-size: 14px; margin: 0 0 22px; }
+
+      /* ---------- cards / sections ---------- */
+      .card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+      .card-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+      .card-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
+      .card-help { color: var(--text-mute); font-size: 12.5px; margin: 0 0 16px; }
+
       .field { margin-bottom: 14px; }
-      .field label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 5px; }
-      .field input, .field textarea, .field select {
-        width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-2);
-        background: var(--bg-3); color: var(--text); font-size: 14px; font-family: inherit;
+      .field:last-child { margin-bottom: 0; }
+      .field > label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+      .field input, .field textarea, .field select, .rep input, .rep textarea {
+        width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border-2);
+        background: var(--bg-3); color: var(--text); font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s;
       }
-      .adm-msg { color: var(--ok); font-size: 13px; min-height: 18px; }
-      .adm-err { color: var(--danger); font-size: 13px; min-height: 18px; }
-      .hidden { display: none; }
+      .field input:focus, .field textarea:focus, .field select:focus, .rep input:focus, .rep textarea:focus { border-color: var(--accent); }
+      textarea { resize: vertical; }
+      .badge { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+      .badge.custom { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent-2); }
+      .badge.default { background: var(--bg-3); color: var(--text-mute); }
+
+      /* ---------- repeater ---------- */
+      .rep { display: flex; flex-direction: column; gap: 10px; }
+      .rep-row { border: 1px solid var(--border-2); border-radius: 11px; padding: 10px 12px; background: var(--bg); }
+      .rep-row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+      .rep-idx { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 7px; background: var(--bg-3); color: var(--text-dim); font-size: 12px; font-weight: 700; }
+      .rep-ops { display: flex; gap: 4px; }
+      .rep-op { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border-2); background: var(--bg-2); color: var(--text-dim); cursor: pointer; font-size: 13px; line-height: 1; }
+      .rep-op:hover { color: var(--text); border-color: var(--accent); }
+      .rep-op.del:hover { color: var(--danger); border-color: var(--danger); }
+      .rep-fields { display: grid; gap: 8px; }
+      .rep-fields.icon-title { grid-template-columns: 64px 1fr; }
+      .rep-add { align-self: flex-start; padding: 8px 14px; border-radius: 9px; border: 1px dashed var(--border-2); background: transparent; color: var(--text-dim); cursor: pointer; font: inherit; font-size: 13px; }
+      .rep-add:hover { color: var(--accent-2); border-color: var(--accent); }
+
+      /* ---------- overview ---------- */
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+      .stat { background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+      .stat .ico { font-size: 18px; opacity: .8; }
+      .stat b { display: block; font-size: 30px; font-weight: 900; margin-top: 6px; line-height: 1; }
+      .stat span { color: var(--text-mute); font-size: 13px; }
+
+      /* ---------- users ---------- */
+      .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+      .adm-search { flex: 1; min-width: 200px; max-width: 340px; height: 40px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-family: inherit; }
+      .count-chip { color: var(--text-mute); font-size: 13px; }
+      .table-wrap { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th, td { padding: 12px 12px; text-align: start; border-bottom: 1px solid var(--border); }
+      thead th { color: var(--text-mute); font-weight: 600; background: var(--bg-2); font-size: 12px; }
+      tbody tr:last-child td { border-bottom: none; }
+      tbody tr:hover { background: color-mix(in srgb, var(--bg-2) 60%, transparent); }
+      .who { display: flex; align-items: center; gap: 10px; }
+      .avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent-2), var(--accent)); color: #04140e; font-weight: 800; font-size: 12px; }
+      .who small { color: var(--text-mute); }
+      .pill { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+      .pill.pro { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent-2); }
+      .pill.free { background: var(--bg-3); color: var(--text-dim); }
+      .row-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 12px; cursor: pointer; font-family: inherit; }
+      .row-btn:hover { border-color: var(--accent); }
+      .row-btn:disabled { opacity: .5; cursor: default; }
+
+      /* ---------- save bar + toast ---------- */
+      .savebar {
+        position: sticky; bottom: 0; margin: 20px -28px -96px; padding: 14px 28px;
+        background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(8px);
+        border-top: 1px solid var(--border); display: flex; align-items: center; gap: 14px;
+      }
+      .savebar .hint { color: var(--text-mute); font-size: 13px; }
+      .toast {
+        position: fixed; inset-block-end: 22px; inset-inline-start: 50%; transform: translate(50%, 20px);
+        background: #04140e; color: #d6fff2; border: 1px solid var(--accent); padding: 11px 18px;
+        border-radius: 10px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none;
+        transition: opacity .2s, transform .2s; z-index: 50;
+      }
+      .toast.show { opacity: 1; transform: translate(50%, 0); }
+      .toast.err { border-color: var(--danger); color: #ffd9d9; }
+
+      .empty { padding: 26px; text-align: center; color: var(--text-mute); }
+      .spin { display: inline-block; width: 15px; height: 15px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: sp .7s linear infinite; vertical-align: -2px; }
+      @keyframes sp { to { transform: rotate(360deg); } }
+
+      @media (max-width: 780px) {
+        .adm-shell { grid-template-columns: 1fr; }
+        .adm-nav { position: static; height: auto; flex-direction: row; flex-wrap: wrap; border-inline-start: none; border-bottom: 1px solid var(--border); }
+        .adm-brand { width: 100%; padding-bottom: 8px; }
+        .adm-navbtn { width: auto; }
+        .adm-nav-spacer { display: none; }
+        .adm-nav-foot { flex-direction: row; border-top: none; padding-top: 0; }
+        .adm-main { padding: 20px 16px 96px; }
+        .savebar { margin: 20px -16px -96px; padding: 14px 16px; }
+        .stats { grid-template-columns: 1fr; }
+      }
     </style>
   </head>
   <body>
-    <header class="top">
-      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="26" height="26" /> Rotion Admin</a>
-      <div class="langs"><button id="signout" class="row-btn hidden">خروج</button></div>
-    </header>
-
-    <!-- Login -->
-    <div class="adm-wrap adm-login" id="login">
-      <h1 style="font-size:24px">لوحة التحكم</h1>
+    <!-- ============ Login ============ -->
+    <div class="adm-login" id="login">
+      <div class="adm-brand" style="padding-inline:0"><img src="/favicon.svg" alt="" /> Rotion Admin</div>
+      <h1>لوحة التحكم</h1>
       <p class="muted">أدخل مفتاح المشرف للدخول.</p>
-      <input id="key" type="password" placeholder="Admin key" autocomplete="off" />
-      <button class="adm-btn" id="enter">دخول</button>
-      <p class="adm-err" id="loginErr"></p>
-    </div>
-
-    <!-- Dashboard -->
-    <div class="adm-wrap hidden" id="dash">
-      <div class="adm-tabs">
-        <button class="adm-tab active" data-tab="overview">نظرة عامة</button>
-        <button class="adm-tab" data-tab="users">المستخدمون</button>
-        <button class="adm-tab" data-tab="content">محتوى الصفحة</button>
-        <button class="adm-tab" data-tab="plans">الباقات والأسعار</button>
+      <div style="display:flex; gap:8px; margin-top:12px">
+        <input id="key" class="adm-input" type="password" placeholder="Admin key" autocomplete="off" />
+        <button class="adm-btn" id="enter">دخول</button>
       </div>
-
-      <section id="tab-overview">
-        <div class="adm-stats">
-          <div class="adm-stat"><b id="s-total">–</b><span>إجمالي المستخدمين</span></div>
-          <div class="adm-stat"><b id="s-pro">–</b><span>مشتركو Pro</span></div>
-          <div class="adm-stat"><b id="s-free">–</b><span>مجاني</span></div>
-        </div>
-        <p class="muted">تُبنى قائمة المستخدمين تلقائياً عند تسجيل الدخول.</p>
-      </section>
-
-      <section id="tab-users" class="hidden">
-        <input class="adm-search" id="userSearch" placeholder="بحث بالبريد أو الاسم…" />
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>البريد</th><th>الاسم</th><th>المصدر</th><th>الباقة</th><th>آخر ظهور</th><th>إجراء</th></tr></thead>
-            <tbody id="usersBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="tab-content" class="hidden">
-        <div class="adm-tabs" style="margin-top:0">
-          <button class="clang active" data-l="en">English</button>
-          <button class="clang" data-l="ar">العربية</button>
-        </div>
-        <p class="muted">
-          عدّل نصوص الصفحة الرئيسية لكل لغة. اترك الحقل فارغاً لاستخدام النص الافتراضي.
-          للقوائم (النقاط/البطاقات): <strong>سطر لكل عنصر</strong>، والحقول مفصولة بـ
-          <code>|</code> بالترتيب: أيقونة | عنوان | وصف.
-        </p>
-
-        <h3 style="margin:18px 0 8px">Hero</h3>
-        <div class="field"><label>العنوان الرئيسي</label><input class="cf" data-path="hero.title" /></div>
-        <div class="field"><label>الوصف</label><textarea class="cf" data-path="hero.sub" rows="2"></textarea></div>
-
-        <h3 style="margin:18px 0 8px">نبذة · About</h3>
-        <div class="field"><label>العنوان</label><input class="cf" data-path="about.title" /></div>
-        <div class="field"><label>النص</label><textarea class="cf" data-path="about.body" rows="3"></textarea></div>
-        <div class="field"><label>النقاط (سطر لكل نقطة: أيقونة | عنوان | وصف)</label><textarea class="cf" data-path="about.points" data-arr="triple" rows="3"></textarea></div>
-
-        <h3 style="margin:18px 0 8px">المميزات · Features</h3>
-        <div class="field"><label>العنوان</label><input class="cf" data-path="features.title" /></div>
-        <div class="field"><label>البطاقات (سطر لكل ميزة: أيقونة | عنوان | وصف)</label><textarea class="cf" data-path="features.items" data-arr="triple" rows="6"></textarea></div>
-
-        <h3 style="margin:18px 0 8px">مميزات الباقات · Plan features</h3>
-        <div class="field"><label>مميزات الباقة المجانية (سطر لكل ميزة)</label><textarea class="cf" data-path="pricing.tiers.0.features" data-arr="lines" rows="4"></textarea></div>
-        <div class="field"><label>مميزات باقة Pro (سطر لكل ميزة)</label><textarea class="cf" data-path="pricing.tiers.1.features" data-arr="lines" rows="5"></textarea></div>
-
-        <h3 style="margin:18px 0 8px">الأسئلة الشائعة · FAQ</h3>
-        <div class="field"><label>العنوان</label><input class="cf" data-path="faq.title" /></div>
-        <div class="field"><label>الأسئلة (سطر لكل سؤال: السؤال | الجواب)</label><textarea class="cf" data-path="faq.items" data-arr="pair" rows="8"></textarea></div>
-
-        <button class="adm-btn" id="saveContent" style="max-width:220px">حفظ محتوى الصفحة</button>
-        <p class="adm-msg" id="contentMsg"></p>
-      </section>
-
-      <section id="tab-plans" class="hidden">
-        <div class="field"><label>الباقة المميّزة (Featured)</label>
-          <select id="c-featured"><option value="pro">Pro</option><option value="free">Free</option></select>
-        </div>
-        <div class="field"><label>إظهار الباقة المجانية على الصفحة</label>
-          <select id="c-showFree"><option value="true">نعم</option><option value="false">لا</option></select>
-        </div>
-
-        <h3 style="margin:18px 0 8px">السعر المعروض · Displayed price</h3>
-        <div class="field"><label>عرض السعر الحقيقي من Paddle تلقائياً</label>
-          <select id="c-showLivePrice"><option value="true">نعم (تلقائي، مطابق للدفع)</option><option value="false">لا (استخدم السعر الثابت أدناه)</option></select>
-        </div>
-        <div class="field"><label>سعر الباقة المجانية (عادةً 0)</label><input id="c-priceFree" placeholder="0" /></div>
-        <div class="field"><label>سعر باقة Pro (يُعرض عند إيقاف السعر التلقائي)</label><input id="c-pricePro" placeholder="12" /></div>
-
-        <button class="adm-btn" id="savePlans" style="max-width:200px">حفظ</button>
-        <p class="adm-msg" id="plansMsg"></p>
-        <p class="muted" style="margin-top:16px">
-          💡 <strong>أسعار</strong> الاشتراك الفعلية تُدار في <strong>Paddle</strong> (مصدر الحقيقة) وتظهر تلقائياً.
-          هنا تتحكم في الإبراز وإظهار المجاني. أما <strong>مميزات</strong> الباقات فتُحرَّر من تبويب «محتوى الصفحة».
-        </p>
-      </section>
+      <p class="adm-err" id="loginErr" style="min-height:18px; color:var(--danger); font-size:13px"></p>
     </div>
+
+    <!-- ============ Dashboard ============ -->
+    <div class="adm-shell hidden" id="dash">
+      <!-- sidebar -->
+      <nav class="adm-nav">
+        <div class="adm-brand"><img src="/favicon.svg" alt="" /> Rotion Admin</div>
+        <button class="adm-navbtn active" data-tab="overview"><span class="ico">📊</span> نظرة عامة</button>
+        <button class="adm-navbtn" data-tab="users"><span class="ico">👥</span> المستخدمون</button>
+        <button class="adm-navbtn" data-tab="content"><span class="ico">📝</span> محتوى الصفحة</button>
+        <button class="adm-navbtn" data-tab="plans"><span class="ico">💳</span> الباقات والأسعار</button>
+        <div class="adm-nav-spacer"></div>
+        <div class="adm-nav-foot">
+          <a class="adm-navbtn" href="/" target="_blank" rel="noopener"><span class="ico">↗</span> فتح الموقع</a>
+          <button class="adm-navbtn" id="signout"><span class="ico">⎋</span> تسجيل الخروج</button>
+        </div>
+      </nav>
+
+      <main class="adm-main">
+        <!-- Overview -->
+        <section id="tab-overview">
+          <h1 class="adm-h">نظرة عامة</h1>
+          <p class="adm-sub">ملخّص سريع لحسابات المستخدمين.</p>
+          <div class="stats">
+            <div class="stat"><span class="ico">👤</span><b id="s-total">–</b><span>إجمالي المستخدمين</span></div>
+            <div class="stat"><span class="ico">⭐</span><b id="s-pro">–</b><span>مشتركو Pro</span></div>
+            <div class="stat"><span class="ico">🆓</span><b id="s-free">–</b><span>الباقة المجانية</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>كيف تُبنى القائمة؟</h3></div>
+            <p class="card-help" style="margin:0">
+              تُضاف الحسابات تلقائياً إلى السجلّ عند تسجيل الدخول. امنح أو ألغِ اشتراك Pro يدوياً من تبويب
+              «المستخدمون». الأسعار والاشتراكات الفعلية مصدرها <strong>Paddle</strong>.
+            </p>
+          </div>
+        </section>
+
+        <!-- Users -->
+        <section id="tab-users" class="hidden">
+          <h1 class="adm-h">المستخدمون</h1>
+          <p class="adm-sub">ابحث، وامنح أو ألغِ اشتراك Pro يدوياً.</p>
+          <div class="toolbar">
+            <input class="adm-search" id="userSearch" placeholder="بحث بالبريد أو الاسم…" />
+            <span class="count-chip" id="userCount"></span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>المستخدم</th><th>المصدر</th><th>الباقة</th><th>آخر ظهور</th><th></th></tr></thead>
+              <tbody id="usersBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Content -->
+        <section id="tab-content" class="hidden">
+          <h1 class="adm-h">محتوى الصفحة الرئيسية</h1>
+          <p class="adm-sub">عدّل النصوص لكل لغة. الحقل الفارغ يستخدم النص الافتراضي تلقائياً.</p>
+          <div class="toolbar" style="margin-bottom:18px">
+            <div style="display:flex; gap:6px">
+              <button class="adm-btn adm-btn-ghost clang active" data-l="en" style="height:38px">English</button>
+              <button class="adm-btn adm-btn-ghost clang" data-l="ar" style="height:38px">العربية</button>
+            </div>
+            <span class="adm-nav-spacer"></span>
+            <a class="row-btn" id="previewLink" href="/" target="_blank" rel="noopener">معاينة ↗</a>
+          </div>
+          <div id="contentForm"></div>
+          <div class="savebar">
+            <button class="adm-btn" id="saveContent">حفظ المحتوى</button>
+            <span class="hint" id="contentMsg">يظهر التعديل فوراً على الموقع، ويثبُت في HTML عند النشر التالي.</span>
+          </div>
+        </section>
+
+        <!-- Plans -->
+        <section id="tab-plans" class="hidden">
+          <h1 class="adm-h">الباقات والأسعار</h1>
+          <p class="adm-sub">تحكّم بالإبراز والعرض والسعر المعروض على الصفحة.</p>
+
+          <div class="card">
+            <div class="card-head"><h3>العرض على الصفحة</h3></div>
+            <p class="card-help">أيّ باقة تُبرَز، وهل تظهر الباقة المجانية.</p>
+            <div class="field"><label>الباقة المميّزة (Featured)</label>
+              <select id="c-featured"><option value="pro">Pro</option><option value="free">Free</option></select>
+            </div>
+            <div class="field"><label>إظهار الباقة المجانية على الصفحة</label>
+              <select id="c-showFree"><option value="true">نعم</option><option value="false">لا</option></select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>السعر المعروض</h3></div>
+            <p class="card-help">
+              الافتراضي يعرض السعر الحقيقي من Paddle (مطابق للدفع). أوقفه لعرض سعر ثابت من عندك —
+              وتأكّد أنه يطابق سعر Paddle، فالدفع دائماً بسعر Paddle.
+            </p>
+            <div class="field"><label>عرض السعر الحقيقي من Paddle تلقائياً</label>
+              <select id="c-showLivePrice"><option value="true">نعم (تلقائي)</option><option value="false">لا (سعر ثابت)</option></select>
+            </div>
+            <div class="field"><label>سعر الباقة المجانية</label><input id="c-priceFree" placeholder="0" inputmode="decimal" /></div>
+            <div class="field"><label>سعر باقة Pro (يُعرض عند إيقاف السعر التلقائي)</label><input id="c-pricePro" placeholder="12" inputmode="decimal" /></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>مميزات الباقات</h3></div>
+            <p class="card-help">تُحرَّر لكل لغة من تبويب «محتوى الصفحة» (قسم مميزات الباقات).</p>
+          </div>
+
+          <div class="savebar">
+            <button class="adm-btn" id="savePlans">حفظ الإعدادات</button>
+            <span class="hint" id="plansMsg"></span>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
 
     <script>
       const KEY_STORE = 'rotion-admin-key';
       let adminKey = sessionStorage.getItem(KEY_STORE) || '';
       const $ = (id) => document.getElementById(id);
+      const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
       const api = (path, opts = {}) =>
         fetch(path, { ...opts, headers: { 'x-admin-key': adminKey, 'content-type': 'application/json', ...(opts.headers || {}) } });
 
+      function toast(msg, isErr) {
+        const t = $('toast');
+        t.textContent = msg;
+        t.classList.toggle('err', !!isErr);
+        t.classList.add('show');
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+      }
+
+      /* ---------- auth ---------- */
       async function tryLogin(key) {
         adminKey = key;
-        const r = await api('/api/admin/stats');
-        if (r.status === 401) return false;
+        let r;
+        try { r = await api('/api/admin/stats'); } catch { return false; }
+        if (!r.ok) return false;
         sessionStorage.setItem(KEY_STORE, key);
         return true;
       }
-
       function showDash() {
         $('login').classList.add('hidden');
         $('dash').classList.remove('hidden');
-        $('signout').classList.remove('hidden');
-        loadStats();
-        loadUsers();
-        loadConfig();
+        loadStats(); loadUsers(); loadConfig();
       }
-
       $('enter').addEventListener('click', async () => {
         $('loginErr').textContent = '';
+        const btn = $('enter'); btn.disabled = true;
         const ok = await tryLogin($('key').value.trim());
-        if (ok) showDash();
-        else $('loginErr').textContent = 'مفتاح غير صحيح.';
+        btn.disabled = false;
+        if (ok) showDash(); else $('loginErr').textContent = 'مفتاح غير صحيح.';
       });
       $('key').addEventListener('keydown', (e) => e.key === 'Enter' && $('enter').click());
       $('signout').addEventListener('click', () => { sessionStorage.removeItem(KEY_STORE); location.reload(); });
 
-      // tabs
-      document.querySelectorAll('.adm-tab').forEach((b) =>
+      /* ---------- nav ---------- */
+      const TABS = ['overview', 'users', 'content', 'plans'];
+      document.querySelectorAll('.adm-navbtn[data-tab]').forEach((b) =>
         b.addEventListener('click', () => {
-          document.querySelectorAll('.adm-tab').forEach((x) => x.classList.remove('active'));
-          b.classList.add('active');
-          ['overview', 'users', 'content', 'plans'].forEach((t) =>
-            $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab)
-          );
+          document.querySelectorAll('.adm-navbtn[data-tab]').forEach((x) => x.classList.toggle('active', x === b));
+          TABS.forEach((t) => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
         })
       );
 
+      /* ---------- overview ---------- */
       async function loadStats() {
-        const d = await (await api('/api/admin/stats')).json();
-        $('s-total').textContent = d.totalUsers ?? 0;
-        $('s-pro').textContent = d.proUsers ?? 0;
-        $('s-free').textContent = d.freeUsers ?? 0;
+        try {
+          const d = await (await api('/api/admin/stats')).json();
+          $('s-total').textContent = d.totalUsers ?? 0;
+          $('s-pro').textContent = d.proUsers ?? 0;
+          $('s-free').textContent = d.freeUsers ?? 0;
+        } catch { toast('تعذّر تحميل الإحصاءات', true); }
       }
 
+      /* ---------- users ---------- */
       let allUsers = [];
       async function loadUsers() {
-        const d = await (await api('/api/admin/users')).json();
-        allUsers = d.users || [];
+        try {
+          const d = await (await api('/api/admin/users')).json();
+          allUsers = d.users || [];
+        } catch { allUsers = []; toast('تعذّر تحميل المستخدمين', true); }
         renderUsers();
       }
+      const initials = (u) => (u.name || u.email || '?').trim().charAt(0).toUpperCase();
       function renderUsers() {
         const q = $('userSearch').value.toLowerCase();
-        const rows = allUsers
-          .filter((u) => !q || (u.email + ' ' + (u.name || '')).toLowerCase().includes(q))
-          .map((u) => {
-            const date = u.lastSeen ? new Date(u.lastSeen).toLocaleDateString() : '–';
-            const toPlan = u.plan === 'pro' ? 'free' : 'pro';
-            const action = u.plan === 'pro' ? 'إلغاء Pro' : 'منح Pro';
-            return `<tr>
-              <td>${u.email}</td><td>${u.name || '–'}</td><td>${u.provider}</td>
-              <td><span class="pill ${u.plan}">${u.plan}${u.manual ? ' ✎' : ''}</span></td>
-              <td>${date}</td>
-              <td><button class="row-btn" data-email="${u.email}" data-plan="${toPlan}">${action}</button></td>
-            </tr>`;
-          })
-          .join('');
-        $('usersBody').innerHTML = rows || '<tr><td colspan="6" class="muted">لا مستخدمون بعد.</td></tr>';
-        $('usersBody').querySelectorAll('.row-btn').forEach((b) =>
-          b.addEventListener('click', async () => {
-            b.disabled = true;
-            await api('/api/admin/set-plan', { method: 'POST', body: JSON.stringify({ email: b.dataset.email, plan: b.dataset.plan }) });
-            await loadUsers();
-            loadStats();
-          })
-        );
+        const list = allUsers.filter((u) => !q || (u.email + ' ' + (u.name || '')).toLowerCase().includes(q));
+        $('userCount').textContent = `${list.length} من ${allUsers.length}`;
+        const body = $('usersBody');
+        body.innerHTML = '';
+        if (!list.length) {
+          body.innerHTML = '<tr><td colspan="5"><div class="empty">لا مستخدمون بعد.</div></td></tr>';
+          return;
+        }
+        for (const u of list) {
+          const date = u.lastSeen ? new Date(u.lastSeen).toLocaleDateString('ar') : '–';
+          const toPlan = u.plan === 'pro' ? 'free' : 'pro';
+          const action = u.plan === 'pro' ? 'إلغاء Pro' : 'منح Pro';
+          const tr = el('tr');
+          tr.innerHTML =
+            `<td><div class="who"><div class="avatar">${initials(u)}</div>` +
+            `<div><div>${u.email}</div>${u.name ? `<small>${u.name}</small>` : ''}</div></div></td>` +
+            `<td>${u.provider || '–'}</td>` +
+            `<td><span class="pill ${u.plan}">${u.plan}${u.manual ? ' ✎' : ''}</span></td>` +
+            `<td>${date}</td>` +
+            `<td><button class="row-btn">${action}</button></td>`;
+          const btn = tr.querySelector('.row-btn');
+          btn.addEventListener('click', async () => {
+            if (!confirm(`${action} للمستخدم ${u.email}؟`)) return;
+            btn.disabled = true; btn.textContent = '…';
+            try {
+              await api('/api/admin/set-plan', { method: 'POST', body: JSON.stringify({ email: u.email, plan: toPlan }) });
+              toast('تم تحديث الباقة ✓');
+              await loadUsers(); loadStats();
+            } catch { toast('فشل التحديث', true); btn.disabled = false; }
+          });
+          body.appendChild(tr);
+        }
       }
       $('userSearch').addEventListener('input', renderUsers);
 
+      /* ================= CONTENT EDITOR ================= */
       // Config shape (KV via /api/config), consumed by mergeCopy.js:
-      //   { featured, showFree, en:{ hero, about, features, pricing }, ar:{...} }
-      // Only NON-EMPTY fields are kept, so cleared fields fall back to defaults.
+      //   { featured, showFree, showLivePrice, priceFree, pricePro,
+      //     en:{ hero, about, features, pricing, faq }, ar:{…} }
+      // Empty fields / rows are dropped so they fall back to the built-in copy.
       let config = { en: {}, ar: {} };
       let clang = 'en';
 
-      // ---- nested get/set by dotted path ("pricing.tiers.0.features") ----
-      const getPath = (obj, path) =>
-        path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
-      function setPath(obj, path, val) {
-        const keys = path.split('.');
-        let o = obj;
-        for (let i = 0; i < keys.length - 1; i++) {
-          const k = keys[i];
-          const nextIsIndex = /^\d+$/.test(keys[i + 1]);
-          if (o[k] == null) o[k] = nextIsIndex ? [] : {};
-          o = o[k];
+      const getPath = (o, p) => p.split('.').reduce((x, k) => (x == null ? undefined : x[k]), o);
+      function setPath(o, p, v) {
+        const ks = p.split('.'); let cur = o;
+        for (let i = 0; i < ks.length - 1; i++) {
+          const k = ks[i]; if (cur[k] == null) cur[k] = /^\d+$/.test(ks[i + 1]) ? [] : {}; cur = cur[k];
         }
-        o[keys[keys.length - 1]] = val;
+        cur[ks[ks.length - 1]] = v;
       }
 
-      // ---- textarea <-> array serialization ----
-      const parseTriple = (text) =>
-        text.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => l.split('|').map((s) => s.trim()));
-      const stringifyTriple = (rows) =>
-        (rows || []).map((r) => (Array.isArray(r) ? r.join(' | ') : r)).join('\n');
-      const parseLines = (text) => text.split('\n').map((l) => l.trim()).filter(Boolean);
-      const stringifyLines = (rows) => (rows || []).join('\n');
-      // FAQ: "question | answer" (answer may itself contain no pipe; split on first).
-      const parsePair = (text) =>
-        text.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
-          const i = l.indexOf('|');
-          return i < 0 ? [l, ''] : [l.slice(0, i).trim(), l.slice(i + 1).trim()];
-        });
-      const stringifyPair = (rows) =>
-        (rows || []).map((r) => (Array.isArray(r) ? r.join(' | ') : r)).join('\n');
+      // Declarative schema — drives the whole editor (display + capture).
+      // kind: 'text' | 'area' | 'triple' (icon|title|desc) | 'pair' (Q|A) | 'lines' (one string per row)
+      const SCHEMA = [
+        { title: 'Hero', fields: [
+          { path: 'hero.title', label: 'العنوان الرئيسي', kind: 'text' },
+          { path: 'hero.sub', label: 'الوصف', kind: 'area' },
+        ]},
+        { title: 'نبذة · About', fields: [
+          { path: 'about.title', label: 'العنوان', kind: 'text' },
+          { path: 'about.body', label: 'النص', kind: 'area' },
+          { path: 'about.points', label: 'النقاط', kind: 'triple' },
+        ]},
+        { title: 'المميزات · Features', fields: [
+          { path: 'features.title', label: 'العنوان', kind: 'text' },
+          { path: 'features.items', label: 'البطاقات', kind: 'triple' },
+        ]},
+        { title: 'مميزات الباقات · Plan features', fields: [
+          { path: 'pricing.tiers.0.features', label: 'مميزات الباقة المجانية', kind: 'lines' },
+          { path: 'pricing.tiers.1.features', label: 'مميزات باقة Pro', kind: 'lines' },
+        ]},
+        { title: 'الأسئلة الشائعة · FAQ', fields: [
+          { path: 'faq.title', label: 'العنوان', kind: 'text' },
+          { path: 'faq.items', label: 'الأسئلة', kind: 'pair' },
+        ]},
+      ];
 
-      // Read the visible form into config[clang]; drop empties so they fall back.
-      function captureForm() {
+      const COLS = {
+        triple: [{ ph: 'أيقونة', cls: 'ico', kind: 'input' }, { ph: 'العنوان', kind: 'input' }, { ph: 'الوصف', kind: 'area' }],
+        pair: [{ ph: 'السؤال', kind: 'input' }, { ph: 'الجواب', kind: 'area' }],
+        lines: [{ ph: 'الميزة', kind: 'input' }],
+      };
+
+      // Build one repeater row for a list field.
+      function buildRow(kind, values) {
+        const cols = COLS[kind];
+        const row = el('div', 'rep-row');
+        const head = el('div', 'rep-row-head');
+        head.appendChild(el('span', 'rep-idx', '1'));
+        const ops = el('div', 'rep-ops');
+        const mk = (txt, cls, fn) => { const b = el('button', 'rep-op' + (cls ? ' ' + cls : ''), txt); b.type = 'button'; b.onclick = fn; return b; };
+        ops.appendChild(mk('↑', '', () => { if (row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling); reindex(row.parentNode); }));
+        ops.appendChild(mk('↓', '', () => { if (row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row); reindex(row.parentNode); }));
+        ops.appendChild(mk('✕', 'del', () => { const p = row.parentNode; row.remove(); reindex(p); }));
+        head.appendChild(ops);
+        row.appendChild(head);
+
+        const fields = el('div', 'rep-fields' + (kind === 'triple' ? ' icon-title' : ''));
+        // For triple: icon+title share the first grid row, desc spans full width below.
+        cols.forEach((c, i) => {
+          const val = (values && values[i]) || '';
+          const node = c.kind === 'area' ? el('textarea') : el('input');
+          if (c.kind === 'area') node.rows = 2;
+          node.placeholder = c.ph;
+          if (c.cls) node.classList.add(c.cls);
+          node.value = val;
+          node.dataset.col = i;
+          if (kind === 'triple' && i === 2) node.style.gridColumn = '1 / -1';
+          fields.appendChild(node);
+        });
+        row.appendChild(fields);
+        return row;
+      }
+      const rowsOf = (container) => [...container.children].filter((c) => c.classList && c.classList.contains('rep-row'));
+      function reindex(container) {
+        rowsOf(container).forEach((r, i) => (r.querySelector('.rep-idx').textContent = i + 1));
+      }
+
+      // Render the whole content form for the current language from config[clang].
+      function renderContent() {
+        const host = $('contentForm');
+        host.innerHTML = '';
+        const lang = config[clang] || {};
+        for (const sec of SCHEMA) {
+          const card = el('div', 'card');
+          card.appendChild(el('div', 'card-head', `<h3>${sec.title}</h3>`));
+          for (const f of sec.fields) {
+            const wrap = el('div', 'field');
+            const cur = getPath(lang, f.path);
+            const isCustom = cur != null && (Array.isArray(cur) ? cur.length : String(cur).trim());
+            wrap.appendChild(el('label', null, `${f.label} <span class="badge ${isCustom ? 'custom' : 'default'}">${isCustom ? 'مخصّص' : 'افتراضي'}</span>`));
+            if (f.kind === 'text' || f.kind === 'area') {
+              const node = f.kind === 'area' ? el('textarea') : el('input');
+              if (f.kind === 'area') node.rows = 2;
+              node.className = 'cf';
+              node.dataset.path = f.path;
+              node.placeholder = 'النص الافتراضي مُستخدَم — اكتب لتخصيصه';
+              node.value = cur == null ? '' : cur;
+              wrap.appendChild(node);
+            } else {
+              const rep = el('div', 'rep');
+              rep.dataset.path = f.path;
+              rep.dataset.kind = f.kind;
+              const arr = Array.isArray(cur) ? cur : [];
+              arr.forEach((v) => rep.appendChild(buildRow(f.kind, f.kind === 'lines' ? [v] : v)));
+              reindex(rep);
+              const add = el('button', 'rep-add', '➕ إضافة عنصر');
+              add.type = 'button';
+              add.onclick = () => { rep.appendChild(buildRow(f.kind)); reindex(rep); };
+              wrap.appendChild(rep);
+              wrap.appendChild(add);
+            }
+            card.appendChild(wrap);
+          }
+          host.appendChild(card);
+        }
+      }
+
+      // Read the visible content form into config[clang]; drop empties → fallback.
+      function captureContent() {
         const lang = {};
-        document.querySelectorAll('#tab-content .cf').forEach((el) => {
-          const path = el.dataset.path;
-          const raw = el.value.trim();
-          if (!raw) return;
-          let val;
-          if (el.dataset.arr === 'triple') val = parseTriple(raw);
-          else if (el.dataset.arr === 'pair') val = parsePair(raw);
-          else if (el.dataset.arr === 'lines') val = parseLines(raw);
-          else val = raw;
-          setPath(lang, path, val);
+        $('contentForm').querySelectorAll('.cf').forEach((node) => {
+          const v = node.value.trim();
+          if (v) setPath(lang, node.dataset.path, v);
+        });
+        $('contentForm').querySelectorAll('.rep').forEach((rep) => {
+          const kind = rep.dataset.kind;
+          const rows = rowsOf(rep).map((row) => {
+            const vals = [...row.querySelectorAll('[data-col]')].map((i) => i.value.trim());
+            return kind === 'lines' ? vals[0] : vals;
+          }).filter((r) => (Array.isArray(r) ? r.some(Boolean) : !!r));
+          if (rows.length) setPath(lang, rep.dataset.path, rows);
         });
         config[clang] = lang;
       }
 
-      // Populate the form from config[clang].
-      function writeForm() {
-        const lang = config[clang] || {};
-        document.querySelectorAll('#tab-content .cf').forEach((el) => {
-          const v = getPath(lang, el.dataset.path);
-          if (v == null) { el.value = ''; return; }
-          if (el.dataset.arr === 'triple') el.value = stringifyTriple(v);
-          else if (el.dataset.arr === 'pair') el.value = stringifyPair(v);
-          else if (el.dataset.arr === 'lines') el.value = stringifyLines(v);
-          else el.value = v;
-        });
-      }
-
-      // content language sub-tabs
+      // language sub-tabs
       document.querySelectorAll('.clang').forEach((b) =>
         b.addEventListener('click', () => {
-          captureForm(); // keep current edits before switching
+          captureContent();
           clang = b.dataset.l;
           document.querySelectorAll('.clang').forEach((x) => x.classList.toggle('active', x === b));
-          writeForm();
+          $('previewLink').href = clang === 'ar' ? '/ar' : '/';
+          renderContent();
         })
       );
 
+      /* ---------- load + persist ---------- */
       async function loadConfig() {
-        config = await (await fetch('/api/config')).json();
+        try {
+          config = await (await fetch('/api/config')).json();
+        } catch { config = {}; }
         if (!config.en) config.en = {};
         if (!config.ar) config.ar = {};
         $('c-featured').value = config.featured || 'pro';
@@ -321,19 +557,19 @@
         $('c-showLivePrice').value = String(config.showLivePrice !== false);
         $('c-priceFree').value = config.priceFree || '';
         $('c-pricePro').value = config.pricePro || '';
-        writeForm();
+        renderContent();
       }
 
-      async function saveAll(msgId) {
-        captureForm();
+      async function persist(btn, msgId, okMsg) {
+        captureContent();
         config.featured = $('c-featured').value;
         config.showFree = $('c-showFree').value === 'true';
         config.showLivePrice = $('c-showLivePrice').value === 'true';
         config.priceFree = $('c-priceFree').value.trim();
         config.pricePro = $('c-pricePro').value.trim();
         // Mirror the display toggles + prices into each language's pricing so
-        // mergeCopy (which merges per-language) applies them on both / and /ar.
-        // Prices are merged INTO the tiers so per-tier features aren't clobbered.
+        // mergeCopy (per-language) applies them on both / and /ar. Prices merge
+        // INTO the tiers so per-tier features aren't clobbered.
         for (const l of ['en', 'ar']) {
           config[l] = config[l] || {};
           const pricing = { ...(config[l].pricing || {}) };
@@ -342,17 +578,21 @@
           pricing.showLivePrice = config.showLivePrice;
           const tiers = Array.isArray(pricing.tiers) ? pricing.tiers.map((t) => ({ ...(t || {}) })) : [];
           const setTierPrice = (i, val) => { tiers[i] = { ...(tiers[i] || {}), price: val }; };
-          setTierPrice(0, config.priceFree); // '' → mergeCopy falls back to the base price
+          setTierPrice(0, config.priceFree);
           setTierPrice(1, config.pricePro);
           pricing.tiers = tiers;
           config[l].pricing = pricing;
         }
-        const r = await api('/api/admin/config', { method: 'PUT', body: JSON.stringify(config) });
-        $(msgId).textContent = r.ok ? 'تم الحفظ ✓ (يظهر فوراً؛ ويثبُت في HTML عند النشر التالي)' : 'فشل الحفظ';
-        setTimeout(() => ($(msgId).textContent = ''), 4000);
+        const label = btn.textContent;
+        btn.disabled = true; btn.innerHTML = '<span class="spin"></span> جارٍ الحفظ';
+        let ok = false;
+        try { ok = (await api('/api/admin/config', { method: 'PUT', body: JSON.stringify(config) })).ok; } catch { ok = false; }
+        btn.disabled = false; btn.textContent = label;
+        toast(ok ? (okMsg || 'تم الحفظ ✓') : 'فشل الحفظ', !ok);
+        if (ok) renderContent(); // refresh custom/default badges
       }
-      $('saveContent').addEventListener('click', () => saveAll('contentMsg'));
-      $('savePlans').addEventListener('click', () => saveAll('plansMsg'));
+      $('saveContent').addEventListener('click', () => persist($('saveContent'), 'contentMsg', 'تم حفظ المحتوى ✓'));
+      $('savePlans').addEventListener('click', () => persist($('savePlans'), 'plansMsg', 'تم حفظ الإعدادات ✓'));
 
       // auto-login if key stored
       if (adminKey) tryLogin(adminKey).then((ok) => (ok ? showDash() : sessionStorage.removeItem(KEY_STORE)));
