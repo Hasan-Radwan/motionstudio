@@ -9,15 +9,15 @@ export const meta = {
 };
 
 export const controls = [
-  { key: 'count', type: 'range', label: 'Count', min: 6, max: 60, step: 1, default: 26 },
-  { key: 'size', type: 'range', label: 'Card size', min: 6, max: 22, step: 1, default: 12, unit: '%' },
-  { key: 'panRange', type: 'range', label: 'Pan range', min: 10, max: 90, step: 1, default: 55, unit: '%' },
+  { key: 'count', type: 'range', label: 'Count', min: 6, max: 60, step: 1, default: 11 },
+  { key: 'size', type: 'range', label: 'Card size', min: 6, max: 22, step: 1, default: 22, unit: '%' },
+  { key: 'panRange', type: 'range', label: 'Pan range', min: 10, max: 90, step: 1, default: 10, unit: '%' },
   { key: 'speed', type: 'range', label: 'Speed', min: 1, max: 4, step: 1, default: 1 },
-  { key: 'radius', type: 'range', label: 'Proximity radius', min: 10, max: 60, step: 1, default: 30, unit: '%' },
-  { key: 'attraction', type: 'range', label: 'Attraction', min: 0, max: 100, step: 1, default: 40, unit: '%' },
-  { key: 'repulsion', type: 'range', label: 'Repulsion', min: 0, max: 100, step: 1, default: 0, unit: '%' },
-  { key: 'scaleBoost', type: 'range', label: 'Scale', min: 0, max: 120, step: 1, default: 45, unit: '%' },
-  { key: 'rotation', type: 'range', label: 'Rotation', min: 0, max: 90, step: 1, default: 20, unit: '°' },
+  { key: 'radius', type: 'range', label: 'Proximity radius', min: 10, max: 60, step: 1, default: 60, unit: '%' },
+  { key: 'attraction', type: 'range', label: 'Attraction', min: 0, max: 100, step: 1, default: 86, unit: '%' },
+  { key: 'repulsion', type: 'range', label: 'Repulsion', min: 0, max: 100, step: 1, default: 48, unit: '%' },
+  { key: 'scaleBoost', type: 'range', label: 'Scale', min: 0, max: 120, step: 1, default: 0, unit: '%' },
+  { key: 'rotation', type: 'range', label: 'Rotation', min: 0, max: 90, step: 1, default: 0, unit: '°' },
   { key: 'sizeMix', type: 'range', label: 'Size mix', min: 0, max: 100, step: 1, default: 40, unit: '%' },
   { key: 'fade', type: 'range', label: 'Fade', min: 0, max: 100, step: 1, default: 35, unit: '%' },
   { key: 'corners', type: 'range', label: 'Corners', min: 0, max: 40, step: 1, default: 10, unit: '%' },

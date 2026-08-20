@@ -993,6 +993,7 @@ function enterStudio() {
   setLang(landingLang); // carry the marketing page's language into the studio
   if (location.pathname !== '/app') history.pushState({ view: 'app' }, '', '/app');
   showStudio();
+  window.trackPageView?.('/app'); // GA4 page_view for the soft route change
 }
 
 // Called by the studio's Home button.
@@ -1000,11 +1001,13 @@ function goHome() {
   const target = isRTL() ? '/ar' : '/';
   if (location.pathname !== target) history.pushState({ view: 'landing' }, '', target);
   showLanding(isRTL() ? 'ar' : 'en');
+  window.trackPageView?.(target);
 }
 
 window.addEventListener('popstate', () => {
   if (location.pathname === '/app') showStudio();
   else showLanding(location.pathname.startsWith('/ar') ? 'ar' : 'en');
+  window.trackPageView?.(location.pathname);
 });
 
 initLanding(landingEl, landingLang, { onLaunch: enterStudio });
