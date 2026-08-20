@@ -50,6 +50,7 @@ import * as carousel3d2 from './carousel3d2.js';
 import * as carousel3dStar from './carousel3dStar.js';
 import * as proximity from './proximity.js';
 import * as stagger from './stagger.js';
+import * as textMorph from './textMorph.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
@@ -64,6 +65,7 @@ export const TEMPLATES = [
   revealWipe, iris, blinds, stagger, // Reveal & Wipe
   stackScatter, fan, cascade, depthDive, polaroidStack, proximity, // Stack & Scatter
   isometric, isoTiles, // Isometric
+  textMorph, // Text
 ].map((m) => ({ ...m.meta, controls: m.controls, render: m.render }));
 
 export function getTemplate(id) {

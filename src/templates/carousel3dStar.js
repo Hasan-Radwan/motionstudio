@@ -22,6 +22,7 @@ export const controls = [
   { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: 90, unit: '°' },
   { key: 'rotationY', type: 'range', label: 'Rotation Y', min: -180, max: 180, step: 1, default: -14, unit: '°' },
   { key: 'rotationZ', type: 'range', label: 'Rotation Z', min: -180, max: 180, step: 1, default: -3, unit: '°' },
+  { key: 'twist', type: 'range', label: 'Twist', min: -90, max: 90, step: 1, default: 0, unit: '°' },
   { key: 'offsetX', type: 'range', label: 'Offset X', min: -40, max: 40, step: 1, default: 0, unit: '%' },
   { key: 'offsetY', type: 'range', label: 'Offset Y', min: -40, max: 40, step: 1, default: 0, unit: '%' },
   { key: 'cycleDeg', type: 'range', label: 'Cycle deg', min: 90, max: 720, step: 90, default: 360, unit: '°' },
@@ -61,17 +62,21 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const rx = (p.rotationX ?? 90) * DEG;
   const ry = (p.rotationY || 0) * DEG;
   const rz = (p.rotationZ || 0) * DEG;
+  const tw = (p.twist || 0) * DEG; // per-card blade angle off pure-radial
 
   const items = [];
   for (let i = 0; i < n; i++) {
     const a = base + i * step;
     const sa = Math.sin(a);
     const ca = Math.cos(a);
-    // Card centre on the ring, plus its two in-plane unit axes (height = radial
-    // spine, width = tangent) — all Euler-rotated with the whole group.
+    // Position sits at ring angle `a`; the card's own axes are angled by Twist
+    // (angle a + tw) so each blade tilts off pure-radial → a pinwheel/fan look.
+    const at = a + tw;
+    const sat = Math.sin(at);
+    const cat = Math.cos(at);
     const P = rotateXYZ(sa * R, 0, ca * R, rx, ry, rz);
-    const S = rotateXYZ(sa, 0, ca, rx, ry, rz); // spine (height) axis
-    const W = rotateXYZ(ca, 0, -sa, rx, ry, rz); // width axis
+    const S = rotateXYZ(sat, 0, cat, rx, ry, rz); // spine (height) axis
+    const W = rotateXYZ(cat, 0, -sat, rx, ry, rz); // width axis
     const proj = foc / Math.max(1, camDist - P.z);
     const dref = Math.max(R, 1);
     const depth = clamp((P.z + dref) / (2 * dref), 0, 1);

@@ -76,6 +76,39 @@ export function buildPanel(root, tpl, params, onChange) {
       }
       sel.addEventListener('change', () => onChange(ctrl.key, sel.value));
       wrap.append(head, sel);
+    } else if (ctrl.type === 'text') {
+      const head = document.createElement('div');
+      head.className = 'control-head';
+      const label = document.createElement('span');
+      label.className = 'control-label';
+      label.textContent = t(ctrl.label);
+      head.appendChild(label);
+      const ta = document.createElement('textarea');
+      ta.className = 'control-textarea';
+      ta.rows = ctrl.rows || 3;
+      ta.placeholder = ctrl.placeholder || '';
+      ta.value = params[ctrl.key] ?? '';
+      ta.addEventListener('input', () => onChange(ctrl.key, ta.value));
+      wrap.append(head, ta);
+    } else if (ctrl.type === 'color') {
+      const head = document.createElement('div');
+      head.className = 'control-head';
+      const label = document.createElement('span');
+      label.className = 'control-label';
+      label.textContent = t(ctrl.label);
+      const val = document.createElement('span');
+      val.className = 'control-value';
+      val.textContent = (params[ctrl.key] || '').toUpperCase();
+      head.append(label, val);
+      const input = document.createElement('input');
+      input.type = 'color';
+      input.className = 'control-color';
+      input.value = params[ctrl.key] || '#000000';
+      input.addEventListener('input', () => {
+        val.textContent = input.value.toUpperCase();
+        onChange(ctrl.key, input.value);
+      });
+      wrap.append(head, input);
     }
 
     root.appendChild(wrap);
