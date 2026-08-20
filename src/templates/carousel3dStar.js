@@ -16,7 +16,7 @@ export const controls = [
   { key: 'count', type: 'range', label: 'Count', min: 4, max: 40, step: 1, default: 12 },
   { key: 'size', type: 'range', label: 'Plane size', min: 10, max: 36, step: 1, default: 22, unit: '%' },
   { key: 'corners', type: 'range', label: 'Corner radius', min: 0, max: 50, step: 1, default: 0, unit: '%' },
-  { key: 'radius', type: 'range', label: 'Orbit radius', min: 8, max: 200, step: 1, default: 24, unit: '%' },
+  { key: 'radius', type: 'range', label: 'Orbit radius', min: 3, max: 200, step: 1, default: 12, unit: '%' },
   { key: 'distance', type: 'range', label: 'Distance', min: 0, max: 100, step: 1, default: 50, unit: '%' },
   { key: 'perspective', type: 'range', label: 'Perspective', min: 1.2, max: 6, step: 0.1, default: 2.2 },
   { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: 90, unit: '°' },
@@ -73,7 +73,8 @@ export function render(ctx, t, p, { imageAt, w, h }) {
     const S = rotateXYZ(sa, 0, ca, rx, ry, rz); // spine (height) axis
     const W = rotateXYZ(ca, 0, -sa, rx, ry, rz); // width axis
     const proj = foc / Math.max(1, camDist - P.z);
-    const depth = clamp((P.z + R) / (2 * R), 0, 1);
+    const dref = Math.max(R, 1);
+    const depth = clamp((P.z + dref) / (2 * dref), 0, 1);
     items.push({ x: cx + P.x * proj, y: cy + P.y * proj, S, W, proj, depth, z: P.z, idx: i });
   }
   items.sort((a, b) => a.z - b.z);
@@ -88,7 +89,10 @@ export function render(ctx, t, p, { imageAt, w, h }) {
     // 2D axes. The axes' foreshortening (|.| < 1 when they tilt toward the camera)
     // gives the true edge-on thinning, and the whole group turns rigidly.
     ctx.transform(it.W.x, it.W.y, it.S.x, it.S.y, it.x, it.y);
-    drawCard(ctx, imageAt(it.idx), -cw / 2, -ch / 2, cw, ch, {
+    // Root each card's INNER edge at the ring and extend it OUTWARD along its
+    // spine (local y ≥ 0), so the blades radiate from the centre like a star
+    // instead of piling up through the middle.
+    drawCard(ctx, imageAt(it.idx), -cw / 2, 0, cw, ch, {
       r: cornerR(p.corners, cw, ch),
       shadowBlur: min * 0.03 * it.proj,
       shadowColor: withAlpha('#000000', 0.5 * it.depth),
