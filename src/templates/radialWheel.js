@@ -9,11 +9,11 @@ export const meta = {
 };
 
 export const controls = [
-  { key: 'count', type: 'range', label: 'Cards', min: 4, max: 12, step: 1, default: 8 },
-  { key: 'radius', type: 'range', label: 'Wheel size', min: 24, max: 48, step: 1, default: 38, unit: '%' },
-  { key: 'size', type: 'range', label: 'Card size', min: 12, max: 34, step: 1, default: 22, unit: '%' },
-  { key: 'tilt', type: 'range', label: 'Perspective', min: 30, max: 95, step: 1, default: 62, unit: '%' },
-  { key: 'turns', type: 'range', label: 'Turns', min: 0.25, max: 3, step: 0.25, default: 1 },
+  { key: 'count', type: 'range', label: 'Cards', min: 4, max: 12, step: 1, default: 9 },
+  { key: 'radius', type: 'range', label: 'Wheel size', min: 24, max: 48, step: 1, default: 36, unit: '%' },
+  { key: 'size', type: 'range', label: 'Card size', min: 12, max: 34, step: 1, default: 12, unit: '%' },
+  { key: 'tilt', type: 'range', label: 'Perspective', min: 30, max: 95, step: 1, default: 76, unit: '%' },
+  { key: 'turns', type: 'range', label: 'Turns', min: 0.25, max: 3, step: 0.25, default: 0.25 },
   {
     key: 'direction',
     type: 'select',
@@ -25,11 +25,12 @@ export const controls = [
     ],
   },
   { key: 'offsetX', type: 'range', label: 'Position X', min: -50, max: 50, step: 1, default: 0, unit: '%' },
-  { key: 'offsetY', type: 'range', label: 'Position Y', min: -50, max: 50, step: 1, default: 0, unit: '%' },
-  { key: 'corners', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 12, unit: '%' },
+  { key: 'offsetY', type: 'range', label: 'Position Y', min: -50, max: 50, step: 1, default: 50, unit: '%' },
+  { key: 'corners', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 30, unit: '%' },
+  { key: 'opacity', type: 'range', label: 'Card opacity', min: 0, max: 100, step: 1, default: 100, unit: '%' },
   { key: 'backdrop', type: 'toggle', label: 'Photo backdrop', default: true },
-  { key: 'blur', type: 'range', label: 'Backdrop blur', min: 0, max: 40, step: 1, default: 18, unit: 'px' },
-  { key: 'dim', type: 'range', label: 'Backdrop dim', min: 0, max: 80, step: 1, default: 42, unit: '%' },
+  { key: 'blur', type: 'range', label: 'Backdrop blur', min: 0, max: 40, step: 1, default: 0, unit: 'px' },
+  { key: 'dim', type: 'range', label: 'Backdrop dim', min: 0, max: 80, step: 1, default: 5, unit: '%' },
 ];
 
 // Cards fixed to the rim of a tilted wheel that spins a whole number of turns per
@@ -97,12 +98,13 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   }
   items.sort((a, b) => a.depth - b.depth); // far first, near on top
 
+  const cardOpacity = (p.opacity ?? 100) / 100;
   for (const it of items) {
     const s = 0.72 + it.depth * 0.42;
     const cw = cardW * s;
     const ch = cardH * s;
     ctx.save();
-    ctx.globalAlpha = 0.5 + it.depth * 0.5;
+    ctx.globalAlpha = (0.5 + it.depth * 0.5) * cardOpacity;
     ctx.translate(it.x, it.y);
     ctx.rotate(it.rot);
     drawCard(ctx, imageAt(it.idx), -cw / 2, -ch / 2, cw, ch, {
