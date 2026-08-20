@@ -16,9 +16,9 @@ export const controls = [
   { key: 'count', type: 'range', label: 'Cards', min: 6, max: 40, step: 1, default: 18 },
   { key: 'size', type: 'range', label: 'Plane size', min: 10, max: 34, step: 1, default: 18, unit: '%' },
   { key: 'corners', type: 'range', label: 'Corner radius', min: 0, max: 50, step: 1, default: 14, unit: '%' },
-  { key: 'radius', type: 'range', label: 'Orbit radius', min: 10, max: 40, step: 1, default: 22, unit: '%' },
+  { key: 'radius', type: 'range', label: 'Orbit radius', min: 10, max: 200, step: 1, default: 22, unit: '%' },
   { key: 'perspective', type: 'range', label: 'Perspective', min: 1.2, max: 6, step: 0.1, default: 2.2 },
-  { key: 'fan', type: 'range', label: 'Fan', min: 0, max: 200, step: 1, default: 100, unit: '%' },
+  { key: 'fan', type: 'range', label: 'Fan', min: 0, max: 100, step: 1, default: 100, unit: '%' },
   { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: -58, unit: '°' },
   { key: 'rotationY', type: 'range', label: 'Rotation Y', min: -180, max: 180, step: 1, default: 0, unit: '°' },
   { key: 'rotationZ', type: 'range', label: 'Rotation Z', min: -180, max: 180, step: 1, default: 0, unit: '°' },
@@ -37,11 +37,12 @@ export const controls = [
   { key: 'offsetY', type: 'range', label: 'Offset Y', min: -40, max: 40, step: 1, default: 0, unit: '%' },
 ];
 
-// A fanned, flower-like 3D carousel. Cards sit on a small ring and each one is
-// spun in the screen plane by its own ring angle, so the group splays out like
-// petals; the whole flower is then Euler-rotated in 3D (Rotation X/Y/Z) and
-// pinhole-projected. Cycle deg / direction spin the fan; whole 360° cycles loop
-// seamlessly (the configuration repeats).
+// A fanned, flower-like 3D carousel. Fan morphs each card's spine between upright
+// (0%, cards stand on the ring) and radial (100%, petals splay from the centre).
+// Rotation X/Y/Z rotate the WHOLE fan rigidly: every card is drawn as a projected
+// parallelogram from its Euler-rotated 3D frame (ctx.transform), so the group tips
+// and turns as one block rather than each card spinning on its own. Whole 360°
+// cycles loop seamlessly.
 export function render(ctx, t, p, { imageAt, w, h }) {
   const min = Math.min(w, h);
   const n = Math.round(p.count);
@@ -56,8 +57,7 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const imgR = first && first.width ? first.width / first.height : 0.66;
   const cardH = cardW / imgR;
   const step = TAU / n;
-  const cycle = (p.cycleDeg || 360) * DEG;
-  const base = t * cycle * dir;
+  const base = t * (p.cycleDeg || 360) * DEG * dir;
   const fan = (p.fan ?? 100) / 100;
   const rx = (p.rotationX || 0) * DEG;
   const ry = (p.rotationY || 0) * DEG;
@@ -66,44 +66,32 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const items = [];
   for (let i = 0; i < n; i++) {
     const a = base + i * step;
-    const pos = rotateXYZ(Math.sin(a) * R, 0, Math.cos(a) * R, rx, ry, rz);
-    const denom = Math.max(1, camDist - pos.z);
-    const proj = foc / denom;
-    const depth = clamp((pos.z + R) / (2 * R), 0, 1);
-
-    // Petal facing: cards fan radially (rotate by their ring angle), rotated by
-    // the group; the rotated normal's z gives the edge-on foreshorten.
-    const nrm = rotateXYZ(Math.sin(a), 0, Math.cos(a), rx, ry, rz);
-    const widthFactor = Math.max(0.03, Math.abs(nrm.z));
-    const mirror = nrm.z < 0 ? -1 : 1;
-
-    items.push({
-      x: cx + pos.x * proj,
-      y: cy + pos.y * proj,
-      proj,
-      depth,
-      widthFactor,
-      mirror,
-      spin: a * fan + rz, // radial splay + group Z spin
-      z: pos.z,
-      idx: i,
-    });
+    const sa = Math.sin(a);
+    const ca = Math.cos(a);
+    // spine morphs upright (0,1,0) ↔ radial (sa,0,ca) via Fan; width = tangent.
+    let sx = sa * fan;
+    let sy = 1 - fan;
+    let sz = ca * fan;
+    const sl = Math.hypot(sx, sy, sz) || 1;
+    const P = rotateXYZ(sa * R, 0, ca * R, rx, ry, rz);
+    const S = rotateXYZ(sx / sl, sy / sl, sz / sl, rx, ry, rz);
+    const W = rotateXYZ(ca, 0, -sa, rx, ry, rz);
+    const proj = foc / Math.max(1, camDist - P.z);
+    const depth = clamp((P.z + R) / (2 * R), 0, 1);
+    items.push({ x: cx + P.x * proj, y: cy + P.y * proj, S, W, proj, depth, z: P.z, idx: i });
   }
   items.sort((a, b) => a.z - b.z);
 
   for (const it of items) {
-    const s = it.proj; // perspective-driven size: near petals big, far small
-    const cw = cardW * s;
-    const ch = cardH * s;
-    if (cw < 1) continue;
+    const cw = cardW * it.proj;
+    const ch = cardH * it.proj;
+    if (cw < 0.5) continue;
     ctx.save();
     ctx.globalAlpha = clamp(0.35 + it.depth * 0.65, 0, 1);
-    ctx.translate(it.x, it.y);
-    ctx.rotate(it.spin);
-    ctx.scale(it.widthFactor * it.mirror, 1);
+    ctx.transform(it.W.x, it.W.y, it.S.x, it.S.y, it.x, it.y);
     drawCard(ctx, imageAt(it.idx), -cw / 2, -ch / 2, cw, ch, {
       r: cornerR(p.corners, cw, ch),
-      shadowBlur: min * 0.045 * s,
+      shadowBlur: min * 0.045 * it.proj,
       shadowColor: withAlpha('#000000', 0.5 * it.depth),
       shadowY: min * 0.015,
       shine: false,

@@ -16,7 +16,7 @@ export const controls = [
   { key: 'count', type: 'range', label: 'Count', min: 4, max: 40, step: 1, default: 12 },
   { key: 'size', type: 'range', label: 'Plane size', min: 10, max: 36, step: 1, default: 22, unit: '%' },
   { key: 'corners', type: 'range', label: 'Corner radius', min: 0, max: 50, step: 1, default: 0, unit: '%' },
-  { key: 'radius', type: 'range', label: 'Orbit radius', min: 8, max: 40, step: 1, default: 24, unit: '%' },
+  { key: 'radius', type: 'range', label: 'Orbit radius', min: 8, max: 200, step: 1, default: 24, unit: '%' },
   { key: 'distance', type: 'range', label: 'Distance', min: 0, max: 100, step: 1, default: 50, unit: '%' },
   { key: 'perspective', type: 'range', label: 'Perspective', min: 1.2, max: 6, step: 0.1, default: 2.2 },
   { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: 90, unit: '°' },
@@ -37,11 +37,12 @@ export const controls = [
   },
 ];
 
-// A star-burst 3D carousel. Cards sit on a ring and each is spun radially so they
-// splay like blades; with Rotation X ≈ 90° the ring is viewed edge-on, so the
-// blades radiate from a dark centre into a star (as in the reference). The whole
-// star is Euler-rotated (X/Y/Z) and pinhole-projected, dollied by Distance, and
-// spun by Cycle deg / Direction. Whole 360° cycles loop seamlessly.
+// A star-burst 3D carousel. Cards are flat petals lying in a ring, their long axis
+// pointing radially; with Rotation X ≈ 90° the ring is seen flat-on and the petals
+// radiate into a star. Rotation X/Y/Z rotate the WHOLE group as one rigid block:
+// each card is drawn as a real projected parallelogram from its 3D frame (its
+// width & height axes are Euler-rotated with the group and fed to ctx.transform),
+// so the cards never spin independently. Whole 360° cycles loop seamlessly.
 export function render(ctx, t, p, { imageAt, w, h }) {
   const min = Math.min(w, h);
   const n = Math.round(p.count);
@@ -50,15 +51,13 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const cy = h / 2 + (h * (p.offsetY || 0)) / 100;
   const R = (w * p.radius) / 100;
   const foc = R * p.perspective;
-  // Distance dollies the camera back (flatter, smaller) as it increases.
   const camDist = foc + R + ((p.distance ?? 50) / 100) * R * 3;
   const cardW = (w * p.size) / 100;
   const first = imageAt(0);
   const imgR = first && first.width ? first.width / first.height : 0.66;
   const cardH = cardW / imgR;
   const step = TAU / n;
-  const cycle = (p.cycleDeg || 360) * DEG;
-  const base = t * cycle * dir;
+  const base = t * (p.cycleDeg || 360) * DEG * dir;
   const rx = (p.rotationX ?? 90) * DEG;
   const ry = (p.rotationY || 0) * DEG;
   const rz = (p.rotationZ || 0) * DEG;
@@ -66,45 +65,34 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const items = [];
   for (let i = 0; i < n; i++) {
     const a = base + i * step;
-    const pos = rotateXYZ(Math.sin(a) * R, 0, Math.cos(a) * R, rx, ry, rz);
-    const denom = Math.max(1, camDist - pos.z);
-    const proj = foc / denom;
-    const depth = clamp((pos.z + R) / (2 * R), 0, 1);
-
-    // Blade facing: cards fan fully radially; the rotated normal's z gives the
-    // edge-on foreshorten that turns the petals into thin star blades.
-    const nrm = rotateXYZ(Math.sin(a), 0, Math.cos(a), rx, ry, rz);
-    const widthFactor = Math.max(0.02, Math.abs(nrm.z));
-    const mirror = nrm.z < 0 ? -1 : 1;
-
-    items.push({
-      x: cx + pos.x * proj,
-      y: cy + pos.y * proj,
-      s: proj,
-      depth,
-      widthFactor,
-      mirror,
-      spin: a + rz, // full radial splay + group Z spin
-      z: pos.z,
-      idx: i,
-    });
+    const sa = Math.sin(a);
+    const ca = Math.cos(a);
+    // Card centre on the ring, plus its two in-plane unit axes (height = radial
+    // spine, width = tangent) — all Euler-rotated with the whole group.
+    const P = rotateXYZ(sa * R, 0, ca * R, rx, ry, rz);
+    const S = rotateXYZ(sa, 0, ca, rx, ry, rz); // spine (height) axis
+    const W = rotateXYZ(ca, 0, -sa, rx, ry, rz); // width axis
+    const proj = foc / Math.max(1, camDist - P.z);
+    const depth = clamp((P.z + R) / (2 * R), 0, 1);
+    items.push({ x: cx + P.x * proj, y: cy + P.y * proj, S, W, proj, depth, z: P.z, idx: i });
   }
   items.sort((a, b) => a.z - b.z);
 
   for (const it of items) {
-    const cw = cardW * it.s;
-    const ch = cardH * it.s;
-    if (cw < 1) continue;
+    const cw = cardW * it.proj;
+    const ch = cardH * it.proj;
+    if (cw < 0.5) continue;
     ctx.save();
     ctx.globalAlpha = clamp(0.4 + it.depth * 0.6, 0, 1);
-    ctx.translate(it.x, it.y);
-    ctx.rotate(it.spin);
-    ctx.scale(it.widthFactor * it.mirror, 1);
+    // Project the card quad: local (x=width, y=height) → screen via its rotated
+    // 2D axes. The axes' foreshortening (|.| < 1 when they tilt toward the camera)
+    // gives the true edge-on thinning, and the whole group turns rigidly.
+    ctx.transform(it.W.x, it.W.y, it.S.x, it.S.y, it.x, it.y);
     drawCard(ctx, imageAt(it.idx), -cw / 2, -ch / 2, cw, ch, {
       r: cornerR(p.corners, cw, ch),
-      shadowBlur: min * 0.04 * it.s,
+      shadowBlur: min * 0.03 * it.proj,
       shadowColor: withAlpha('#000000', 0.5 * it.depth),
-      shadowY: min * 0.012,
+      shadowY: min * 0.01,
       shine: false,
     });
     ctx.restore();
