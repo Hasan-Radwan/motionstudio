@@ -215,6 +215,8 @@ const AR = {
   'Background color': 'لون الخلفية',
   Extrabold: 'عريض جداً',
   Color: 'لون',
+  Motion: 'الحركة',
+  Transparent: 'شفاف',
   Elements: 'العناصر',
   Stagger: 'التتابع',
   Duration: 'المدة',
