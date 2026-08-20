@@ -10,7 +10,7 @@
  * this script in the page <head>:  <meta name="ga-id" content="G-XXXXXXXXXX" />
  */
 (function () {
-  var GA_ID = 'G-XXXXXXXXXX'; // ← replace with your GA4 Measurement ID
+  var GA_ID = 'G-FSHQ6X4D96'; // Rotion App GA4 Measurement ID
 
   // Optional per-page override via <meta name="ga-id" content="...">.
   try {
