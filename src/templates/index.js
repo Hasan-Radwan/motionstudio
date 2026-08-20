@@ -47,13 +47,14 @@ import * as radialWheel from './radialWheel.js';
 import * as storyFeed from './storyFeed.js';
 import * as carousel3d from './carousel3d.js';
 import * as carousel3d2 from './carousel3d2.js';
+import * as carousel3dStar from './carousel3dStar.js';
 import * as proximity from './proximity.js';
 import * as stagger from './stagger.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
-  cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
+  cardTilt3d, carousel3d, carousel3d2, carousel3dStar, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
   orbit, spiral, globe, haloGlobe, orbWall, radialWheel, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
