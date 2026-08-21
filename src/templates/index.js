@@ -44,6 +44,8 @@ import * as splitScreen from './splitScreen.js';
 import * as cinematic from './cinematic.js';
 import * as polaroidStack from './polaroidStack.js';
 import * as radialWheel from './radialWheel.js';
+import * as spiralVortex from './spiralVortex.js';
+import * as orbitRing from './orbitRing.js';
 import * as storyFeed from './storyFeed.js';
 import * as carousel3d from './carousel3d.js';
 import * as carousel3d2 from './carousel3d2.js';
@@ -65,7 +67,7 @@ export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
   cardTilt3d, carousel3d, carousel3d2, carousel3dStar, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
-  orbit, spiral, globe, haloGlobe, orbWall, radialWheel, // Orbit
+  orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
   grid, wave, mosaic, driftTiles, // Grid
