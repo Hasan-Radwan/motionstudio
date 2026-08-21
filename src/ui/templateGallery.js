@@ -6,8 +6,47 @@ import { t as tr } from '../i18n.js';
 // Module-level so a rebuild (language switch) doesn't stack duplicate ⌘K listeners.
 let _keyHandler = null;
 
+// ---- animated thumbnails ----
+// Painted thumbs animate on a shared, throttled rAF loop; only on-screen thumbs
+// repaint (IntersectionObserver), and the loop idles while the tab is hidden.
+const THUMB_LOOP_MS = 5000; // preview loop length
+let _animThumbs = []; // { thumb, tpl, visible }
+let _animRaf = null;
+let _animLast = 0;
+let _thumbIO = null;
+
+function stopThumbAnimator() {
+  if (_animRaf) cancelAnimationFrame(_animRaf);
+  _animRaf = null;
+  if (_thumbIO) _thumbIO.disconnect();
+  _thumbIO = null;
+  _animThumbs = [];
+}
+
+function startThumbAnimator() {
+  if (_animRaf) return;
+  const tick = (now) => {
+    _animRaf = requestAnimationFrame(tick);
+    if (typeof document !== 'undefined' && document.hidden) return;
+    if (now - _animLast < 42) return; // ~24fps is plenty for previews
+    _animLast = now;
+    const t = (now % THUMB_LOOP_MS) / THUMB_LOOP_MS;
+    for (const e of _animThumbs) {
+      if (e.visible) paintThumb(e.thumb, e.tpl, t);
+    }
+  };
+  _animRaf = requestAnimationFrame(tick);
+}
+
 export function buildGallery(root, { activeId, onSelect }) {
   root.innerHTML = '';
+  stopThumbAnimator(); // reset on rebuild (language switch) to avoid leaks
+  _thumbIO = new IntersectionObserver((entries) => {
+    for (const en of entries) {
+      const a = en.target.__anim;
+      if (a) a.visible = en.isIntersecting;
+    }
+  });
   if (_keyHandler) {
     document.removeEventListener('keydown', _keyHandler);
     _keyHandler = null;
@@ -89,13 +128,19 @@ export function buildGallery(root, { activeId, onSelect }) {
     }
 
     // Paint a folder's thumbs the first time it opens (cheaper than painting all
-    // ~45 templates up front, and canvases need to be visible to size correctly).
+    // ~50 templates up front, and canvases need to be visible to size correctly),
+    // then register each for the shared animation loop so previews play live.
     const paintFolder = () => {
       for (const e of entries) {
         if (painted.has(e.tpl.id)) continue;
         painted.add(e.tpl.id);
-        requestAnimationFrame(() => paintThumb(e.thumb, e.tpl));
+        const anim = { thumb: e.thumb, tpl: e.tpl, visible: true };
+        e.thumb.__anim = anim;
+        _animThumbs.push(anim);
+        _thumbIO?.observe(e.thumb);
+        requestAnimationFrame(() => paintThumb(e.thumb, e.tpl, 0.2));
       }
+      startThumbAnimator();
     };
     const setOpen = (open) => {
       folder.classList.toggle('open', open);

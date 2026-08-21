@@ -140,10 +140,8 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 // Render a static representative frame of a template into a thumb canvas.
-export function paintThumb(canvas, tpl) {
+export function paintThumb(canvas, tpl, t = 0.32) {
   const ctx = canvas.getContext('2d');
-  const w = (canvas.width = 200);
-  const h = (canvas.height = 78 * (200 / (canvas.clientWidth || 200)));
   canvas.width = 200;
   canvas.height = 78;
   const W = 200;
@@ -155,9 +153,10 @@ export function paintThumb(canvas, tpl) {
   ctx.fillRect(0, 0, W, H);
   ctx.save();
   try {
-    tpl.render(ctx, 0.32, defaultParams(tpl), {
+    tpl.render(ctx, t, defaultParams(tpl), {
       image: getPlaceholder(),
       imageAt: () => getPlaceholder(),
+      count: 1,
       w: W,
       h: H,
     });

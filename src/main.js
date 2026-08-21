@@ -209,6 +209,9 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
   state.templateId = tpl.id;
   if (!keepParams) state.params = defaultParams(tpl);
   renderer.setTemplate(tpl).setParams(state.params);
+  // A template may suggest its own loop length (e.g. slower spirals). Applied on
+  // a fresh switch only, so restoring a saved project keeps its stored duration.
+  if (!keepParams && tpl.duration) renderer.setDuration(tpl.duration);
   buildPanel(controlsEl, tpl, state.params, (key, value) => {
     state.params = { ...state.params, [key]: value };
     renderer.setParams(state.params);

@@ -7,6 +7,7 @@ export const meta = {
   name: 'Spiral Vortex',
   category: 'Orbit',
   media: { default: 8, min: 1, max: 12 },
+  duration: 12, // slower default loop (seconds)
 };
 
 export const controls = [
