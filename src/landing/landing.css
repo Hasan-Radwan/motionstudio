@@ -67,6 +67,14 @@
   border-radius: 7px;
   filter: drop-shadow(0 0 8px var(--accent-glow));
 }
+.lp-brand-logo {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+@media (max-width: 640px) {
+  .lp-brand-logo { height: 24px; }
+}
 .lp-brand-mark {
   color: var(--accent);
 }

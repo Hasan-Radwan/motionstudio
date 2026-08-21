@@ -48,7 +48,7 @@
         display: flex; flex-direction: column; gap: 4px;
       }
       .adm-brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 16px; padding: 6px 8px 16px; }
-      .adm-brand img { width: 24px; height: 24px; }
+      .adm-brand img { height: 22px; width: auto; }
       .adm-navbtn {
         display: flex; align-items: center; gap: 10px; width: 100%; text-align: start;
         padding: 10px 12px; border-radius: 10px; border: 1px solid transparent; cursor: pointer;
@@ -162,7 +162,7 @@
   <body>
     <!-- ============ Login ============ -->
     <div class="adm-login" id="login">
-      <div class="adm-brand" style="padding-inline:0"><img src="/favicon.svg" alt="" /> Rotion Admin</div>
+      <div class="adm-brand" style="padding-inline:0"><img src="/rotion-logo.svg" alt="Rotion" /> Admin</div>
       <h1>لوحة التحكم</h1>
       <p class="muted">أدخل مفتاح المشرف للدخول.</p>
       <div style="display:flex; gap:8px; margin-top:12px">
@@ -176,7 +176,7 @@
     <div class="adm-shell hidden" id="dash">
       <!-- sidebar -->
       <nav class="adm-nav">
-        <div class="adm-brand"><img src="/favicon.svg" alt="" /> Rotion Admin</div>
+        <div class="adm-brand"><img src="/rotion-logo.svg" alt="Rotion" /> Admin</div>
         <button class="adm-navbtn active" data-tab="overview"><span class="ico">📊</span> نظرة عامة</button>
         <button class="adm-navbtn" data-tab="users"><span class="ico">👥</span> المستخدمون</button>
         <button class="adm-navbtn" data-tab="content"><span class="ico">📝</span> محتوى الصفحة</button>

@@ -83,6 +83,11 @@ button {
   font-size: 15px;
   font-weight: 800;
 }
+.brand-logo {
+  display: block;
+  height: 26px;
+  width: auto;
+}
 
 .topbar-actions {
   display: flex;
