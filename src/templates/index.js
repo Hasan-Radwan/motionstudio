@@ -57,11 +57,12 @@ import * as textWave from './textWave.js';
 import * as gradientText from './gradientText.js';
 import * as lineReveal from './lineReveal.js';
 import * as charStagger from './charStagger.js';
+import * as fluidText from './fluidText.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
-  textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, // Text
+  textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, // Text
   cardTilt3d, carousel3d, carousel3d2, carousel3dStar, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
   orbit, spiral, globe, haloGlobe, orbWall, radialWheel, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
