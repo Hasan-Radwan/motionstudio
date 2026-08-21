@@ -46,6 +46,7 @@ import * as polaroidStack from './polaroidStack.js';
 import * as radialWheel from './radialWheel.js';
 import * as spiralVortex from './spiralVortex.js';
 import * as orbitRing from './orbitRing.js';
+import * as imageTrail from './imageTrail.js';
 import * as storyFeed from './storyFeed.js';
 import * as carousel3d from './carousel3d.js';
 import * as carousel3d2 from './carousel3d2.js';
@@ -74,7 +75,7 @@ export const TEMPLATES = [
   marquee, totem, // Ticker & Marquee
   spotlight, pan, zoomBlur, cinematic, // Spotlight & Focus
   revealWipe, iris, blinds, stagger, // Reveal & Wipe
-  stackScatter, fan, cascade, depthDive, polaroidStack, proximity, // Stack & Scatter
+  stackScatter, fan, cascade, depthDive, polaroidStack, proximity, imageTrail, // Stack & Scatter
   isometric, isoTiles, // Isometric
 ].map((m) => ({ ...m.meta, controls: m.controls, render: m.render }));
 
