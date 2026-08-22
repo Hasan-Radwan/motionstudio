@@ -327,6 +327,10 @@ button {
   padding: 10px 18px;
   border-top: 1px solid var(--border);
   background: var(--bg-2);
+  flex-wrap: wrap;
+}
+.timeline .tl-track {
+  min-width: 140px;
 }
 .tl-btn {
   flex: 0 0 auto;
@@ -403,6 +407,59 @@ button {
   font-variant-numeric: tabular-nums;
   color: var(--text-mute);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+/* duration stepper */
+.tl-dur {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline-start: 10px;
+  margin-inline-start: 4px;
+  border-inline-start: 1px solid var(--border);
+}
+.tl-dur-label {
+  font-size: 12px;
+  color: var(--text-mute);
+}
+.tl-dur-btn {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-3);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  transition: border-color 0.15s, background 0.15s;
+}
+.tl-dur-btn:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+.tl-dur-input {
+  width: 46px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-3);
+  color: var(--text);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+}
+.tl-dur-input:focus {
+  border-color: var(--accent);
+}
+.tl-dur-unit {
+  font-size: 12px;
+  color: var(--text-mute);
+  margin-inline-start: -2px;
 }
 
 /* ---------- Panel (left / settings) ---------- */

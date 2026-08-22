@@ -1,6 +1,8 @@
 // Playback timeline shown under the preview stage: a play/pause button, a
-// scrubbable progress track, and a seconds readout driven by the renderer's
-// current loop time and the active template's loop duration.
+// scrubbable progress track, a seconds readout, and a duration stepper (change
+// the loop/video length in seconds) — all driven by the renderer.
+
+import { t as tr } from '../i18n.js';
 
 const PLAY_ICON =
   '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.79-6.86a1 1 0 0 0 0-1.7L9.53 4.29A1 1 0 0 0 8 5.14z"/></svg>';
@@ -9,7 +11,7 @@ const PAUSE_ICON =
 
 const fmt = (s) => `${s.toFixed(1)}s`;
 
-export function buildTimeline(root, renderer) {
+export function buildTimeline(root, renderer, onDurationChange) {
   root.innerHTML = '';
   root.classList.add('timeline');
 
@@ -31,7 +33,49 @@ export function buildTimeline(root, renderer) {
   const time = document.createElement('span');
   time.className = 'tl-time';
 
-  root.append(play, track, time);
+  // Duration stepper — change the video/loop length in seconds.
+  const durWrap = document.createElement('div');
+  durWrap.className = 'tl-dur';
+  const durLabel = document.createElement('span');
+  durLabel.className = 'tl-dur-label';
+  durLabel.textContent = tr('Duration');
+  const minus = document.createElement('button');
+  minus.type = 'button';
+  minus.className = 'tl-dur-btn';
+  minus.textContent = '−';
+  minus.setAttribute('aria-label', '-1s');
+  const durInput = document.createElement('input');
+  durInput.className = 'tl-dur-input';
+  durInput.type = 'number';
+  durInput.min = '0.5';
+  durInput.max = '60';
+  durInput.step = '0.5';
+  durInput.setAttribute('aria-label', tr('Duration'));
+  const durUnit = document.createElement('span');
+  durUnit.className = 'tl-dur-unit';
+  durUnit.textContent = 's';
+  const plus = document.createElement('button');
+  plus.type = 'button';
+  plus.className = 'tl-dur-btn';
+  plus.textContent = '+';
+  plus.setAttribute('aria-label', '+1s');
+  durWrap.append(durLabel, minus, durInput, durUnit, plus);
+
+  root.append(play, track, time, durWrap);
+
+  const clampDur = (v) => Math.min(60, Math.max(0.5, Math.round(v * 2) / 2));
+  const applyDur = (v, fromInput) => {
+    const d = clampDur(v);
+    renderer.setDuration(d);
+    if (!fromInput || document.activeElement !== durInput) durInput.value = d.toFixed(1);
+    if (onDurationChange) onDurationChange(d);
+  };
+  minus.addEventListener('click', () => applyDur((renderer.duration || 4) - 1));
+  plus.addEventListener('click', () => applyDur((renderer.duration || 4) + 1));
+  durInput.addEventListener('change', () => {
+    const raw = parseFloat(durInput.value);
+    applyDur(Number.isFinite(raw) ? raw : renderer.duration || 4, true);
+  });
 
   const setIcon = (playing) => {
     play.innerHTML = playing ? PAUSE_ICON : PLAY_ICON;
@@ -45,6 +89,9 @@ export function buildTimeline(root, renderer) {
     const dur = renderer.duration || 1;
     time.textContent = `${fmt(t * dur)} / ${fmt(dur)}`;
     track.setAttribute('aria-valuenow', (t * dur).toFixed(1));
+    // Keep the stepper in sync with the renderer (e.g. a template's default
+    // duration, or the export dialog) unless the user is editing it.
+    if (document.activeElement !== durInput) durInput.value = dur.toFixed(1);
     setIcon(playing);
   };
   renderer.onFrame(onFrame);

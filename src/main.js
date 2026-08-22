@@ -928,7 +928,11 @@ async function boot() {
   fitCanvas();
   // Keep the preview fitted as the stage area changes (window resize, panels).
   new ResizeObserver(fitCanvas).observe(stageWrapEl);
-  buildTimeline($('stage-timeline'), renderer); // play/pause + scrubber under the stage
+  // play/pause + scrubber + duration stepper under the stage
+  buildTimeline($('stage-timeline'), renderer, () => {
+    updateMeta();
+    scheduleAutosave();
+  });
   renderer.start();
 
   // Apply the current language to the studio chrome + layout direction. The
