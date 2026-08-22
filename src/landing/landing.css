@@ -69,11 +69,11 @@
 }
 .lp-brand-logo {
   display: block;
-  height: 30px;
+  height: 51px; /* enlarged ~70% for a more prominent brand */
   width: auto;
 }
 @media (max-width: 640px) {
-  .lp-brand-logo { height: 24px; }
+  .lp-brand-logo { height: 40px; }
 }
 .lp-brand-mark {
   color: var(--accent);

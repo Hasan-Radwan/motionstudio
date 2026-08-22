@@ -1,5 +1,8 @@
 import { drawCard, withAlpha } from '../engine/canvasUtils.js';
-import { TAU } from '../engine/easing.js';
+import { TAU, clamp } from '../engine/easing.js';
+import { rotateXYZ } from '../engine/threed.js';
+
+const DEG = Math.PI / 180;
 
 export const meta = {
   id: 'orbit',
@@ -13,6 +16,10 @@ export const controls = [
   { key: 'radius', type: 'range', label: 'Radius', min: 20, max: 46, step: 1, default: 34, unit: '%' },
   { key: 'flatten', type: 'range', label: 'Perspective', min: 20, max: 90, step: 1, default: 45, unit: '%' },
   { key: 'size', type: 'range', label: 'Card size', min: 16, max: 44, step: 1, default: 28, unit: '%' },
+  // Rotate the WHOLE ring rigidly in 3D — all cards move together on the axis.
+  { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: 0, unit: '°' },
+  { key: 'rotationY', type: 'range', label: 'Rotation Y', min: -180, max: 180, step: 1, default: 0, unit: '°' },
+  { key: 'rotationZ', type: 'range', label: 'Rotation Z', min: -180, max: 180, step: 1, default: 0, unit: '°' },
 ];
 
 export function render(ctx, t, p, { imageAt, w, h }) {
@@ -21,19 +28,21 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const imgR = first && first.width ? first.width / first.height : 1.4;
   const cx = w / 2;
   const cy = h / 2;
-  const rx = (w * p.radius) / 100;
-  const ry = rx * (p.flatten / 100);
+  const R = (w * p.radius) / 100;
+  // Perspective (flatten) is reproduced as a base X-tilt of the horizontal ring
+  // so the default look is unchanged; Rotation X/Y/Z add rigid 3D rotation on top
+  // and turn every card together as one block.
+  const baseTilt = Math.asin(clamp(p.flatten / 100, 0, 1));
+  const rx = (p.rotationX || 0) * DEG + baseTilt;
+  const ry = (p.rotationY || 0) * DEG;
+  const rz = (p.rotationZ || 0) * DEG;
 
   const items = [];
   for (let i = 0; i < p.count; i++) {
     const ang = t * TAU + (i / p.count) * TAU;
-    const depth = (Math.sin(ang) + 1) / 2; // 0 back .. 1 front
-    items.push({
-      x: cx + Math.cos(ang) * rx,
-      y: cy + Math.sin(ang) * ry,
-      depth,
-      img: imageAt(i),
-    });
+    const pos = rotateXYZ(Math.cos(ang) * R, 0, Math.sin(ang) * R, rx, ry, rz);
+    const depth = (pos.z + R) / (2 * R); // 0 back .. 1 front
+    items.push({ x: cx + pos.x, y: cy + pos.y, depth, img: imageAt(i) });
   }
   items.sort((a, b) => a.depth - b.depth); // back first
 

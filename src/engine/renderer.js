@@ -161,6 +161,7 @@ export class Renderer {
   drawScene(ctx, w, h, t) {
     ctx.clearRect(0, 0, w, h);
     drawBackground(ctx, w, h, this.background, t);
+    this._drawText(ctx, w, h, t, 'back'); // text layers placed behind the cards
     if (this.template && typeof this.template.render === 'function') {
       ctx.save();
       this.template.render(ctx, t, this.params, {
@@ -172,7 +173,7 @@ export class Renderer {
       });
       ctx.restore();
     }
-    this._drawText(ctx, w, h, t);
+    this._drawText(ctx, w, h, t, 'front'); // text layers on top of the cards
     this._drawWatermark(ctx, w, h);
   }
 
@@ -211,9 +212,11 @@ export class Renderer {
 
   // Optional text overlays, drawn on top of the template every frame so they show
   // in both the live preview and the export. Animations are seamless over the loop.
-  _drawText(ctx, w, h, t) {
+  _drawText(ctx, w, h, t, layer = 'front') {
     if (!this.texts || !this.texts.length) return;
-    for (const tx of this.texts) this._drawOneText(ctx, w, h, t, tx);
+    for (const tx of this.texts) {
+      if ((tx.layer || 'front') === layer) this._drawOneText(ctx, w, h, t, tx);
+    }
   }
 
   _drawOneText(ctx, w, h, t, tx) {

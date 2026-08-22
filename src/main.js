@@ -112,6 +112,7 @@ function makeText() {
     x: 50,
     y: 82,
     anim: 'none',
+    layer: 'front', // 'front' (over the cards) or 'back' (behind them)
   };
 }
 

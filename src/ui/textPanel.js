@@ -155,6 +155,17 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
   );
   fields.appendChild(rangeField(t('Position X'), 0, 100, 1, text.x, '%', (v) => patch({ x: v })));
   fields.appendChild(rangeField(t('Position Y'), 0, 100, 1, text.y, '%', (v) => patch({ y: v })));
+  fields.appendChild(
+    selectField(
+      t('Text layer'),
+      [
+        { value: 'front', label: t('In front') },
+        { value: 'back', label: t('Behind cards') },
+      ],
+      text.layer || 'front',
+      (v) => patch({ layer: v })
+    )
+  );
   fields.appendChild(selectField(t('Animation'), ANIMS, text.anim, (v) => patch({ anim: v })));
 
   return layer;
