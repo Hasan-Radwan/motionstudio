@@ -1431,10 +1431,14 @@ select,
     height: auto;
   }
 
-  /* Preview first, with a comfortable height */
+  /* Preview first, and PINNED below the topbar so it stays visible while the
+     user scrolls the gallery + properties beneath it. */
   .stage {
     order: 1;
-    min-height: 46vh;
+    height: 50vh;
+    position: sticky;
+    top: var(--topbar-h, 52px);
+    z-index: 5;
   }
   .stage-canvas-wrap {
     padding: 14px;

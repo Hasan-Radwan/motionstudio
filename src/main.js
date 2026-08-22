@@ -928,6 +928,16 @@ async function boot() {
   fitCanvas();
   // Keep the preview fitted as the stage area changes (window resize, panels).
   new ResizeObserver(fitCanvas).observe(stageWrapEl);
+  // Track the (wrapping) topbar height so the mobile sticky preview pins right
+  // below it — see the `.stage { position: sticky; top: var(--topbar-h) }` rule.
+  const topbarEl = document.querySelector('.topbar');
+  if (topbarEl) {
+    const syncTopbarH = () =>
+      document.documentElement.style.setProperty('--topbar-h', `${topbarEl.offsetHeight}px`);
+    syncTopbarH();
+    new ResizeObserver(syncTopbarH).observe(topbarEl);
+    window.addEventListener('resize', syncTopbarH);
+  }
   // play/pause + scrubber + duration stepper under the stage
   buildTimeline($('stage-timeline'), renderer, () => {
     updateMeta();
