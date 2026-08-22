@@ -29,7 +29,7 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
   // ---------- nav ----------
   const nav = make('nav', 'lp-nav');
   nav.innerHTML = `
-    <a class="lp-brand" href="#top"><img class="lp-brand-logo" src="/rotion-logo.svg" alt="Rotion" height="51" /></a>
+    <a class="lp-brand" href="#top"><img class="lp-brand-app" src="/icon-rotion-02.png" alt="" width="36" height="36" /> Rotion App</a>
     <div class="lp-nav-links">
       <a href="#about">${c.nav.about}</a>
       <a href="#how">${c.nav.how}</a>

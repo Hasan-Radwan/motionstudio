@@ -74,10 +74,9 @@ button {
 }
 .brand-icon {
   display: block;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  filter: drop-shadow(0 0 8px var(--accent-glow));
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
 }
 .brand-name {
   font-size: 15px;
