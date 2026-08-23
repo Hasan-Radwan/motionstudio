@@ -45,8 +45,8 @@ export const COPY = {
       items: [
         ['🎬', '60+ animated templates', '3D carousels, kinetic text, spirals, cinematic and more.'],
         ['🖱️', 'Zero learning curve', 'No timeline, no keyframes. If you can drag a file, you can use it.'],
-        ['✍️', 'Animated text', 'Headlines with morph, typewriter, gradient and 3D flip effects.'],
-        ['🅰️', 'Arabic & English', 'Full RTL text with professional Arabic fonts (Cairo, Tajawal).'],
+        ['✍️', 'Add custom text', 'Type your own headlines with animated effects — morph, typewriter, gradient, 3D.'],
+        ['🎵', 'Add music', 'Drop a soundtrack onto your clip; it is baked into the exported video.'],
         ['🖼️', 'Your backgrounds', 'Solid colour, gradient, or your own image behind any template.'],
         ['⚡', 'Up to 8K export', 'Crisp MP4 / WebM, seamless loops, in any aspect ratio.'],
       ],
@@ -140,8 +140,8 @@ export const COPY = {
       items: [
         ['🎬', '+60 قالب متحرك', 'كاروسيلات ثلاثية الأبعاد، نصوص حركية، حلزونات، سينمائي والمزيد.'],
         ['🖱️', 'بلا منحنى تعلّم', 'لا خطوط زمنية ولا مفاتيح حركة. إن كنت تسحب ملفاً فأنت تُتقنه.'],
-        ['✍️', 'نصوص متحركة', 'عناوين بتأثيرات تحوّل، آلة كاتبة، تدرّج، وانقلاب ثلاثي الأبعاد.'],
-        ['🅰️', 'عربي وإنجليزي', 'دعم كامل للكتابة RTL بخطوط عربية احترافية (Cairo، Tajawal).'],
+        ['✍️', 'أضف نصاً مخصّصاً', 'اكتب عناوينك الخاصة بتأثيرات متحركة — تحوّل، آلة كاتبة، تدرّج، وثلاثي الأبعاد.'],
+        ['🎵', 'أضف موسيقى', 'أضف مقطعاً صوتياً إلى الفيديو، ويُدمَج تلقائياً في التصدير.'],
         ['🖼️', 'خلفياتك الخاصة', 'لون، تدرّج، أو صورتك الخاصة خلف أي قالب.'],
         ['⚡', 'تصدير حتى 8K', 'MP4 / WebM واضح، حلقات سلسة، بأي نسبة أبعاد.'],
       ],
