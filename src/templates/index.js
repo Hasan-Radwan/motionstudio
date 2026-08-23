@@ -39,6 +39,7 @@ import * as depthDive from './depthDive.js';
 import * as featureStream from './featureStream.js';
 import * as neonFrame from './neonFrame.js';
 import * as reflection from './reflection.js';
+import * as imageTunnel from './imageTunnel.js';
 import * as ribbonFlow from './ribbonFlow.js';
 import * as splitScreen from './splitScreen.js';
 import * as cinematic from './cinematic.js';
@@ -67,7 +68,7 @@ import * as text3dFlip from './text3dFlip.js';
 export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
-  cardTilt3d, carousel3d, carousel3d2, carousel3dStar, flip3d, cardTunnel, cube, reflection, // 3D & Perspective
+  cardTilt3d, carousel3d, carousel3d2, carousel3dStar, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
   orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, // Orbit
   carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
