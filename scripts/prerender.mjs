@@ -22,6 +22,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { buildMarkup } from '../src/landing/markup.js';
+import { COPY } from '../src/landing/copy.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '..', 'dist');
@@ -160,4 +161,9 @@ console.log(config ? '✓ Loaded live admin content overrides' : '· No admin ov
   mkdirSync(arDir, { recursive: true });
   writeFileSync(join(arDir, 'index.html'), '<!doctype html>\n' + document.documentElement.outerHTML);
   console.log('✓ Pre-rendered Arabic → dist/ar/index.html');
+
+  // Expose the base marketing copy so the admin dashboard can show the current
+  // homepage text (as placeholders) instead of empty fields.
+  writeFileSync(join(distDir, 'site-copy.json'), JSON.stringify({ en: COPY.en, ar: COPY.ar }));
+  console.log('✓ Wrote base copy → dist/site-copy.json');
 }

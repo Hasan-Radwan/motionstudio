@@ -400,6 +400,7 @@
       // Empty fields / rows are dropped so they fall back to the built-in copy.
       let config = { en: {}, ar: {} };
       let clang = 'en';
+      let baseCopy = { en: {}, ar: {} }; // current homepage text (from /site-copy.json)
 
       const getPath = (o, p) => p.split('.').reduce((x, k) => (x == null ? undefined : x[k]), o);
       function setPath(o, p, v) {
@@ -443,7 +444,7 @@
       };
 
       // Build one repeater row for a list field.
-      function buildRow(kind, values) {
+      function buildRow(kind, values, asPlaceholder) {
         const cols = COLS[kind];
         const row = el('div', 'rep-row');
         const head = el('div', 'rep-row-head');
@@ -462,9 +463,16 @@
           const val = (values && values[i]) || '';
           const node = c.kind === 'area' ? el('textarea') : el('input');
           if (c.kind === 'area') node.rows = 2;
-          node.placeholder = c.ph;
           if (c.cls) node.classList.add(c.cls);
-          node.value = val;
+          // asPlaceholder: show the live homepage value greyed (empty value → not
+          // saved unless the admin actually types over it).
+          if (asPlaceholder) {
+            node.placeholder = val || c.ph;
+            node.value = '';
+          } else {
+            node.placeholder = c.ph;
+            node.value = val;
+          }
           node.dataset.col = i;
           if (kind === 'triple' && i === 2) node.style.gridColumn = '1 / -1';
           fields.appendChild(node);
@@ -488,6 +496,7 @@
           for (const f of sec.fields) {
             const wrap = el('div', 'field');
             const cur = getPath(lang, f.path);
+            const def = getPath(baseCopy[clang] || {}, f.path); // current homepage text
             const isCustom = cur != null && (Array.isArray(cur) ? cur.length : String(cur).trim());
             wrap.appendChild(el('label', null, `${f.label} <span class="badge ${isCustom ? 'custom' : 'default'}">${isCustom ? 'مخصّص' : 'افتراضي'}</span>`));
             if (f.kind === 'text' || f.kind === 'area') {
@@ -495,7 +504,8 @@
               if (f.kind === 'area') node.rows = 2;
               node.className = 'cf';
               node.dataset.path = f.path;
-              node.placeholder = 'النص الافتراضي مُستخدَم — اكتب لتخصيصه';
+              // Show the LIVE homepage text as the placeholder so the admin sees it.
+              node.placeholder = def != null ? String(def) : 'النص الافتراضي مُستخدَم — اكتب لتخصيصه';
               node.value = cur == null ? '' : cur;
               wrap.appendChild(node);
             } else {
@@ -503,7 +513,14 @@
               rep.dataset.path = f.path;
               rep.dataset.kind = f.kind;
               const arr = Array.isArray(cur) ? cur : [];
-              arr.forEach((v) => rep.appendChild(buildRow(f.kind, f.kind === 'lines' ? [v] : v)));
+              if (arr.length) {
+                arr.forEach((v) => rep.appendChild(buildRow(f.kind, f.kind === 'lines' ? [v] : v)));
+              } else {
+                // No override yet → show the current homepage items as greyed
+                // placeholder rows (empty values, so nothing is saved unless typed).
+                const defArr = Array.isArray(def) ? def : [];
+                defArr.forEach((v) => rep.appendChild(buildRow(f.kind, f.kind === 'lines' ? [v] : v, true)));
+              }
               reindex(rep);
               const add = el('button', 'rep-add', '➕ إضافة عنصر');
               add.type = 'button';
@@ -551,6 +568,9 @@
         try {
           config = await (await fetch('/api/config')).json();
         } catch { config = {}; }
+        try {
+          baseCopy = await (await fetch('/site-copy.json', { cache: 'no-store' })).json();
+        } catch { baseCopy = { en: {}, ar: {} }; }
         if (!config.en) config.en = {};
         if (!config.ar) config.ar = {};
         $('c-featured').value = config.featured || 'pro';
