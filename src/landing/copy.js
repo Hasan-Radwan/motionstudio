@@ -55,12 +55,16 @@ export const COPY = {
       title: 'Plans for everyone',
       sub: 'Start free, upgrade when you need more',
       perMonth: '/ mo',
+      perYear: '/ yr',
+      monthly: 'Monthly',
+      yearly: 'Yearly',
+      yearlySave: 'Save 17%',
       popular: 'Most popular',
       cta: 'Get started',
       // When true, the Pro price is replaced at runtime with the real localized
-      // price from Paddle (PricePreview). Set false (from the admin dashboard) to
-      // show the fixed `price` values below instead.
-      showLivePrice: true,
+      // price from Paddle. Off here so the fixed $10 / $99 below are shown — keep
+      // your Paddle prices in sync with these.
+      showLivePrice: false,
       tiers: [
         {
           name: 'Free',
@@ -71,13 +75,14 @@ export const COPY = {
         },
         {
           name: 'Pro',
-          price: '12',
+          price: '10',
+          priceYearly: '99',
           desc: 'For creators & designers',
           features: ['All templates', 'Export up to 8K', 'No app watermark', 'Your own watermark', 'Custom font upload'],
           featured: true,
         },
       ],
-      note: '* Prices shown are placeholders — edit to match your business plan.',
+      note: '* Billed securely via Paddle. Cancel anytime.',
     },
     faq: {
       title: 'Frequently asked questions',
@@ -150,9 +155,13 @@ export const COPY = {
       title: 'خطط تناسب الجميع',
       sub: 'ابدأ مجاناً، وطوّر متى احتجت المزيد',
       perMonth: '/ شهرياً',
+      perYear: '/ سنوياً',
+      monthly: 'شهري',
+      yearly: 'سنوي',
+      yearlySave: 'وفّر 17%',
       popular: 'الأكثر رواجاً',
       cta: 'ابدأ الآن',
-      showLivePrice: true,
+      showLivePrice: false,
       tiers: [
         {
           name: 'مجاني',
@@ -163,13 +172,14 @@ export const COPY = {
         },
         {
           name: 'احترافي',
-          price: '12',
+          price: '10',
+          priceYearly: '99',
           desc: 'لصنّاع المحتوى والمصممين',
           features: ['كل القوالب', 'تصدير حتى 8K', 'بدون علامة مائية', 'علامتك المائية الخاصة', 'رفع خطوط مخصّصة'],
           featured: true,
         },
       ],
-      note: '* الأسعار هنا مبدئية للعرض — عدّلها حسب خطتك التجارية.',
+      note: '* الدفع بأمان عبر Paddle. يمكنك الإلغاء في أي وقت.',
     },
     faq: {
       title: 'الأسئلة الشائعة',

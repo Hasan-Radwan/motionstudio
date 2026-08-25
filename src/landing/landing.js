@@ -229,7 +229,30 @@ function wireInteractivity(root, lang, c, onLaunch) {
   // Only swap in the real Paddle price when the admin hasn't opted for a fixed
   // displayed price (pricing.showLivePrice === false).
   if (c.pricing.showLivePrice !== false) setupLivePricing(root, c.pricing.perMonth);
+  setupBillingToggle(root, c);
   setupFaq(root);
+}
+
+// Monthly / Yearly billing toggle: swaps the price + per-period label on any plan
+// that has a yearly price (data-m / data-y on .lp-plan-price).
+function setupBillingToggle(root, c) {
+  const opts = [...root.querySelectorAll('.lp-bill-opt')];
+  if (!opts.length) return;
+  const apply = (period) => {
+    root.querySelectorAll('.lp-plan-price[data-y]').forEach((el) => {
+      const amt = el.querySelector('.lp-plan-amount');
+      const per = el.querySelector('.lp-plan-per');
+      if (amt) amt.textContent = period === 'yearly' ? el.dataset.y : el.dataset.m;
+      if (per) per.textContent = period === 'yearly' ? c.pricing.perYear : c.pricing.perMonth;
+    });
+  };
+  opts.forEach((o) =>
+    o.addEventListener('click', () => {
+      opts.forEach((x) => x.classList.toggle('active', x === o));
+      apply(o.dataset.period);
+    })
+  );
+  apply('monthly');
 }
 
 // FAQ accordion: toggle each item open/closed on click (multiple may be open).

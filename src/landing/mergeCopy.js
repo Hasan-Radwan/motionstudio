@@ -51,8 +51,9 @@ export function mergeCopy(base, overrides) {
 function mergePricing(base, over) {
   let tiers = base.tiers.map((tier, i) => ({
     ...tier,
-    // Displayed price string (admin-editable). Empty override keeps the base.
+    // Displayed price strings (admin-editable). Empty override keeps the base.
     price: str(tier.price, over?.tiers?.[i]?.price),
+    priceYearly: str(tier.priceYearly, over?.tiers?.[i]?.priceYearly),
     features: arr(tier.features, over?.tiers?.[i]?.features),
   }));
   // featured: 'free' | 'pro' — move the highlight badge. Compare against the BASE

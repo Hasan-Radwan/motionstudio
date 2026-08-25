@@ -268,7 +268,9 @@
               <select id="c-showLivePrice"><option value="true">نعم (تلقائي)</option><option value="false">لا (سعر ثابت)</option></select>
             </div>
             <div class="field"><label>سعر الباقة المجانية</label><input id="c-priceFree" placeholder="0" inputmode="decimal" /></div>
-            <div class="field"><label>سعر باقة Pro (يُعرض عند إيقاف السعر التلقائي)</label><input id="c-pricePro" placeholder="12" inputmode="decimal" /></div>
+            <div class="field"><label>سعر باقة Pro — شهري ($ / شهر)</label><input id="c-pricePro" placeholder="10" inputmode="decimal" /></div>
+            <div class="field"><label>سعر باقة Pro — سنوي ($ / سنة)</label><input id="c-priceProYearly" placeholder="99" inputmode="decimal" /></div>
+            <p class="card-help">في الصفحة الرئيسية يظهر زر تبديل بين «شهري» و«سنوي». مميزات كل باقة تُحرَّر من تبويب «محتوى الصفحة».</p>
           </div>
 
           <div class="card">
@@ -578,6 +580,7 @@
         $('c-showLivePrice').value = String(config.showLivePrice !== false);
         $('c-priceFree').value = config.priceFree || '';
         $('c-pricePro').value = config.pricePro || '';
+        $('c-priceProYearly').value = config.priceProYearly || '';
         renderContent();
       }
 
@@ -588,6 +591,7 @@
         config.showLivePrice = $('c-showLivePrice').value === 'true';
         config.priceFree = $('c-priceFree').value.trim();
         config.pricePro = $('c-pricePro').value.trim();
+        config.priceProYearly = $('c-priceProYearly').value.trim();
         // Mirror the display toggles + prices into each language's pricing so
         // mergeCopy (per-language) applies them on both / and /ar. Prices merge
         // INTO the tiers so per-tier features aren't clobbered.
@@ -601,6 +605,7 @@
           const setTierPrice = (i, val) => { tiers[i] = { ...(tiers[i] || {}), price: val }; };
           setTierPrice(0, config.priceFree);
           setTierPrice(1, config.pricePro);
+          tiers[1] = { ...(tiers[1] || {}), priceYearly: config.priceProYearly };
           pricing.tiers = tiers;
           config[l].pricing = pricing;
         }

@@ -111,9 +111,20 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
   // ---------- pricing ----------
   const pricing = make('section', 'lp-section lp-section-alt lp-reveal');
   pricing.id = 'pricing';
+  const hasYearly = c.pricing.tiers.some((tr) => tr.priceYearly);
   pricing.innerHTML = `
     <h2 class="lp-h2">${c.pricing.title}</h2>
     <p class="lp-section-lead">${c.pricing.sub}</p>
+    ${
+      hasYearly
+        ? `<div class="lp-bill" role="tablist" aria-label="Billing period">
+      <button class="lp-bill-opt active" type="button" data-period="monthly">${c.pricing.monthly}</button>
+      <button class="lp-bill-opt" type="button" data-period="yearly">${c.pricing.yearly}${
+            c.pricing.yearlySave ? `<span class="lp-bill-save">${c.pricing.yearlySave}</span>` : ''
+          }</button>
+    </div>`
+        : ''
+    }
     <div class="lp-pricing">
       ${c.pricing.tiers
         .map(
@@ -121,7 +132,7 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
         <div class="lp-plan${tr.featured ? ' lp-plan-featured' : ''}" data-tier="${tr.price === '0' ? 'free' : 'pro'}">
           ${tr.featured ? `<span class="lp-plan-tag">${c.pricing.popular}</span>` : ''}
           <h3 class="lp-plan-name">${tr.name}</h3>
-          <div class="lp-plan-price"><span class="lp-plan-cur">$</span>${tr.price}<span class="lp-plan-per">${c.pricing.perMonth}</span></div>
+          <div class="lp-plan-price"${tr.priceYearly ? ` data-m="${tr.price}" data-y="${tr.priceYearly}"` : ''}><span class="lp-plan-cur">$</span><span class="lp-plan-amount">${tr.price}</span><span class="lp-plan-per">${c.pricing.perMonth}</span></div>
           <p class="lp-plan-desc">${tr.desc}</p>
           <ul class="lp-plan-features">
             ${tr.features.map((f) => `<li>${f}</li>`).join('')}

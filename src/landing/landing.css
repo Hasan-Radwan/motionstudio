@@ -451,6 +451,46 @@
 }
 
 /* pricing */
+.lp-bill {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 auto 26px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+.lp-bill-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.lp-bill-opt.active {
+  background: var(--accent);
+  color: #05130d;
+}
+.lp-bill-save {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-2) 25%, transparent);
+  color: var(--accent-2);
+}
+.lp-bill-opt.active .lp-bill-save {
+  background: rgba(5, 19, 13, 0.18);
+  color: #05130d;
+}
 .lp-pricing {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 320px));
