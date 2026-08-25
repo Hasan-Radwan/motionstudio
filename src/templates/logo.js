@@ -1,4 +1,4 @@
-import { roundedRectPath, drawImageContain, cornerR } from '../engine/canvasUtils.js';
+import { roundedRectPath, drawImageContain, cornerR, cardShadowScale } from '../engine/canvasUtils.js';
 import { TAU, pingpong } from '../engine/easing.js';
 
 export const meta = {
@@ -64,10 +64,11 @@ export function render(ctx, t, p, { image, w, h }) {
   // optional backing plate (a little larger than the logo box)
   if (p.plate) {
     const pw = box * 1.4;
+    const sh = cardShadowScale();
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = min * 0.05;
-    ctx.shadowOffsetY = min * 0.02;
+    ctx.shadowBlur = min * 0.05 * sh;
+    ctx.shadowOffsetY = min * 0.02 * sh;
     roundedRectPath(ctx, -pw / 2, -pw / 2, pw, pw, cornerR(p.radius, pw, pw));
     ctx.fillStyle = '#ffffff';
     ctx.fill();

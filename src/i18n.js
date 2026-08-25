@@ -69,6 +69,7 @@ const AR = {
   // media panel
   Frame: 'الإطار',
   'Card shape': 'شكل الكارت',
+  Shadow: 'الظل',
   Media: 'الوسائط',
   'Number of images': 'عدد الصور',
   Image: 'صورة',

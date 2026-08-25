@@ -70,6 +70,18 @@ export function getCardShape() {
   return _cardShape;
 }
 
+// Global card-shadow strength as a 0..1 multiplier applied to every card's drop
+// shadow (see drawCard + the templates that draw their own shadow). Default 0 =
+// no shadow anywhere; the user dials it up from the media panel. Module state so
+// preview and exporter share it.
+let _cardShadow = 0;
+export function setCardShadow(v) {
+  _cardShadow = Math.max(0, Number(v) || 0);
+}
+export function cardShadowScale() {
+  return _cardShadow;
+}
+
 // Fit a rect of the given aspect ratio inside (x,y,w,h), centered (contain).
 function fitRatio(x, y, w, h, ratio) {
   let nw, nh;
@@ -213,12 +225,14 @@ export function drawCard(ctx, img, x, y, w, h, opts = {}) {
   h = box.h;
   const r = opts.r ?? 16;
   ctx.save();
-  if (opts.shadowBlur) {
+  // Scale the card's designed shadow by the global strength (0 = off by default).
+  const blur = (opts.shadowBlur || 0) * _cardShadow;
+  if (blur) {
     setShadow(
       ctx,
-      opts.shadowBlur,
+      blur,
       opts.shadowColor || 'rgba(0,0,0,0.45)',
-      opts.shadowY ?? opts.shadowBlur * 0.4
+      (opts.shadowY ?? opts.shadowBlur * 0.4) * _cardShadow
     );
     // paint a solid shape first so the shadow shows even for transparent PNGs
     pathCardShape(ctx, x, y, w, h, shape, r);

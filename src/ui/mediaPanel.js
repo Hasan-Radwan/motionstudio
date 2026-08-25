@@ -36,8 +36,8 @@ function paintThumb(canvas, img) {
 
 export function buildMediaPanel(root, model, handlers) {
   root.innerHTML = '';
-  const { aspect, count, min, max, slots, cardShape } = model;
-  const { onAspect, onCount, onPick, onClear, onDropFile, onCardShape } = handlers;
+  const { aspect, count, min, max, slots, cardShape, cardShadow } = model;
+  const { onAspect, onCount, onPick, onClear, onDropFile, onCardShape, onCardShadow } = handlers;
 
   // ---------- FRAME ----------
   root.appendChild(section(t('Frame')));
@@ -66,6 +66,32 @@ export function buildMediaPanel(root, model, handlers) {
     shapeSeg.appendChild(b);
   }
   root.appendChild(shapeSeg);
+
+  // ---------- CARD SHADOW (global, default 0 = off) ----------
+  const shadowVal = Math.round((cardShadow ?? 0) * 100);
+  const shWrap = document.createElement('div');
+  shWrap.className = 'control';
+  const shHead = document.createElement('div');
+  shHead.className = 'control-head';
+  const shLabel = document.createElement('span');
+  shLabel.className = 'control-label';
+  shLabel.textContent = t('Shadow');
+  const shValEl = document.createElement('span');
+  shValEl.className = 'control-value';
+  shValEl.textContent = `${shadowVal}%`;
+  shHead.append(shLabel, shValEl);
+  const shInput = document.createElement('input');
+  shInput.type = 'range';
+  shInput.min = '0';
+  shInput.max = '100';
+  shInput.step = '1';
+  shInput.value = String(shadowVal);
+  shInput.addEventListener('input', () => {
+    shValEl.textContent = `${shInput.value}%`;
+    onCardShadow && onCardShadow(Number(shInput.value) / 100);
+  });
+  shWrap.append(shHead, shInput);
+  root.appendChild(shWrap);
 
   // ---------- MEDIA ----------
   const head = document.createElement('div');

@@ -21,7 +21,7 @@ import { audioAllowed, fontsAllowed } from './account/account.js';
 import { DEFAULT_FONT } from './assets/fonts.js';
 import { loadFontFromBlob } from './assets/fontLoader.js';
 import { initDropzone, loadImageFromBlob } from './ui/dropzone.js';
-import { setCardShape } from './engine/canvasUtils.js';
+import { setCardShape, setCardShadow } from './engine/canvasUtils.js';
 import { initLanding } from './landing/landing.js';
 import { t, isRTL, toggleLang, onLang, setLang } from './i18n.js';
 import { onAuth, currentUser, signOut, isSignedIn } from './auth/auth.js';
@@ -76,6 +76,8 @@ const state = {
   slotCount: 1,
   // global card shape applied by card-based templates
   cardShape: 'original',
+  // global card-shadow strength (0..1, 0 = off) applied across all templates
+  cardShadow: 0,
   // user-uploaded fonts: { id, name, family, blob }
   customFonts: [],
   // optional audio track (Pro): { blob, name, volume, url }
@@ -147,6 +149,7 @@ function scheduleAutosave() {
       duration: renderer.duration,
       slotCount: state.slotCount,
       cardShape: state.cardShape,
+      cardShadow: state.cardShadow,
       customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
       audio: { name: state.audio.name, volume: state.audio.volume, blob: state.audio.blob },
       texts: state.texts,
@@ -311,6 +314,7 @@ function renderMedia() {
       max: mc.max,
       slots: state.slots,
       cardShape: state.cardShape,
+      cardShadow: state.cardShadow,
     },
     {
       onAspect: setAspect,
@@ -322,6 +326,7 @@ function renderMedia() {
       onClear: clearSlot,
       onDropFile: (i, file) => receiveFile(file, i),
       onCardShape: setCardShapeChoice,
+      onCardShadow: setCardShadowChoice,
     }
   );
 }
@@ -331,6 +336,14 @@ function setCardShapeChoice(shape) {
   state.cardShape = shape;
   setCardShape(shape);
   renderMedia(); // refresh the active button
+  scheduleAutosave();
+}
+
+// Change the global card-shadow strength (0..1). Applies live to every template;
+// no panel rebuild needed since the slider owns its own label.
+function setCardShadowChoice(v) {
+  state.cardShadow = v;
+  setCardShadow(v);
   scheduleAutosave();
 }
 
@@ -581,6 +594,7 @@ function openProjects() {
           duration: renderer.duration,
           slotCount: state.slotCount,
           cardShape: state.cardShape,
+          cardShadow: state.cardShadow,
           customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
           audio: { name: state.audio.name, volume: state.audio.volume, blob: state.audio.blob },
           texts: state.texts,
@@ -701,6 +715,8 @@ async function restoreState(rec) {
   // Restore the global card shape.
   state.cardShape = rec.cardShape || 'original';
   setCardShape(state.cardShape);
+  state.cardShadow = rec.cardShadow || 0;
+  setCardShadow(state.cardShadow);
 
   // Re-register any uploaded fonts (keeping their stable family names) so text
   // layers referencing them render again.
@@ -935,6 +951,7 @@ async function boot() {
     .setTexts(state.texts)
     .setWatermark(state.watermark);
   setCardShape(state.cardShape);
+  setCardShadow(state.cardShadow);
   selectTemplate(currentTemplate());
   renderBackground();
   renderText();

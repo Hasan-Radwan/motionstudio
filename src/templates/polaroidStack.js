@@ -1,4 +1,4 @@
-import { roundedRectPath, drawImageCover } from '../engine/canvasUtils.js';
+import { roundedRectPath, drawImageCover, cardShadowScale } from '../engine/canvasUtils.js';
 import { seeded, TAU } from '../engine/easing.js';
 
 export const meta = {
@@ -41,11 +41,12 @@ export function render(ctx, t, p, { imageAt, w, h }) {
     ctx.translate(cx + ox, cy + oy);
     ctx.rotate(baseAng + wobble);
 
-    // card shadow + white body
+    // card shadow (global strength, 0 = off) + white body
+    const sh = cardShadowScale();
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = min * 0.04;
-    ctx.shadowOffsetY = min * 0.02;
+    ctx.shadowBlur = min * 0.04 * sh;
+    ctx.shadowOffsetY = min * 0.02 * sh;
     roundedRectPath(ctx, -cardW / 2, -cardH / 2, cardW, cardH, cardW * 0.03);
     ctx.fillStyle = '#f7f7f4';
     ctx.fill();
