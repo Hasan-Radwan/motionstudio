@@ -553,6 +553,29 @@
   font-size: 13px;
   border-top: 1px solid var(--border);
 }
+.lp-social {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.lp-social-link {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: var(--bg-2);
+  transition: color 0.15s, border-color 0.15s, transform 0.12s, background 0.15s;
+}
+.lp-social-link:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background: var(--accent);
+  transform: translateY(-2px);
+}
 .lp-legal {
   display: flex;
   flex-wrap: wrap;
