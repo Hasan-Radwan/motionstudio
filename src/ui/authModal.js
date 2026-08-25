@@ -6,11 +6,18 @@ import { signIn, signUp, signInWithProfile, AUTH_ERRORS } from '../auth/auth.js'
 import { renderGoogleButton, verifyGoogleToken, googleConfigured } from '../auth/google.js';
 import { t, getLang } from '../i18n.js';
 
-export function openAuthModal({ onDone, startTab = 'signin' } = {}) {
+export function openAuthModal({ onDone, startTab = 'signin', reason = '' } = {}) {
   openModal({
     title: t('Account'),
     render(body, close) {
       let mode = startTab; // 'signin' | 'signup'
+
+      if (reason) {
+        const why = document.createElement('p');
+        why.className = 'auth-reason';
+        why.textContent = reason;
+        body.appendChild(why);
+      }
 
       const tabs = document.createElement('div');
       tabs.className = 'segmented auth-tabs';

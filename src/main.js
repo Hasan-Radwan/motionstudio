@@ -796,6 +796,17 @@ function onAccountClick() {
   else openAuthModal({ onDone: () => {} });
 }
 
+// Gate an action behind sign-in. If already signed in, run `next` immediately;
+// otherwise open the auth modal (defaulting to the Create-account tab, since a
+// gated action usually means a first-time visitor) and run `next` on success.
+function requireAuth(reason, next) {
+  if (isSignedIn()) {
+    next();
+    return;
+  }
+  openAuthModal({ reason, startTab: 'signup', onDone: () => next() });
+}
+
 // ---------- Localization ----------
 // Re-apply the current language across the studio chrome + data-driven panels,
 // and flip the layout direction (RTL for Arabic). Called on boot and whenever
@@ -872,11 +883,15 @@ async function boot() {
     audioInput.value = '';
   });
 
-  $('btn-projects').addEventListener('click', openProjects);
+  $('btn-projects').addEventListener('click', () =>
+    requireAuth(t('Sign in or create a free account to save your projects and reopen them later.'), openProjects)
+  );
   $('btn-export').addEventListener('click', () =>
-    openExportDialog(renderer, currentTemplate().name, {
-      audio: audioAllowed() && state.audio.blob ? { blob: state.audio.blob, volume: state.audio.volume } : null,
-    })
+    requireAuth(t('Sign in or create a free account to export your video and save your projects.'), () =>
+      openExportDialog(renderer, currentTemplate().name, {
+        audio: audioAllowed() && state.audio.blob ? { blob: state.audio.blob, volume: state.audio.volume } : null,
+      })
+    )
   );
   $('btn-home').addEventListener('click', goHome);
   $('brand-home').addEventListener('click', goHome);

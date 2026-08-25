@@ -388,6 +388,10 @@ const AR = {
   'Sign in': 'تسجيل الدخول',
   'Sign out': 'تسجيل الخروج',
   'Create account': 'إنشاء حساب',
+  'Sign in or create a free account to export your video and save your projects.':
+    'سجّل الدخول أو أنشئ حساباً مجانياً لتصدير الفيديو وحفظ مشاريعك.',
+  'Sign in or create a free account to save your projects and reopen them later.':
+    'سجّل الدخول أو أنشئ حساباً مجانياً لحفظ مشاريعك وفتحها لاحقاً.',
   Name: 'الاسم',
   Email: 'البريد الإلكتروني',
   Password: 'كلمة المرور',
