@@ -98,7 +98,8 @@ export async function syncEntitlement(email) {
       setPlan(d.plan);
       return;
     }
-    const ended = d.status === 'canceled' || d.status === 'paused' || d.status === 'past_due';
+    const ended =
+      d.status === 'canceled' || d.status === 'paused' || d.status === 'past_due' || d.status === 'expired';
     if (ended && isPaid()) setPlan('free');
   } catch {
     /* API not available yet — keep local state */

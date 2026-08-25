@@ -151,7 +151,12 @@ async function handleEntitlement(url, env) {
   if (!email || !env.SUBS) return json({ plan: 'free', status: null });
   const rec = await env.SUBS.get('sub:' + email);
   const data = rec ? JSON.parse(rec) : null;
-  return json({ plan: data?.plan || 'free', status: data?.status || null });
+  // Manual grants can carry an expiry (monthly / yearly / specific date). Once it
+  // passes, the entitlement lapses to free automatically without any cron job.
+  if (data?.plan === 'pro' && data.expiresAt && Date.now() > data.expiresAt) {
+    return json({ plan: 'free', status: 'expired', expiresAt: data.expiresAt });
+  }
+  return json({ plan: data?.plan || 'free', status: data?.status || null, expiresAt: data?.expiresAt || null });
 }
 
 // ---- User directory (built as people sign in) ----
@@ -197,15 +202,18 @@ async function handleAdminUsers(request, env) {
     const rec = JSON.parse((await env.SUBS.get(k.name)) || '{}');
     const subRaw = await env.SUBS.get('sub:' + (rec.email || ''));
     const sub = subRaw ? JSON.parse(subRaw) : null;
+    // Reflect a lapsed manual grant as free in the directory too.
+    const expired = sub?.plan === 'pro' && sub.expiresAt && Date.now() > sub.expiresAt;
     users.push({
       email: rec.email,
       name: rec.name || '',
       provider: rec.provider || 'local',
       firstSeen: rec.firstSeen || null,
       lastSeen: rec.lastSeen || null,
-      plan: sub?.plan || 'free',
-      status: sub?.status || null,
+      plan: expired ? 'free' : sub?.plan || 'free',
+      status: expired ? 'expired' : sub?.status || null,
       manual: !!sub?.manual,
+      expiresAt: sub?.expiresAt || null,
     });
   }
   users.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
@@ -237,16 +245,24 @@ async function handleAdminSetPlan(request, env) {
   const email = (body?.email || '').toLowerCase();
   const plan = body?.plan;
   if (!email || !['free', 'pro'].includes(plan)) return json({ error: 'bad_input' }, 400);
+  // Optional expiry for a manual Pro grant (ms timestamp). Absent / null = never
+  // expires. Sanity-bound it to a future time; ignore anything in the past.
+  let expiresAt = null;
+  if (plan === 'pro') {
+    const e = Number(body?.expiresAt);
+    if (Number.isFinite(e) && e > Date.now()) expiresAt = e;
+  }
   await env.SUBS.put(
     'sub:' + email,
     JSON.stringify({
       plan,
       status: plan === 'pro' ? 'active' : 'canceled',
       manual: true,
+      expiresAt,
       updatedAt: Date.now(),
     })
   );
-  return json({ ok: true });
+  return json({ ok: true, expiresAt });
 }
 
 async function handleAdminConfig(request, env) {

@@ -124,6 +124,24 @@
       .row-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-size: 12px; cursor: pointer; font-family: inherit; }
       .row-btn:hover { border-color: var(--accent); }
       .row-btn:disabled { opacity: .5; cursor: default; }
+      .exp { font-size: 12px; color: var(--text-dim); }
+      .exp-soon { color: var(--accent-2); font-weight: 700; }
+
+      /* ---------- grant-period modal ---------- */
+      .gm-back { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55);
+        display: flex; align-items: center; justify-content: center; padding: 20px; }
+      .gm-card { width: 100%; max-width: 380px; background: var(--bg-2); border: 1px solid var(--border);
+        border-radius: 14px; padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+      .gm-title { margin: 0 0 4px; font-size: 16px; }
+      .gm-sub { margin: 0 0 14px; color: var(--text-dim); font-size: 13px; }
+      .gm-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+      .gm-opt { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border: 1px solid var(--border-2);
+        border-radius: 9px; cursor: pointer; font-size: 14px; }
+      .gm-opt:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+      .gm-date { width: 100%; margin-bottom: 16px; padding: 9px 11px; border-radius: 9px;
+        border: 1px solid var(--border-2); background: var(--bg-3); color: var(--text); font-family: inherit; }
+      .gm-date:disabled { opacity: .45; }
+      .gm-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
       /* ---------- save bar + toast ---------- */
       .savebar {
@@ -217,7 +235,7 @@
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>المستخدم</th><th>المصدر</th><th>الباقة</th><th>آخر ظهور</th><th></th></tr></thead>
+              <thead><tr><th>المستخدم</th><th>المصدر</th><th>الباقة</th><th>ينتهي في</th><th>آخر ظهور</th><th></th></tr></thead>
               <tbody id="usersBody"></tbody>
             </table>
           </div>
@@ -365,33 +383,101 @@
         const body = $('usersBody');
         body.innerHTML = '';
         if (!list.length) {
-          body.innerHTML = '<tr><td colspan="5"><div class="empty">لا مستخدمون بعد.</div></td></tr>';
+          body.innerHTML = '<tr><td colspan="6"><div class="empty">لا مستخدمون بعد.</div></td></tr>';
           return;
         }
+        const now = Date.now();
         for (const u of list) {
           const date = u.lastSeen ? new Date(u.lastSeen).toLocaleDateString('ar') : '–';
           const toPlan = u.plan === 'pro' ? 'free' : 'pro';
           const action = u.plan === 'pro' ? 'إلغاء Pro' : 'منح Pro';
+          // Expiry cell: only meaningful for an active Pro grant with an expiry.
+          let expCell = '<span class="muted">–</span>';
+          if (u.plan === 'pro') {
+            if (u.expiresAt) {
+              const soon = u.expiresAt - now < 3 * 86400000;
+              expCell = `<span class="exp${soon ? ' exp-soon' : ''}">${new Date(u.expiresAt).toLocaleDateString('ar')}</span>`;
+            } else {
+              expCell = '<span class="muted">دائم</span>';
+            }
+          }
           const tr = el('tr');
           tr.innerHTML =
             `<td><div class="who"><div class="avatar">${initials(u)}</div>` +
             `<div><div>${u.email}</div>${u.name ? `<small>${u.name}</small>` : ''}</div></div></td>` +
             `<td>${u.provider || '–'}</td>` +
             `<td><span class="pill ${u.plan}">${u.plan}${u.manual ? ' ✎' : ''}</span></td>` +
+            `<td>${expCell}</td>` +
             `<td>${date}</td>` +
             `<td><button class="row-btn">${action}</button></td>`;
           const btn = tr.querySelector('.row-btn');
           btn.addEventListener('click', async () => {
-            if (!confirm(`${action} للمستخدم ${u.email}؟`)) return;
+            let expiresAt = null;
+            if (toPlan === 'pro') {
+              // Ask for the grant period (monthly / yearly / specific date / permanent).
+              const choice = await openGrantModal(u.email);
+              if (choice === null) return; // cancelled
+              expiresAt = choice.expiresAt;
+            } else {
+              if (!confirm(`${action} للمستخدم ${u.email}؟`)) return;
+            }
             btn.disabled = true; btn.textContent = '…';
             try {
-              await api('/api/admin/set-plan', { method: 'POST', body: JSON.stringify({ email: u.email, plan: toPlan }) });
+              await api('/api/admin/set-plan', { method: 'POST', body: JSON.stringify({ email: u.email, plan: toPlan, expiresAt }) });
               toast('تم تحديث الباقة ✓');
               await loadUsers(); loadStats();
-            } catch { toast('فشل التحديث', true); btn.disabled = false; }
+            } catch { toast('فشل التحديث', true); btn.disabled = false; btn.textContent = action; }
           });
           body.appendChild(tr);
         }
+      }
+
+      /* Grant-period picker: resolves to { expiresAt } (ms or null=permanent),
+         or null if the admin cancels. Built inline (no modal framework here). */
+      function openGrantModal(email) {
+        return new Promise((resolve) => {
+          const back = el('div', 'gm-back');
+          const DAY = 86400000;
+          const todayISO = new Date(Date.now() + DAY).toISOString().slice(0, 10);
+          back.innerHTML =
+            `<div class="gm-card">
+              <h3 class="gm-title">منح Pro لـ <span dir="ltr">${email}</span></h3>
+              <p class="gm-sub">اختر مدة المنح:</p>
+              <div class="gm-opts">
+                <label class="gm-opt"><input type="radio" name="gm" value="month" checked><span>شهر واحد</span></label>
+                <label class="gm-opt"><input type="radio" name="gm" value="year"><span>سنة واحدة</span></label>
+                <label class="gm-opt"><input type="radio" name="gm" value="date"><span>حتى تاريخ محدد</span></label>
+                <label class="gm-opt"><input type="radio" name="gm" value="forever"><span>دائم (بلا نهاية)</span></label>
+              </div>
+              <input type="date" class="gm-date" min="${todayISO}" value="${todayISO}" disabled />
+              <div class="gm-actions">
+                <button class="adm-btn adm-btn-ghost gm-cancel">إلغاء</button>
+                <button class="adm-btn gm-ok">منح</button>
+              </div>
+            </div>`;
+          document.body.appendChild(back);
+          const dateInput = back.querySelector('.gm-date');
+          back.querySelectorAll('input[name="gm"]').forEach((r) =>
+            r.addEventListener('change', () => { dateInput.disabled = back.querySelector('input[name="gm"]:checked').value !== 'date'; })
+          );
+          const cleanup = () => back.remove();
+          const done = (val) => { cleanup(); resolve(val); };
+          back.querySelector('.gm-cancel').addEventListener('click', () => done(null));
+          back.addEventListener('click', (e) => { if (e.target === back) done(null); });
+          back.querySelector('.gm-ok').addEventListener('click', () => {
+            const v = back.querySelector('input[name="gm"]:checked').value;
+            let expiresAt = null;
+            if (v === 'month') expiresAt = Date.now() + 30 * DAY;
+            else if (v === 'year') expiresAt = Date.now() + 365 * DAY;
+            else if (v === 'date') {
+              if (!dateInput.value) { toast('اختر تاريخاً', true); return; }
+              // End of the chosen day, so the grant covers that whole date.
+              expiresAt = new Date(dateInput.value + 'T23:59:59').getTime();
+              if (!(expiresAt > Date.now())) { toast('اختر تاريخاً مستقبلياً', true); return; }
+            }
+            done({ expiresAt });
+          });
+        });
       }
       $('userSearch').addEventListener('input', renderUsers);
 
