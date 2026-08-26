@@ -6,7 +6,7 @@
 export const COPY = {
   en: {
     dir: 'ltr',
-    nav: { about: 'About', how: 'How it works', features: 'Features', pricing: 'Pricing', faq: 'FAQ', launch: 'Launch' },
+    nav: { about: 'About', how: 'How it works', features: 'Features', templates: 'Templates', pricing: 'Pricing', faq: 'FAQ', launch: 'Launch' },
     langBtn: 'ع',
     langHref: '/ar',
     hero: {
@@ -50,6 +50,10 @@ export const COPY = {
         ['🖼️', 'Your backgrounds', 'Solid colour, gradient, or your own image behind any template.'],
         ['⚡', 'Up to 8K export', 'Crisp MP4 / WebM, seamless loops, in any aspect ratio.'],
       ],
+    },
+    templates: {
+      title: '60+ motion templates',
+      sub: 'From 3D carousels and orbits to kinetic text, isometric tiles, and cinematic slideshows — pick a style and make it yours.',
     },
     pricing: {
       title: 'Plans for everyone',
@@ -106,7 +110,7 @@ export const COPY = {
   },
   ar: {
     dir: 'rtl',
-    nav: { about: 'نبذة', how: 'كيف يعمل', features: 'المميزات', pricing: 'الأسعار', faq: 'الأسئلة', launch: 'ابدأ الآن' },
+    nav: { about: 'نبذة', how: 'كيف يعمل', features: 'المميزات', templates: 'القوالب', pricing: 'الأسعار', faq: 'الأسئلة', launch: 'ابدأ الآن' },
     langBtn: 'EN',
     langHref: '/',
     hero: {
@@ -150,6 +154,10 @@ export const COPY = {
         ['🖼️', 'خلفياتك الخاصة', 'لون، تدرّج، أو صورتك الخاصة خلف أي قالب.'],
         ['⚡', 'تصدير حتى 8K', 'MP4 / WebM واضح، حلقات سلسة، بأي نسبة أبعاد.'],
       ],
+    },
+    templates: {
+      title: 'أكثر من 60 قالب موشن',
+      sub: 'من الكاروسيلات ثلاثية الأبعاد والمدارات إلى النصوص الحركية والبلاطات الأيزومترية والشرائح السينمائية — اختر أسلوباً واجعله لك.',
     },
     pricing: {
       title: 'خطط تناسب الجميع',

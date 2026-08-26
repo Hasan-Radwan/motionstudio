@@ -392,6 +392,47 @@
   border-radius: var(--radius);
   padding: 24px;
 }
+
+/* ---------- templates catalog (indexable) ---------- */
+.lp-tpl-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+.lp-tpl-group {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.lp-tpl-cat {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 12px;
+  color: var(--accent-2);
+  letter-spacing: 0.2px;
+}
+.lp-tpl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lp-tpl-chip {
+  font-size: 13px;
+  color: var(--text-dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 11px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.lp-tpl-chip:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
 .lp-mini-icon,
 .lp-feature-icon {
   font-size: 28px;

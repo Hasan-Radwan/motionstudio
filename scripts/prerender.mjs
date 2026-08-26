@@ -23,6 +23,29 @@ import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
 import { buildMarkup } from '../src/landing/markup.js';
 import { COPY } from '../src/landing/copy.js';
+import { ALL_TEMPLATE_NAMES } from '../src/landing/templatesCatalog.js';
+
+// Inject an ItemList of every template name into the page's JSON-LD @graph so
+// search engines and AI answer-engines can see and cite the full catalogue
+// (otherwise the 61 names live only inside the client-rendered /app).
+function addTemplatesItemList(document, lang) {
+  const ld = document.querySelector('script[type="application/ld+json"]');
+  if (!ld) return;
+  const data = JSON.parse(ld.textContent);
+  const base = lang === 'ar' ? 'https://rotionapp.com/ar/' : 'https://rotionapp.com/';
+  (data['@graph'] ||= []).push({
+    '@type': 'ItemList',
+    '@id': base + '#templates',
+    name: lang === 'ar' ? 'قوالب الموشن في Rotion App' : 'Rotion App motion templates',
+    numberOfItems: ALL_TEMPLATE_NAMES.length,
+    itemListElement: ALL_TEMPLATE_NAMES.map((name, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name,
+    })),
+  });
+  ld.textContent = JSON.stringify(data, null, 2);
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const distDir = join(__dirname, '..', 'dist');
@@ -56,6 +79,7 @@ console.log(config ? '✓ Loaded live admin content overrides' : '· No admin ov
   const landing = document.getElementById('landing');
   if (!landing) throw new Error('prerender: #landing not found in dist/index.html');
   buildMarkup(landing, 'en', document, config?.en);
+  addTemplatesItemList(document, 'en');
   writeFileSync(indexPath, '<!doctype html>\n' + document.documentElement.outerHTML);
   console.log('✓ Pre-rendered English → dist/index.html');
 }
@@ -109,7 +133,8 @@ console.log(config ? '✓ Loaded live admin content overrides' : '· No admin ov
         node.inLanguage = ['ar', 'en'];
         if (node.offers) {
           node.offers[0].description = 'باقة مجانية بالقوالب الأساسية وتصدير حتى 720p.';
-          node.offers[1].description = 'باقة Pro: كل القوالب، تصدير حتى 8K، بلا علامة مائية.';
+          if (node.offers[1]) node.offers[1].description = 'باقة Pro شهرياً: كل القوالب، تصدير حتى 8K، بلا علامة مائية.';
+          if (node.offers[2]) node.offers[2].description = 'باقة Pro سنوياً (وفّر 17%): كل القوالب، تصدير حتى 8K، بلا علامة مائية.';
         }
       }
       if (node['@type'] === 'FAQPage') {
@@ -144,7 +169,7 @@ console.log(config ? '✓ Loaded live admin content overrides' : '· No admin ov
             name: 'هل الأداة مجانية؟',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'توجد باقة مجانية دائمة، وباقة Pro بسعر 9 دولارات شهرياً تفتح التصدير 8K وإزالة العلامة والمزيد.',
+              text: 'توجد باقة مجانية دائمة، وباقة Pro بسعر 10 دولارات شهرياً أو 99 دولاراً سنوياً تفتح التصدير 8K وإزالة العلامة والمزيد.',
             },
           },
         ];
@@ -152,6 +177,8 @@ console.log(config ? '✓ Loaded live admin content overrides' : '· No admin ov
     }
     ld.textContent = JSON.stringify(data, null, 2);
   }
+
+  addTemplatesItemList(document, 'ar');
 
   const landing = document.getElementById('landing');
   if (!landing) throw new Error('prerender: #landing not found while building Arabic variant');

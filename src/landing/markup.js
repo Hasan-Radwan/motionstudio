@@ -6,6 +6,7 @@
 
 import { COPY } from './copy.js';
 import { mergeCopy } from './mergeCopy.js';
+import { TEMPLATE_CATEGORIES } from './templatesCatalog.js';
 
 // `doc` lets the prerender script pass a virtual (linkedom) document; defaults
 // to the real one in the browser. `overrides` (optional) is an admin-authored
@@ -34,6 +35,7 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
       <a href="#about">${c.nav.about}</a>
       <a href="#how">${c.nav.how}</a>
       <a href="#features">${c.nav.features}</a>
+      <a href="#templates">${c.nav.templates}</a>
       <a href="#pricing">${c.nav.pricing}</a>
       <a href="#faq">${c.nav.faq}</a>
     </div>
@@ -106,6 +108,25 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
             `<div class="lp-feature" data-idx="${i}"><div class="lp-feature-icon">${f[0]}</div><h3>${f[1]}</h3><p>${f[2]}</p></div>`
         )
         .join('')}
+    </div>`;
+
+  // ---------- templates (indexable catalog: all 61 names, grouped) ----------
+  const isAr = lang === 'ar';
+  const templates = make('section', 'lp-section lp-reveal');
+  templates.id = 'templates';
+  templates.innerHTML = `
+    <h2 class="lp-h2">${c.templates.title}</h2>
+    <p class="lp-section-lead">${c.templates.sub}</p>
+    <div class="lp-tpl-groups">
+      ${TEMPLATE_CATEGORIES.map(
+        (g) => `
+        <div class="lp-tpl-group">
+          <h3 class="lp-tpl-cat">${isAr ? g.catAr : g.cat}</h3>
+          <ul class="lp-tpl-list">
+            ${g.items.map((name) => `<li class="lp-tpl-chip">${name}</li>`).join('')}
+          </ul>
+        </div>`
+      ).join('')}
     </div>`;
 
   // ---------- pricing ----------
@@ -191,6 +212,6 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
     </nav>
     <p class="lp-copy">${c.footer}</p>`;
 
-  root.append(nav, hero, about, how, features, pricing, faq, cta, footer);
+  root.append(nav, hero, about, how, features, templates, pricing, faq, cta, footer);
   return { c };
 }
