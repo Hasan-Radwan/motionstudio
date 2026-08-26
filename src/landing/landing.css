@@ -493,12 +493,25 @@
   background: rgba(5, 19, 13, 0.18);
   color: #05130d;
 }
+/* Center every direct child (heading, lead, billing toggle, cards) on the same
+   axis. The pricing section is full-width (lp-section-alt: max-width:none), so a
+   centered flex column keeps the heading aligned with the content below it. */
+#pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#pricing > .lp-h2,
+#pricing > .lp-section-lead {
+  width: 100%;
+}
 .lp-pricing {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 320px));
   justify-content: center;
   gap: 20px;
   align-items: stretch;
+  width: 100%;
 }
 .lp-plan {
   position: relative;
