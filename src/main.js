@@ -84,8 +84,9 @@ const state = {
   bgAuto: true,
   // user-uploaded fonts: { id, name, family, blob }
   customFonts: [],
-  // optional audio track (Pro): { blob, name, volume, url }
-  audio: { blob: null, name: '', volume: 100, url: null },
+  // optional audio track (Pro): { blob, name, volume, url, fadeIn, fadeOut }
+  // fadeIn/fadeOut are a % of the loop duration (0–50), so they scale with it.
+  audio: { blob: null, name: '', volume: 100, fadeIn: 0, fadeOut: 0, url: null },
   // optional text overlays (one or more independent layers)
   texts: [makeText()],
   // optional logo watermark (img/blob filled when the user adds a logo)
@@ -154,8 +155,15 @@ function scheduleAutosave() {
       slotCount: state.slotCount,
       cardShape: state.cardShape,
       cardShadow: state.cardShadow,
+      bgAuto: state.bgAuto,
       customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
-      audio: { name: state.audio.name, volume: state.audio.volume, blob: state.audio.blob },
+      audio: {
+        name: state.audio.name,
+        volume: state.audio.volume,
+        fadeIn: state.audio.fadeIn,
+        fadeOut: state.audio.fadeOut,
+        blob: state.audio.blob,
+      },
       texts: state.texts,
       watermark: serializeWatermark(state.watermark),
       watermarkBlob: state.watermark.blob || null,
@@ -220,6 +228,8 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
   // A template may suggest its own loop length (e.g. slower spirals). Applied on
   // a fresh switch only, so restoring a saved project keeps its stored duration.
   if (!keepParams && tpl.duration) renderer.setDuration(tpl.duration);
+  // A template may also prefer a specific frame (e.g. a portrait portfolio).
+  if (!keepParams && tpl.aspect) renderer.setAspect(tpl.aspect);
   buildPanel(controlsEl, tpl, state.params, (key, value) => {
     state.params = { ...state.params, [key]: value };
     renderer.setParams(state.params);
@@ -234,7 +244,7 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
   resizeSlots(target);
   gallery?.setActive(tpl.id);
   applyImages();
-  loadTemplateDefaults(tpl, !keepParams);
+  loadTemplateDefaults(tpl);
   renderMedia();
   updateMeta();
   scheduleAutosave();
@@ -243,14 +253,14 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
 // Load a template's optional default sample cards (+ default background) from
 // public/samples/. Async and race-guarded; missing files gracefully no-op so the
 // generated placeholder / global background stay in place until the user adds
-// images. Only auto-applies the sample background on a fresh switch while the
-// user hasn't chosen their own (state.bgAuto).
-function loadTemplateDefaults(tpl, applyAutoBg) {
+// images. The sample background is applied only while the background is still
+// "auto" (state.bgAuto) — i.e. the user hasn't picked one of their own — so it
+// works for both a fresh switch and a restored session that never set a bg.
+function loadTemplateDefaults(tpl) {
   loadSampleCards(tpl.id).then((imgs) => {
     if (state.templateId !== tpl.id) return; // user moved on
     renderer.setSampleImages(imgs);
   });
-  if (!applyAutoBg) return;
   loadSampleBackground(tpl.id).then((bg) => {
     if (state.templateId !== tpl.id) return;
     renderer.setAutoBackground(bg);
@@ -527,8 +537,49 @@ function renderAudio() {
   });
 }
 
+function audioBaseVolume() {
+  return Math.max(0, Math.min(1, (state.audio.volume ?? 100) / 100));
+}
+
+// Fade envelope for loop-time t in [0,1): ramps up over the first fadeIn% and
+// down over the last fadeOut% of the loop, so the fades scale with whatever loop
+// duration the user picks.
+function audioEnvelope(t) {
+  const fi = Math.max(0, Math.min(50, state.audio.fadeIn ?? 0)) / 100;
+  const fo = Math.max(0, Math.min(50, state.audio.fadeOut ?? 0)) / 100;
+  let e = 1;
+  if (fi > 0 && t < fi) e = t / fi;
+  if (fo > 0 && t > 1 - fo) e = Math.min(e, (1 - t) / fo);
+  return Math.max(0, Math.min(1, e));
+}
+
+function fadeActive() {
+  return (state.audio.fadeIn ?? 0) > 0 || (state.audio.fadeOut ?? 0) > 0;
+}
+
+// Small dedicated rAF loop that modulates the preview volume by the fade envelope
+// at the renderer's current loop time (only runs while playing with fades set).
+let _audioFadeRaf = null;
+function startAudioFade() {
+  if (_audioFadeRaf) return;
+  const tick = () => {
+    _audioFadeRaf = requestAnimationFrame(tick);
+    previewAudio.volume = audioBaseVolume() * audioEnvelope(renderer.getTime());
+  };
+  _audioFadeRaf = requestAnimationFrame(tick);
+}
+function stopAudioFade() {
+  if (_audioFadeRaf) cancelAnimationFrame(_audioFadeRaf);
+  _audioFadeRaf = null;
+}
+
 function applyAudioVolume() {
-  previewAudio.volume = Math.max(0, Math.min(1, (state.audio.volume ?? 100) / 100));
+  if (audioPlaying && fadeActive()) {
+    startAudioFade(); // the loop owns previewAudio.volume while fades are active
+  } else {
+    stopAudioFade();
+    previewAudio.volume = audioBaseVolume();
+  }
 }
 
 // Point the preview <audio> at the current track (or clear it).
@@ -550,7 +601,14 @@ async function receiveAudio(file) {
   }
   if (state.audio.url) URL.revokeObjectURL(state.audio.url);
   const url = URL.createObjectURL(file);
-  state.audio = { blob: file, name: file.name, volume: state.audio.volume ?? 100, url };
+  state.audio = {
+    blob: file,
+    name: file.name,
+    volume: state.audio.volume ?? 100,
+    fadeIn: state.audio.fadeIn ?? 0,
+    fadeOut: state.audio.fadeOut ?? 0,
+    url,
+  };
   applyAudioSource();
   previewAudio.play().catch(() => {});
   renderAudio();
@@ -559,8 +617,16 @@ async function receiveAudio(file) {
 
 function clearAudio() {
   previewAudio.pause();
+  stopAudioFade();
   if (state.audio.url) URL.revokeObjectURL(state.audio.url);
-  state.audio = { blob: null, name: '', volume: state.audio.volume ?? 100, url: null };
+  state.audio = {
+    blob: null,
+    name: '',
+    volume: state.audio.volume ?? 100,
+    fadeIn: state.audio.fadeIn ?? 0,
+    fadeOut: state.audio.fadeOut ?? 0,
+    url: null,
+  };
   applyAudioSource();
   renderAudio();
   scheduleAutosave();
@@ -571,10 +637,13 @@ function previewAudioBindings() {
   // keep the panel play/pause button in sync with actual playback state
   previewAudio.addEventListener('play', () => {
     audioPlaying = true;
+    applyAudioVolume(); // starts the fade loop when fades are set
     renderAudio();
   });
   previewAudio.addEventListener('pause', () => {
     audioPlaying = false;
+    stopAudioFade();
+    previewAudio.volume = audioBaseVolume();
     renderAudio();
   });
 }
@@ -633,8 +702,15 @@ function openProjects() {
           slotCount: state.slotCount,
           cardShape: state.cardShape,
           cardShadow: state.cardShadow,
+          bgAuto: state.bgAuto,
           customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
-          audio: { name: state.audio.name, volume: state.audio.volume, blob: state.audio.blob },
+          audio: {
+            name: state.audio.name,
+            volume: state.audio.volume,
+            fadeIn: state.audio.fadeIn,
+            fadeOut: state.audio.fadeOut,
+            blob: state.audio.blob,
+          },
           texts: state.texts,
           watermark: serializeWatermark(state.watermark),
           watermarkBlob: state.watermark.blob || null,
@@ -716,7 +792,10 @@ async function restoreState(rec) {
   }
   const mock = MOCKUPS.find((m) => m.id === rec.mockupId) || DEFAULT_MOCKUP;
   state.background = bg;
-  state.bgAuto = false; // a restored project keeps its own saved background
+  // Whether the background is still "auto": use the saved flag when present;
+  // otherwise infer it (an untouched global-default bg = auto, so the template's
+  // default background can still apply). loadTemplateDefaults() reapplies it.
+  state.bgAuto = rec.bgAuto != null ? !!rec.bgAuto : bg?.id === DEFAULT_BACKGROUND.id;
   state.mockupId = mock.id;
   renderer.setBackground(bg).setUseAutoBackground(false).setMockup(mock);
   renderBackground();
@@ -744,10 +823,11 @@ async function restoreState(rec) {
   // Restore the audio track (recreate its object URL from the saved blob).
   if (state.audio.url) URL.revokeObjectURL(state.audio.url);
   const ra = rec.audio;
+  const raFade = { fadeIn: ra?.fadeIn ?? 0, fadeOut: ra?.fadeOut ?? 0 };
   state.audio =
     ra && ra.blob
-      ? { blob: ra.blob, name: ra.name || 'audio', volume: ra.volume ?? 100, url: URL.createObjectURL(ra.blob) }
-      : { blob: null, name: '', volume: ra?.volume ?? 100, url: null };
+      ? { blob: ra.blob, name: ra.name || 'audio', volume: ra.volume ?? 100, ...raFade, url: URL.createObjectURL(ra.blob) }
+      : { blob: null, name: '', volume: ra?.volume ?? 100, ...raFade, url: null };
   applyAudioSource();
   renderAudio();
 
@@ -944,7 +1024,15 @@ async function boot() {
   $('btn-export').addEventListener('click', () =>
     requireAuth(t('Sign in or create a free account to export your video and save your projects.'), () =>
       openExportDialog(renderer, currentTemplate().name, {
-        audio: audioAllowed() && state.audio.blob ? { blob: state.audio.blob, volume: state.audio.volume } : null,
+        audio:
+          audioAllowed() && state.audio.blob
+            ? {
+                blob: state.audio.blob,
+                volume: state.audio.volume,
+                fadeIn: state.audio.fadeIn,
+                fadeOut: state.audio.fadeOut,
+              }
+            : null,
       })
     )
   );

@@ -62,6 +62,25 @@ export async function loadSampleCards(tplId) {
   return imgs.filter(Boolean);
 }
 
+// Synchronous access to a template's already-loaded sample cards, for the gallery
+// thumbnails (which paint on a shared rAF loop and can't await). Kicks off a
+// one-time background load so subsequent frames can use them; returns [] until
+// they're ready, so the thumb simply shows the generated placeholder meanwhile.
+const _warmed = new Set();
+export function sampleCardsSync(tplId) {
+  const urls = TEMPLATE_SAMPLES[tplId]?.cards || GENERIC_CARDS;
+  if (!_warmed.has(tplId)) {
+    _warmed.add(tplId);
+    Promise.all(urls.map(loadOne)); // fire-and-forget; fills the cache
+  }
+  const imgs = [];
+  for (const u of urls) {
+    const im = _cache.get(u);
+    if (im) imgs.push(im);
+  }
+  return imgs;
+}
+
 // Load a template's default BACKGROUND as a ready-to-use background object, or
 // null when the template has none / the file is missing.
 export async function loadSampleBackground(tplId) {

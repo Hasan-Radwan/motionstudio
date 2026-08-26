@@ -108,6 +108,8 @@ async function encodeWithWebCodecs({
       audioTrack = await preEncodeAudio({
         blob: audio.blob,
         volume: audio.volume,
+        fadeIn: audio.fadeIn,
+        fadeOut: audio.fadeOut,
         format,
         duration: totalFrames / fps,
       });
@@ -217,7 +219,7 @@ async function encodeWithWebCodecs({
 // Decode an audio blob, loop/trim it to `duration` seconds (with volume gain),
 // and encode it to AAC (mp4) or Opus (webm). Returns { numberOfChannels,
 // sampleRate, chunks:[{chunk, meta}] } or throws.
-async function preEncodeAudio({ blob, volume = 100, format, duration }) {
+async function preEncodeAudio({ blob, volume = 100, fadeIn = 0, fadeOut = 0, format, duration }) {
   if (typeof AudioEncoder === 'undefined' || typeof AudioData === 'undefined') {
     throw new Error('AudioEncoder unavailable');
   }
@@ -235,6 +237,16 @@ async function preEncodeAudio({ blob, volume = 100, format, duration }) {
   const gain = Math.max(0, Math.min(1, (volume ?? 100) / 100));
   const totalFrames = Math.round(duration * sampleRate);
   const srcLen = buf.length;
+  // Fade in/out as a fraction (0–50%) of the exported clip, applied as a linear
+  // ramp on the sample amplitudes so it matches the preview and scales with duration.
+  const fadeInFrames = Math.max(0, Math.min(0.5, (fadeIn || 0) / 100)) * totalFrames;
+  const fadeOutFrames = Math.max(0, Math.min(0.5, (fadeOut || 0) / 100)) * totalFrames;
+  const envAt = (gi) => {
+    let e = 1;
+    if (fadeInFrames > 0 && gi < fadeInFrames) e = gi / fadeInFrames;
+    if (fadeOutFrames > 0 && gi > totalFrames - fadeOutFrames) e = Math.min(e, (totalFrames - gi) / fadeOutFrames);
+    return e < 0 ? 0 : e;
+  };
   const src = [];
   for (let c = 0; c < channels; c++) src.push(buf.getChannelData(Math.min(c, buf.numberOfChannels - 1)));
 
@@ -256,7 +268,7 @@ async function preEncodeAudio({ blob, volume = 100, format, duration }) {
     for (let c = 0; c < channels; c++) {
       const ch = src[c];
       const off = c * n;
-      for (let i = 0; i < n; i++) data[off + i] = ch[(pos + i) % srcLen] * gain;
+      for (let i = 0; i < n; i++) data[off + i] = ch[(pos + i) % srcLen] * gain * envAt(pos + i);
     }
     const frame = new AudioData({
       format: 'f32-planar',

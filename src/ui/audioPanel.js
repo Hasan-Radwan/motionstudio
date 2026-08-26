@@ -87,8 +87,41 @@ export function buildAudioPanel(root, { audio, playing, onPick, onClear, onChang
   vol.append(head, input);
   root.appendChild(vol);
 
+  // ---- fade in / out (as a % of the loop duration, so they scale with it) ----
+  root.appendChild(
+    fadeControl(`↗ ${t('Fade in')}`, audio.fadeIn ?? 0, (v) => onChange && onChange({ fadeIn: v }))
+  );
+  root.appendChild(
+    fadeControl(`↘ ${t('Fade out')}`, audio.fadeOut ?? 0, (v) => onChange && onChange({ fadeOut: v }))
+  );
+
   const note = document.createElement('p');
   note.className = 'muted audio-note';
   note.textContent = t('Plays in preview and is included in the export.');
   root.appendChild(note);
+}
+
+// A 0–50% slider used for fade in / fade out (percentage of the loop duration).
+function fadeControl(label, value, onInput) {
+  const wrap = document.createElement('div');
+  wrap.className = 'control';
+  const head = document.createElement('div');
+  head.className = 'control-head';
+  const val = document.createElement('span');
+  val.className = 'control-value';
+  val.textContent = `${value ?? 0}%`;
+  head.innerHTML = `<span class="control-label">${label}</span>`;
+  head.appendChild(val);
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.min = 0;
+  input.max = 50;
+  input.step = 1;
+  input.value = value ?? 0;
+  input.addEventListener('input', () => {
+    val.textContent = `${input.value}%`;
+    onInput(parseInt(input.value, 10));
+  });
+  wrap.append(head, input);
+  return wrap;
 }

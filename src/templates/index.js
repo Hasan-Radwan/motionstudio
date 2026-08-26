@@ -2,6 +2,7 @@
 // The gallery and controls panel are generated entirely from this data —
 // adding a template = adding a file here, no UI code changes.
 
+import { sampleCardsSync } from '../assets/samples.js';
 import * as logo from './logo.js';
 import * as cardTilt3d from './cardTilt3d.js';
 import * as flip3d from './flip3d.js';
@@ -154,11 +155,20 @@ export function paintThumb(canvas, tpl, t = 0.32) {
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
   ctx.save();
+  // Use the template's default sample images (per-template set, else the generic
+  // cards) for a representative preview; fall back to the generated placeholder
+  // until the samples finish loading (or if none exist).
+  const samples = sampleCardsSync(tpl.id);
+  const hasS = samples.length > 0;
+  const imageAt = hasS
+    ? (i) => samples[(((i | 0) % samples.length) + samples.length) % samples.length]
+    : () => getPlaceholder();
+  const count = hasS ? (tpl.media && tpl.media.default) || 1 : 1;
   try {
     tpl.render(ctx, t, defaultParams(tpl), {
-      image: getPlaceholder(),
-      imageAt: () => getPlaceholder(),
-      count: 1,
+      image: imageAt(0),
+      imageAt,
+      count,
       w: W,
       h: H,
     });

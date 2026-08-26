@@ -5,28 +5,29 @@ export const meta = {
   name: 'Curved Carousel',
   category: 'Carousel & Flow',
   pro: true, // Pro-only template (gated on selection; badged in the gallery)
+  aspect: '4:5', // portrait "portfolio" frame by default
   media: { default: 6, min: 1, max: 12 },
 };
 
 export const controls = [
-  { key: 'size', type: 'range', label: 'Poster size', min: 18, max: 55, step: 1, default: 30, unit: '%' },
-  { key: 'speed', type: 'range', label: 'Speed', min: 1, max: 4, step: 1, default: 1 },
+  { key: 'size', type: 'range', label: 'Poster size', min: 18, max: 55, step: 1, default: 24, unit: '%' },
+  { key: 'speed', type: 'range', label: 'Speed', min: 1, max: 4, step: 1, default: 2 },
   // Signed curve: + bends backward (peak at the centre, ∩), − bends forward
   // (dip at the centre, ∪), 0 is a flat line.
-  { key: 'arc', type: 'range', label: 'Arc depth (in/out)', min: -100, max: 100, step: 1, default: 45, unit: '%' },
-  { key: 'centerScale', type: 'range', label: 'Center zoom', min: 100, max: 150, step: 1, default: 122, unit: '%' },
-  { key: 'dof', type: 'range', label: 'Edge blur (depth)', min: 0, max: 100, step: 1, default: 55, unit: '%' },
-  { key: 'tilt', type: 'range', label: 'Side tilt', min: 0, max: 60, step: 1, default: 28, unit: '°' },
-  { key: 'radius', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 12, unit: '%' },
+  { key: 'arc', type: 'range', label: 'Arc depth (in/out)', min: -100, max: 100, step: 1, default: 76, unit: '%' },
+  { key: 'centerScale', type: 'range', label: 'Center zoom', min: 100, max: 150, step: 1, default: 126, unit: '%' },
+  { key: 'dof', type: 'range', label: 'Edge blur (depth)', min: 0, max: 100, step: 1, default: 27, unit: '%' },
+  { key: 'tilt', type: 'range', label: 'Side tilt', min: 0, max: 60, step: 1, default: 12, unit: '°' },
+  { key: 'radius', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 29, unit: '%' },
   // Shift the whole carousel row (posters only; the foreground subject stays put).
-  { key: 'posX', type: 'range', label: 'Position X', min: -50, max: 50, step: 1, default: 0, unit: '%' },
-  { key: 'posY', type: 'range', label: 'Position Y', min: -50, max: 50, step: 1, default: 0, unit: '%' },
+  { key: 'posX', type: 'range', label: 'Position X', min: -50, max: 50, step: 1, default: -1, unit: '%' },
+  { key: 'posY', type: 'range', label: 'Position Y', min: -50, max: 50, step: 1, default: -2, unit: '%' },
   // Foreground subject (a static PNG cutout drawn in front — the first image is
   // pulled out of the carousel and pinned). Its slot is fixed to 1, so there is
   // no visible "slot" control; position it with size / X / Y.
-  { key: 'fgSize', type: 'range', label: 'Foreground size', min: 30, max: 100, step: 1, default: 72, unit: '%' },
-  { key: 'fgX', type: 'range', label: 'Foreground X', min: 0, max: 100, step: 1, default: 50, unit: '%' },
-  { key: 'fgY', type: 'range', label: 'Foreground Y', min: 40, max: 100, step: 1, default: 100, unit: '%' },
+  { key: 'fgSize', type: 'range', label: 'Foreground size', min: 30, max: 100, step: 1, default: 42, unit: '%' },
+  { key: 'fgX', type: 'range', label: 'Foreground X', min: 0, max: 100, step: 1, default: 51, unit: '%' },
+  { key: 'fgY', type: 'range', label: 'Foreground Y', min: 40, max: 100, step: 1, default: 92, unit: '%' },
 ];
 
 const smooth = (x) => x * x * (3 - 2 * x); // smoothstep 0..1
