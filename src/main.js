@@ -25,13 +25,14 @@ import { setCardShape, setCardShadow } from './engine/canvasUtils.js';
 import { initLanding } from './landing/landing.js';
 import { t, isRTL, toggleLang, onLang, setLang } from './i18n.js';
 import { onAuth, currentUser, signOut, isSignedIn } from './auth/auth.js';
-import { currentPlan, onPlan, syncEntitlement } from './account/account.js';
+import { currentPlan, onPlan, syncEntitlement, isPaid } from './account/account.js';
 import { openAuthModal } from './ui/authModal.js';
 import { openPlansModal } from './ui/plansModal.js';
 import { setProjectScope } from './store/projects.js';
 import { openExportDialog } from './ui/exportDialog.js';
 import { openModal } from './ui/modal.js';
 import { BACKGROUNDS, DEFAULT_BACKGROUND } from './assets/backgrounds.js';
+import { loadSampleCards, loadSampleBackground } from './assets/samples.js';
 import { MOCKUPS, DEFAULT_MOCKUP, paintMockupPreview } from './assets/mockups.js';
 import {
   autosave,
@@ -78,6 +79,9 @@ const state = {
   cardShape: 'original',
   // global card-shadow strength (0..1, 0 = off) applied across all templates
   cardShadow: 0,
+  // true while the background is still auto (a template's default sample bg may
+  // show); flips false the moment the user picks a background of their own.
+  bgAuto: true,
   // user-uploaded fonts: { id, name, family, blob }
   customFonts: [],
   // optional audio track (Pro): { blob, name, volume, url }
@@ -230,9 +234,40 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
   resizeSlots(target);
   gallery?.setActive(tpl.id);
   applyImages();
+  loadTemplateDefaults(tpl, !keepParams);
   renderMedia();
   updateMeta();
   scheduleAutosave();
+}
+
+// Load a template's optional default sample cards (+ default background) from
+// public/samples/. Async and race-guarded; missing files gracefully no-op so the
+// generated placeholder / global background stay in place until the user adds
+// images. Only auto-applies the sample background on a fresh switch while the
+// user hasn't chosen their own (state.bgAuto).
+function loadTemplateDefaults(tpl, applyAutoBg) {
+  loadSampleCards(tpl.id).then((imgs) => {
+    if (state.templateId !== tpl.id) return; // user moved on
+    renderer.setSampleImages(imgs);
+  });
+  if (!applyAutoBg) return;
+  loadSampleBackground(tpl.id).then((bg) => {
+    if (state.templateId !== tpl.id) return;
+    renderer.setAutoBackground(bg);
+    renderer.setUseAutoBackground(state.bgAuto && !!bg);
+  });
+}
+
+// User-initiated template pick from the gallery. Pro-only templates are gated for
+// free users: show the upgrade prompt and snap the active highlight back to the
+// current template (the gallery pre-activates the clicked card).
+function pickTemplate(tpl) {
+  if (tpl.pro && !isPaid()) {
+    openPlansModal();
+    gallery?.setActive(state.templateId);
+    return;
+  }
+  selectTemplate(tpl);
 }
 
 // ---------- Image slots ----------
@@ -353,13 +388,15 @@ function renderBackground() {
     background: state.background,
     onChange: (bg) => {
       state.background = bg;
-      renderer.setBackground(bg);
+      state.bgAuto = false; // user picked a background — stop auto-applying defaults
+      renderer.setBackground(bg).setUseAutoBackground(false);
       scheduleAutosave();
     },
     onPickImage: () => bgInput.click(),
     onClearImage: () => {
       state.background = DEFAULT_BACKGROUND;
-      renderer.setBackground(state.background);
+      state.bgAuto = false;
+      renderer.setBackground(state.background).setUseAutoBackground(false);
       renderBackground();
       scheduleAutosave();
     },
@@ -381,7 +418,8 @@ async function receiveBackgroundImage(file) {
     fit: prev?.type === 'image' ? prev.fit || 'cover' : 'cover',
     dim: prev?.type === 'image' ? prev.dim ?? 0 : 0,
   };
-  renderer.setBackground(state.background);
+  state.bgAuto = false;
+  renderer.setBackground(state.background).setUseAutoBackground(false);
   renderBackground();
   scheduleAutosave();
 }
@@ -678,8 +716,9 @@ async function restoreState(rec) {
   }
   const mock = MOCKUPS.find((m) => m.id === rec.mockupId) || DEFAULT_MOCKUP;
   state.background = bg;
+  state.bgAuto = false; // a restored project keeps its own saved background
   state.mockupId = mock.id;
-  renderer.setBackground(bg).setMockup(mock);
+  renderer.setBackground(bg).setUseAutoBackground(false).setMockup(mock);
   renderBackground();
   // New saves store texts[]; old saves stored a single text object.
   const restoredTexts = Array.isArray(rec.texts)
@@ -838,7 +877,7 @@ function relocalizeStudio() {
   // Rebuild the gallery (category titles) and the data-driven panels.
   gallery = buildGallery(galleryEl, {
     activeId: state.templateId,
-    onSelect: (tpl) => selectTemplate(tpl),
+    onSelect: pickTemplate,
   });
   selectTemplate(currentTemplate(), true, true); // rebuild controls + media, keep params/slots
   renderText();
@@ -852,7 +891,7 @@ function relocalizeStudio() {
 async function boot() {
   gallery = buildGallery(galleryEl, {
     activeId: state.templateId,
-    onSelect: (tpl) => selectTemplate(tpl),
+    onSelect: pickTemplate,
   });
 
   // Stage drop / paste fill the first empty slot (per-slot upload lives in the

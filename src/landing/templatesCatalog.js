@@ -20,7 +20,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Carousel & Flow',
     catAr: 'كاروسيل وانسياب',
-    items: ['Arc Carousel', 'Carousel', 'Coverflow', 'Filmstrip', 'Ribbon Flow', 'Swipe Deck'],
+    items: ['Arc Carousel', 'Carousel', 'Coverflow', 'Curved Carousel', 'Filmstrip', 'Ribbon Flow', 'Swipe Deck'],
   },
   {
     cat: 'Stack & Scatter',

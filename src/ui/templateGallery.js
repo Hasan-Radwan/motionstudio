@@ -112,6 +112,15 @@ export function buildGallery(root, { activeId, onSelect }) {
       thumb.className = 'tpl-thumb';
       card.appendChild(thumb);
 
+      // Pro-only templates get a small brand-gradient "Pro" badge above the thumb.
+      if (tpl.pro) {
+        card.classList.add('tpl-card-pro');
+        const badge = document.createElement('span');
+        badge.className = 'tpl-pro-badge';
+        badge.textContent = 'Pro';
+        card.appendChild(badge);
+      }
+
       const name = document.createElement('span');
       name.className = 'tpl-name';
       name.textContent = tpl.name;

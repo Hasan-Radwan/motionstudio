@@ -30,6 +30,9 @@ export class Renderer {
     this.images = []; // raw uploaded images (filled slots, in order)
     this._composites = []; // each possibly wrapped in a mockup frame
     this.placeholder = null; // demo asset shown before any upload
+    this.sampleImages = []; // optional per-template default card images (before upload)
+    this.autoBackground = null; // optional per-template default background (transient)
+    this.useAutoBackground = false; // draw autoBackground instead of `background`
     this.texts = []; // optional text overlay layers
     this.watermark = null; // optional logo overlay { img, size, corner, opacity, margin }
     this.background = null;
@@ -101,6 +104,21 @@ export class Renderer {
     this.placeholder = img;
     return this;
   }
+  // Per-template default card images, shown (cycled) before the user uploads any.
+  setSampleImages(arr) {
+    this.sampleImages = (arr || []).filter(Boolean);
+    return this;
+  }
+  // Per-template default background (transient; never persisted). `useAuto` gates
+  // whether it's drawn instead of the user/global background.
+  setAutoBackground(bg) {
+    this.autoBackground = bg || null;
+    return this;
+  }
+  setUseAutoBackground(v) {
+    this.useAutoBackground = !!v;
+    return this;
+  }
   // Set the full list of uploaded images (already filtered to filled slots).
   setImages(arr) {
     this.images = (arr || []).filter(Boolean);
@@ -140,7 +158,12 @@ export class Renderer {
   // indices are handled (carousel wraps past 0), so it's always safe to call.
   imageAt(i) {
     const list = this._composites;
-    if (!list.length) return this.placeholder;
+    if (!list.length) {
+      // No uploads: prefer the template's default sample cards, else the placeholder.
+      const s = this.sampleImages;
+      if (s.length) return s[(((i | 0) % s.length) + s.length) % s.length];
+      return this.placeholder;
+    }
     const n = list.length;
     return list[(((i | 0) % n) + n) % n];
   }
@@ -160,7 +183,8 @@ export class Renderer {
   // The pure scene function. Draws one frame at normalized loop time t in [0,1).
   drawScene(ctx, w, h, t) {
     ctx.clearRect(0, 0, w, h);
-    drawBackground(ctx, w, h, this.background, t);
+    const bg = this.useAutoBackground && this.autoBackground ? this.autoBackground : this.background;
+    drawBackground(ctx, w, h, bg, t);
     this._drawText(ctx, w, h, t, 'back'); // text layers placed behind the cards
     if (this.template && typeof this.template.render === 'function') {
       ctx.save();
@@ -251,9 +275,12 @@ export class Renderer {
     ctx.font = `${tx.weight || 600} ${size}px ${resolveFontStack(tx.font)}`;
     ctx.translate(w * (tx.x / 100), h * (tx.y / 100) + dy);
     ctx.scale(scale, scale);
-    ctx.shadowColor = 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur = size * 0.14;
-    ctx.shadowOffsetY = size * 0.04;
+    // Optional drop shadow (off by default; toggled per text from the text panel).
+    if (tx.shadow) {
+      ctx.shadowColor = 'rgba(0,0,0,0.45)';
+      ctx.shadowBlur = size * 0.14;
+      ctx.shadowOffsetY = size * 0.04;
+    }
     ctx.fillStyle = tx.color || '#ffffff';
 
     const lines = String(tx.content).split('\n');

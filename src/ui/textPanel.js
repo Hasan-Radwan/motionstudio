@@ -84,17 +84,50 @@ function rangeField(label, min, max, step, value, unit, onInput) {
   return wrap;
 }
 
-// One text layer's editor. `patch` updates the layer at `index`.
+// A label + on/off toggle (matches the controls-panel toggle styling).
+function toggleField(label, value, onInput) {
+  const wrap = document.createElement('div');
+  wrap.className = 'control';
+  const tg = document.createElement('div');
+  tg.className = 'toggle' + (value ? ' on' : '');
+  const lab = document.createElement('span');
+  lab.className = 'control-label';
+  lab.textContent = label;
+  const track = document.createElement('span');
+  track.className = 'toggle-track';
+  tg.append(lab, track);
+  tg.addEventListener('click', () => {
+    const v = !tg.classList.contains('on');
+    tg.classList.toggle('on', v);
+    onInput(v);
+  });
+  wrap.appendChild(tg);
+  return wrap;
+}
+
+// One text layer's editor, rendered as a collapsible "folder". `patch` updates
+// the layer at `index`. The fold state lives on the text object (in-session; not
+// persisted) so it survives panel rebuilds on add/remove.
 function buildLayer(index, text, { onChange, onRemove, removable }) {
   const layer = document.createElement('div');
-  layer.className = 'text-layer';
+  layer.className = 'text-layer' + (text.collapsed ? ' collapsed' : '');
 
   const header = document.createElement('div');
   header.className = 'text-layer-head';
+
+  const caret = document.createElement('span');
+  caret.className = 'text-layer-caret';
+  caret.textContent = text.collapsed ? '▸' : '▾';
+
   const title = document.createElement('span');
   title.className = 'text-layer-title';
-  title.textContent = `${t('Text')} ${index + 1}`;
-  header.appendChild(title);
+  const titleText = () => {
+    const c = (text.content || '').trim().replace(/\s+/g, ' ');
+    return c ? c.slice(0, 26) + (c.length > 26 ? '…' : '') : `${t('Text')} ${index + 1}`;
+  };
+  title.textContent = titleText();
+
+  header.append(caret, title);
   if (removable) {
     const del = document.createElement('button');
     del.type = 'button';
@@ -102,10 +135,24 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
     del.title = t('Remove this text');
     del.setAttribute('aria-label', t('Remove this text'));
     del.textContent = '✕';
-    del.addEventListener('click', () => onRemove(index));
+    del.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onRemove(index);
+    });
     header.appendChild(del);
   }
+  // fold / unfold on header click
+  header.addEventListener('click', () => {
+    const collapsed = !layer.classList.contains('collapsed');
+    layer.classList.toggle('collapsed', collapsed);
+    text.collapsed = collapsed;
+    caret.textContent = collapsed ? '▸' : '▾';
+  });
   layer.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'text-layer-body';
+  layer.appendChild(body);
 
   const patch = (p) => onChange(index, p);
 
@@ -115,14 +162,16 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
   ta.rows = 2;
   ta.placeholder = t('Add text (optional)…');
   ta.value = text.content || '';
-  ta.addEventListener('input', () => patch({ content: ta.value }));
-  layer.appendChild(ta);
 
   // fields shown only when this layer has text, to keep the panel tidy
   const fields = document.createElement('div');
   fields.className = 'text-fields' + (text.content ? '' : ' hidden');
-  layer.appendChild(fields);
-  ta.addEventListener('input', () => fields.classList.toggle('hidden', !ta.value));
+  body.append(ta, fields);
+  ta.addEventListener('input', () => {
+    patch({ content: ta.value });
+    title.textContent = titleText();
+    fields.classList.toggle('hidden', !ta.value);
+  });
 
   fields.appendChild(
     selectField(t('Font'), getAllFonts().map((f) => ({ value: f.id, label: f.name })), text.font, (v) =>
@@ -149,6 +198,7 @@ function buildLayer(index, text, { onChange, onRemove, removable }) {
   row.appendChild(colorWrap);
   fields.appendChild(row);
 
+  fields.appendChild(toggleField(t('Text shadow'), !!text.shadow, (v) => patch({ shadow: v })));
   fields.appendChild(selectField(t('Align'), ALIGNS, text.align, (v) => patch({ align: v })));
   fields.appendChild(
     selectField(t('Direction'), DIRS, text.dir || 'auto', (v) => patch({ dir: v }))

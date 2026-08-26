@@ -12,6 +12,7 @@ import * as spiral from './spiral.js';
 import * as globe from './globe.js';
 import * as carousel from './carousel.js';
 import * as coverflow from './coverflow.js';
+import * as curvedCarousel from './curvedCarousel.js';
 import * as deck from './deck.js';
 import * as filmstrip from './filmstrip.js';
 import * as slideshow from './slideshow.js';
@@ -70,7 +71,7 @@ export const TEMPLATES = [
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
   cardTilt3d, carousel3d, carousel3d2, carousel3dStar, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
   orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, // Orbit
-  carousel, coverflow, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
+  carousel, coverflow, curvedCarousel, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
   grid, wave, mosaic, driftTiles, // Grid
   marquee, totem, // Ticker & Marquee
