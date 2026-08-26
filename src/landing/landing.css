@@ -452,7 +452,8 @@
 
 /* pricing */
 .lp-bill {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   gap: 4px;
   margin: 0 auto 26px;
   padding: 4px;
@@ -476,8 +477,9 @@
   transition: background 0.15s, color 0.15s;
 }
 .lp-bill-opt.active {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #05130d;
+  box-shadow: 0 4px 16px var(--accent-glow);
 }
 .lp-bill-save {
   font-size: 11px;
