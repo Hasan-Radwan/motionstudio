@@ -17,6 +17,8 @@ import { buildBackgroundPanel } from './ui/backgroundPanel.js';
 import { buildTextPanel } from './ui/textPanel.js';
 import { buildWatermarkPanel } from './ui/watermarkPanel.js';
 import { buildAudioPanel } from './ui/audioPanel.js';
+import { buildEasingPanel } from './ui/easingPanel.js';
+import { cubicBezier, DEFAULT_EASING } from './engine/easing.js';
 import { audioAllowed, fontsAllowed } from './account/account.js';
 import { DEFAULT_FONT } from './assets/fonts.js';
 import { loadFontFromBlob } from './assets/fontLoader.js';
@@ -57,6 +59,7 @@ const wmEl = $('panel-watermark');
 const wmInput = $('wm-input');
 const bgInput = $('bg-input');
 const fontInput = $('font-input');
+const easingEl = $('panel-easing');
 const audioEl = $('panel-audio');
 const audioInput = $('audio-input');
 const previewAudio = $('preview-audio');
@@ -79,6 +82,8 @@ const state = {
   cardShape: 'original',
   // global card-shadow strength (0..1, 0 = off) applied across all templates
   cardShadow: 0,
+  // global motion easing curve (Pro): { preset, pts:[x1,y1,x2,y2] }
+  easing: { preset: DEFAULT_EASING.preset, pts: DEFAULT_EASING.pts.slice() },
   // true while the background is still auto (a template's default sample bg may
   // show); flips false the moment the user picks a background of their own.
   bgAuto: true,
@@ -155,6 +160,7 @@ function scheduleAutosave() {
       slotCount: state.slotCount,
       cardShape: state.cardShape,
       cardShadow: state.cardShadow,
+      easing: state.easing,
       bgAuto: state.bgAuto,
       customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
       audio: {
@@ -518,6 +524,32 @@ async function receiveWatermarkLogo(file) {
   scheduleAutosave();
 }
 
+// ---------- Easing (global motion curve; editing is Pro) ----------
+function renderEasing() {
+  buildEasingPanel(easingEl, {
+    easing: state.easing,
+    allowed: isPaid(),
+    onChange: setEasingChoice,
+    onUpgrade: openPlansModal,
+  });
+}
+
+// Push the current easing curve into the renderer (linear → no remap).
+function applyEasing() {
+  const { preset, pts } = state.easing || {};
+  if (!pts || preset === 'linear') {
+    renderer.setEasing(null);
+  } else {
+    renderer.setEasing(cubicBezier(pts[0], pts[1], pts[2], pts[3]));
+  }
+}
+
+function setEasingChoice(easing) {
+  state.easing = { preset: easing.preset, pts: easing.pts.slice() };
+  applyEasing();
+  scheduleAutosave();
+}
+
 // ---------- Audio (Pro) ----------
 let audioPlaying = false;
 
@@ -705,6 +737,7 @@ function openProjects() {
           slotCount: state.slotCount,
           cardShape: state.cardShape,
           cardShadow: state.cardShadow,
+          easing: state.easing,
           bgAuto: state.bgAuto,
           customFonts: state.customFonts.map((f) => ({ id: f.id, name: f.name, family: f.family, blob: f.blob })),
           audio: {
@@ -833,12 +866,18 @@ async function restoreState(rec) {
       : { blob: null, name: '', volume: ra?.volume ?? 100, ...raFade, url: null };
   applyAudioSource();
   renderAudio();
+  renderEasing();
 
   // Restore the global card shape.
   state.cardShape = rec.cardShape || 'original';
   setCardShape(state.cardShape);
   state.cardShadow = rec.cardShadow || 0;
   setCardShadow(state.cardShadow);
+  state.easing =
+    rec.easing && Array.isArray(rec.easing.pts)
+      ? { preset: rec.easing.preset || 'custom', pts: rec.easing.pts.slice() }
+      : { preset: DEFAULT_EASING.preset, pts: DEFAULT_EASING.pts.slice() };
+  applyEasing();
 
   // Re-register any uploaded fonts (keeping their stable family names) so text
   // layers referencing them render again.
@@ -967,6 +1006,7 @@ function relocalizeStudio() {
   renderWatermark();
   renderBackground();
   renderAudio();
+  renderEasing();
   updateMeta();
 }
 
@@ -1055,6 +1095,7 @@ async function boot() {
   onPlan(() => {
     updateAccountButton();
     renderAudio(); // audio panel gate depends on the plan
+    renderEasing(); // easing editor unlocks on Pro
   });
   setProjectScope(currentUser()?.id || '');
   if (currentUser()?.email) {
@@ -1082,11 +1123,13 @@ async function boot() {
     .setWatermark(state.watermark);
   setCardShape(state.cardShape);
   setCardShadow(state.cardShadow);
+  applyEasing();
   selectTemplate(currentTemplate());
   renderBackground();
   renderText();
   renderWatermark();
   renderAudio();
+  renderEasing();
   fitCanvas();
   // Keep the preview fitted as the stage area changes (window resize, panels).
   new ResizeObserver(fitCanvas).observe(stageWrapEl);

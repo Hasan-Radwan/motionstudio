@@ -82,6 +82,24 @@ export const TEMPLATES = [
   isometric, isoTiles, // Isometric
 ].map((m) => ({ ...m.meta, controls: m.controls, render: m.render }));
 
+// Give every template a global Position X/Y control that shifts the whole
+// composition (its cards move together), UNLESS it already exposes its own
+// position offset. Detection covers the posX/posY + offsetX/offsetY keys and the
+// "Position X/Y" label. Templates that get the injected control don't handle it
+// themselves — the renderer applies the offset for them (see renderer.drawScene),
+// keyed off `hasOwnPos`.
+const POS_KEYS = new Set(['posX', 'posY', 'offsetX', 'offsetY']);
+const POS_LABELS = new Set(['Position X', 'Position Y']);
+const POS_CONTROLS = [
+  { key: 'posX', type: 'range', label: 'Position X', min: -50, max: 50, step: 1, default: 0, unit: '%' },
+  { key: 'posY', type: 'range', label: 'Position Y', min: -50, max: 50, step: 1, default: 0, unit: '%' },
+];
+for (const tpl of TEMPLATES) {
+  const ctrls = tpl.controls || [];
+  tpl.hasOwnPos = ctrls.some((c) => POS_KEYS.has(c.key) || POS_LABELS.has(c.label));
+  if (!tpl.hasOwnPos) tpl.controls = [...ctrls, ...POS_CONTROLS];
+}
+
 export function getTemplate(id) {
   return TEMPLATES.find((t) => t.id === id) || TEMPLATES[0];
 }

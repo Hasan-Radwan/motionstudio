@@ -33,6 +33,7 @@ export class Renderer {
     this.sampleImages = []; // optional per-template default card images (before upload)
     this.autoBackground = null; // optional per-template default background (transient)
     this.useAutoBackground = false; // draw autoBackground instead of `background`
+    this._easing = null; // optional global timing curve applied to the loop time
     this.texts = []; // optional text overlay layers
     this.watermark = null; // optional logo overlay { img, size, corner, opacity, margin }
     this.background = null;
@@ -105,6 +106,12 @@ export class Renderer {
     return this;
   }
   // Per-template default card images, shown (cycled) before the user uploads any.
+  // Set the global timing curve (a function t→t' with fixed 0/1 endpoints so the
+  // loop stays seamless). Pass null for linear.
+  setEasing(fn) {
+    this._easing = typeof fn === 'function' ? fn : null;
+    return this;
+  }
   setSampleImages(arr) {
     this.sampleImages = (arr || []).filter(Boolean);
     return this;
@@ -183,12 +190,24 @@ export class Renderer {
   // The pure scene function. Draws one frame at normalized loop time t in [0,1).
   drawScene(ctx, w, h, t) {
     ctx.clearRect(0, 0, w, h);
+    // Remap the linear loop time through the global easing curve (endpoints are
+    // pinned so the loop stays seamless). Everything drawn uses the eased time so
+    // the whole composition shares one motion feel.
+    const te = this._easing ? this._easing(t) : t;
     const bg = this.useAutoBackground && this.autoBackground ? this.autoBackground : this.background;
-    drawBackground(ctx, w, h, bg, t);
-    this._drawText(ctx, w, h, t, 'back'); // text layers placed behind the cards
+    drawBackground(ctx, w, h, bg, te);
+    this._drawText(ctx, w, h, te, 'back'); // text layers placed behind the cards
     if (this.template && typeof this.template.render === 'function') {
       ctx.save();
-      this.template.render(ctx, t, this.params, {
+      // Global Position X/Y for templates that don't handle it themselves: shift
+      // the whole composition (its cards) together. Native-position templates set
+      // hasOwnPos and apply their own offset inside render().
+      if (!this.template.hasOwnPos) {
+        const ox = ((this.params.posX || 0) / 100) * w;
+        const oy = ((this.params.posY || 0) / 100) * h;
+        if (ox || oy) ctx.translate(ox, oy);
+      }
+      this.template.render(ctx, te, this.params, {
         image: this.imageAt(0),
         imageAt: (i) => this.imageAt(i),
         // Fall back to the count of default sample cards when nothing is uploaded,
@@ -200,7 +219,7 @@ export class Renderer {
       });
       ctx.restore();
     }
-    this._drawText(ctx, w, h, t, 'front'); // text layers on top of the cards
+    this._drawText(ctx, w, h, te, 'front'); // text layers on top of the cards
     this._drawWatermark(ctx, w, h);
   }
 

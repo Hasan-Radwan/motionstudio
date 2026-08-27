@@ -1443,26 +1443,29 @@ select,
    settings panel.
    ============================================================ */
 @media (max-width: 820px) {
+  /* App-shell layout: the page itself doesn't scroll. The topbar and the video
+     preview are fixed; ONLY the gallery + properties scroll beneath the pinned
+     preview, so the user can watch the video while editing options on a phone. */
   html,
   body {
-    height: auto;
-    overflow: auto;
+    height: 100%;
+    overflow: hidden;
     -webkit-text-size-adjust: 100%;
   }
   #app {
-    height: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Topbar: wrap actions, compact buttons */
+  /* Topbar: fixed row(s) at the very top (part of the app shell, not scrolled). */
   .topbar {
+    flex: 0 0 auto;
     height: auto;
     flex-wrap: wrap;
     gap: 8px;
     padding: 8px 12px;
-    position: sticky;
-    top: 0;
     z-index: 20;
   }
   .topbar-actions {
@@ -1474,40 +1477,43 @@ select,
     font-size: 12.5px;
   }
 
-  /* Stack the workspace */
+  /* The workspace is the ONE scroll container on mobile. */
   .workspace {
+    flex: 1 1 auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    height: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Preview first, and PINNED below the topbar so it stays visible while the
-     user scrolls the gallery + properties beneath it. */
+  /* Pinned preview: sticks to the top of the scroll area. Its background is
+     opaque (see .stage) so the gallery/options scroll cleanly underneath. */
   .stage {
     order: 1;
-    height: 50vh;
+    flex: 0 0 auto;
+    height: 44vh;
     position: sticky;
-    top: var(--topbar-h, 52px);
+    top: 0;
     z-index: 5;
   }
   .stage-canvas-wrap {
-    padding: 14px;
+    padding: 12px;
   }
   .stage-footer {
     padding: 0 14px;
   }
 
-  /* Template gallery → vertical folder list, capped height with its own scroll */
+  /* Gallery + properties flow and scroll together under the pinned preview
+     (no nested inner scroll, which would trap touch scrolling). */
   .gallery {
     order: 2;
-    max-height: 48vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
     border-left: none;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    -webkit-overflow-scrolling: touch;
   }
-  /* Open folders lay their cards out 2-up to save vertical space */
   .gallery-folder.open .gallery-folder-body {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1517,7 +1523,6 @@ select,
     margin-bottom: 0;
   }
 
-  /* Settings panel → full-width, flows with the page (no inner scroll) */
   .panel {
     order: 3;
     width: 100%;
@@ -1525,6 +1530,7 @@ select,
     border-top: 1px solid var(--border);
     overflow: visible;
     padding: 16px;
+    padding-bottom: 32px; /* breathing room past the last control */
   }
 
   /* Export dialog: stack the two-up rows */
@@ -1540,7 +1546,7 @@ select,
     padding: 7px 9px;
     font-size: 12px;
   }
-  .stage { min-height: 42vh; }
+  .stage { height: 40vh; }
 }
 
 .text-font-btn { margin-top: 8px; }
@@ -1568,3 +1574,85 @@ select,
 }
 .audio-play:hover { border-color: var(--accent); }
 .audio-name { flex: 1; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Easing panel ---------- */
+.ez-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  padding: 8px;
+  margin-bottom: 10px;
+}
+.ez-box.ez-locked { opacity: 0.9; }
+.ez-svg { display: block; width: 100%; height: auto; touch-action: none; }
+.ez-dot { fill: var(--text-mute); opacity: 0.35; }
+.ez-diag { stroke: var(--border-2); stroke-width: 1; stroke-dasharray: 3 3; }
+.ez-hline { stroke: var(--text-mute); stroke-width: 1; opacity: 0.5; }
+.ez-curve { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.ez-handle {
+  fill: #fff;
+  stroke: var(--accent);
+  stroke-width: 2;
+  cursor: grab;
+  transition: r 0.1s;
+}
+.ez-locked .ez-handle { cursor: pointer; }
+.ez-handle:hover { r: 8.5; }
+.ez-nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.ez-num {
+  width: 100%;
+  text-align: center;
+  padding: 7px 2px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-3);
+  color: var(--text);
+  font-size: 12.5px;
+}
+.ez-num:focus { border-color: var(--accent); outline: none; }
+.ez-tabs { margin-bottom: 10px; }
+.ez-presets { display: flex; flex-direction: column; gap: 2px; }
+.ez-presets.hidden { display: none; }
+.ez-preset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.ez-preset:hover { background: var(--bg-2); color: var(--text); }
+.ez-preset.active { background: var(--bg-3); color: var(--text); border-color: var(--border-2); }
+.ez-preset-name { font-weight: 600; }
+.ez-mini { width: 28px; height: 30px; color: var(--text-mute); flex: 0 0 auto; }
+.ez-preset.active .ez-mini { color: var(--accent); }
+.ez-reset {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-mute);
+  font-size: 13px;
+  cursor: pointer;
+}
+.ez-reset:hover { color: var(--text); border-color: var(--border-2); }
+.ez-pro-hint {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text);
+  font-size: 12.5px;
+  cursor: pointer;
+}
