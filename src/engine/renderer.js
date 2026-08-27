@@ -191,7 +191,10 @@ export class Renderer {
       this.template.render(ctx, t, this.params, {
         image: this.imageAt(0),
         imageAt: (i) => this.imageAt(i),
-        count: Math.max(1, this._composites.length),
+        // Fall back to the count of default sample cards when nothing is uploaded,
+        // so multi-image templates (carousels/grids) lay out their sample set
+        // instead of collapsing to a single card.
+        count: Math.max(1, this._composites.length || this.sampleImages.length),
         w,
         h,
       });

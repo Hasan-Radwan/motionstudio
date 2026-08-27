@@ -277,6 +277,9 @@ function pickTemplate(tpl) {
     gallery?.setActive(state.templateId);
     return;
   }
+  // Explicitly picking a template re-adopts its default look, including its
+  // default sample background (until the user chooses one of their own again).
+  state.bgAuto = true;
   selectTemplate(tpl);
 }
 
