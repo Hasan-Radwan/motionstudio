@@ -168,14 +168,18 @@ async function handleTrackUser(request, env) {
   } catch {
     return json({ error: 'bad_json' }, 400);
   }
-  const email = (body?.email || '').toLowerCase();
-  if (!email) return json({ error: 'no_email' }, 400);
+  const email = (body?.email || '').toLowerCase().trim();
+  // Basic email sanity + bound, so it's a safe KV key and directory entry.
+  if (!email || email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return json({ error: 'bad_email' }, 400);
+  }
   const key = 'user:' + email;
   const now = Date.now();
   const existing = await env.SUBS.get(key);
   const rec = existing ? JSON.parse(existing) : { email, firstSeen: now };
-  if (body.name) rec.name = body.name;
-  if (body.provider) rec.provider = body.provider;
+  // Clamp / whitelist attacker-controlled fields (the admin panel also escapes them).
+  if (body.name) rec.name = String(body.name).slice(0, 80);
+  if (body.provider) rec.provider = ['local', 'google'].includes(body.provider) ? body.provider : 'local';
   rec.lastSeen = now;
   await env.SUBS.put(key, JSON.stringify(rec));
   return json({ ok: true });

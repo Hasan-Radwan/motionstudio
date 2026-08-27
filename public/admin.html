@@ -19,6 +19,8 @@
       * { box-sizing: border-box; }
       body { margin: 0; }
       .muted { color: var(--text-mute); }
+      /* Everything except the login is hidden until the admin authenticates. */
+      .hidden { display: none !important; }
 
       /* ---------- login ---------- */
       .adm-login { max-width: 380px; margin: 8vh auto; padding: 0 20px; }
@@ -311,6 +313,10 @@
       let adminKey = sessionStorage.getItem(KEY_STORE) || '';
       const $ = (id) => document.getElementById(id);
       const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+      // HTML-escape any user-controlled value before putting it in innerHTML —
+      // signup name/email/provider are attacker-controlled, so this prevents a
+      // stored XSS that could run in the admin's session and steal the key.
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const api = (path, opts = {}) =>
         fetch(path, { ...opts, headers: { 'x-admin-key': adminKey, 'content-type': 'application/json', ...(opts.headers || {}) } });
 
@@ -403,10 +409,10 @@
           }
           const tr = el('tr');
           tr.innerHTML =
-            `<td><div class="who"><div class="avatar">${initials(u)}</div>` +
-            `<div><div>${u.email}</div>${u.name ? `<small>${u.name}</small>` : ''}</div></div></td>` +
-            `<td>${u.provider || '–'}</td>` +
-            `<td><span class="pill ${u.plan}">${u.plan}${u.manual ? ' ✎' : ''}</span></td>` +
+            `<td><div class="who"><div class="avatar">${esc(initials(u))}</div>` +
+            `<div><div>${esc(u.email)}</div>${u.name ? `<small>${esc(u.name)}</small>` : ''}</div></div></td>` +
+            `<td>${esc(u.provider || '–')}</td>` +
+            `<td><span class="pill ${esc(u.plan)}">${esc(u.plan)}${u.manual ? ' ✎' : ''}</span></td>` +
             `<td>${expCell}</td>` +
             `<td>${date}</td>` +
             `<td><button class="row-btn">${action}</button></td>`;
@@ -441,7 +447,7 @@
           const todayISO = new Date(Date.now() + DAY).toISOString().slice(0, 10);
           back.innerHTML =
             `<div class="gm-card">
-              <h3 class="gm-title">منح Pro لـ <span dir="ltr">${email}</span></h3>
+              <h3 class="gm-title">منح Pro لـ <span dir="ltr">${esc(email)}</span></h3>
               <p class="gm-sub">اختر مدة المنح:</p>
               <div class="gm-opts">
                 <label class="gm-opt"><input type="radio" name="gm" value="month" checked><span>شهر واحد</span></label>
