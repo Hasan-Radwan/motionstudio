@@ -10,7 +10,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: '3D & Perspective',
     catAr: 'ثلاثي الأبعاد والمنظور',
-    items: ['Card Tilt', 'Card Tunnel', 'Carousel 3D 01', 'Carousel 3D 02', 'Carousel 3D Star', 'Cube Spin', 'Flip Card', 'Image Tunnel', 'Reflection'],
+    items: ['Card Tilt', 'Card Tunnel', 'Carousel 3D 01', 'Carousel 3D 02', 'Cube Spin', 'Flip Card', 'Image Tunnel', 'Reflection'],
   },
   {
     cat: 'Orbit',
@@ -20,7 +20,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Carousel & Flow',
     catAr: 'كاروسيل وانسياب',
-    items: ['Arc Carousel', 'Carousel', 'Coverflow', 'Curved Carousel', 'Filmstrip', 'Ribbon Flow', 'Swipe Deck'],
+    items: ['Arc Carousel', 'Carousel', 'Carousel 03', 'Carousel 04', 'Coverflow', 'Curved Carousel', 'Curved Carousel 02', 'Curved Carousel 03', 'Filmstrip', 'Gallery01', 'Ribbon Flow', 'Swipe Deck'],
   },
   {
     cat: 'Stack & Scatter',

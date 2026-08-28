@@ -18,20 +18,26 @@ const GENERIC_CARDS = Array.from(
 
 // Per-template overrides. `cards` is a list of image URLs; `background` is one URL.
 // Add more templates as you design images for them.
+// The Curved Carousel sample set — card-1 is the FOREGROUND subject (a
+// transparent PNG cut-out); the rest are the posters. Shared by all three
+// Curved Carousel variants.
+const CURVED_CAROUSEL_SAMPLE = {
+  cards: [
+    '/samples/curvedCarousel/card-1.png',
+    '/samples/curvedCarousel/card-2.jpg',
+    '/samples/curvedCarousel/card-3.jpg',
+    '/samples/curvedCarousel/card-4.jpg',
+    '/samples/curvedCarousel/card-5.jpg',
+    '/samples/curvedCarousel/card-6.jpg',
+  ],
+  background: '/samples/curvedCarousel/bg.jpg',
+};
+
+// Per-template overrides. `cards` is a list of image URLs; `background` is one URL.
 export const TEMPLATE_SAMPLES = {
-  curvedCarousel: {
-    // card-1 is the FOREGROUND subject (a transparent PNG cut-out); the rest are
-    // the carousel posters.
-    cards: [
-      '/samples/curvedCarousel/card-1.png',
-      '/samples/curvedCarousel/card-2.jpg',
-      '/samples/curvedCarousel/card-3.jpg',
-      '/samples/curvedCarousel/card-4.jpg',
-      '/samples/curvedCarousel/card-5.jpg',
-      '/samples/curvedCarousel/card-6.jpg',
-    ],
-    background: '/samples/curvedCarousel/bg.jpg',
-  },
+  curvedCarousel: CURVED_CAROUSEL_SAMPLE,
+  curvedCarousel02: CURVED_CAROUSEL_SAMPLE,
+  curvedCarousel03: CURVED_CAROUSEL_SAMPLE,
 };
 
 // url -> HTMLImageElement | null (null = confirmed missing). Cached so repeated

@@ -14,15 +14,15 @@ export const meta = {
 
 export const controls = [
   { key: 'count', type: 'range', label: 'Cards', min: 6, max: 40, step: 1, default: 18 },
-  { key: 'size', type: 'range', label: 'Plane size', min: 10, max: 34, step: 1, default: 18, unit: '%' },
+  { key: 'size', type: 'range', label: 'Plane size', min: 10, max: 34, step: 1, default: 13, unit: '%' },
   { key: 'corners', type: 'range', label: 'Corner radius', min: 0, max: 50, step: 1, default: 14, unit: '%' },
-  { key: 'radius', type: 'range', label: 'Orbit radius', min: 10, max: 200, step: 1, default: 22, unit: '%' },
-  { key: 'perspective', type: 'range', label: 'Perspective', min: 1.2, max: 6, step: 0.1, default: 2.2 },
-  { key: 'fan', type: 'range', label: 'Fan', min: 0, max: 100, step: 1, default: 100, unit: '%' },
-  { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: -58, unit: '°' },
-  { key: 'rotationY', type: 'range', label: 'Rotation Y', min: -180, max: 180, step: 1, default: 0, unit: '°' },
-  { key: 'rotationZ', type: 'range', label: 'Rotation Z', min: -180, max: 180, step: 1, default: 0, unit: '°' },
-  { key: 'cycleDeg', type: 'range', label: 'Cycle deg', min: 90, max: 720, step: 90, default: 360, unit: '°' },
+  { key: 'radius', type: 'range', label: 'Orbit radius', min: 10, max: 200, step: 1, default: 50, unit: '%' },
+  { key: 'perspective', type: 'range', label: 'Perspective', min: 1.2, max: 6, step: 0.1, default: 4.2 },
+  { key: 'fan', type: 'range', label: 'Fan', min: 0, max: 100, step: 1, default: 0, unit: '%' },
+  { key: 'rotationX', type: 'range', label: 'Rotation X', min: -180, max: 180, step: 1, default: -30, unit: '°' },
+  { key: 'rotationY', type: 'range', label: 'Rotation Y', min: -180, max: 180, step: 1, default: 4, unit: '°' },
+  { key: 'rotationZ', type: 'range', label: 'Rotation Z', min: -180, max: 180, step: 1, default: 21, unit: '°' },
+  { key: 'cycleDeg', type: 'range', label: 'Cycle deg', min: 90, max: 720, step: 90, default: 90, unit: '°' },
   {
     key: 'direction',
     type: 'select',

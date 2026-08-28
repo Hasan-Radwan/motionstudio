@@ -278,11 +278,9 @@ function loadTemplateDefaults(tpl) {
 // free users: show the upgrade prompt and snap the active highlight back to the
 // current template (the gallery pre-activates the clicked card).
 function pickTemplate(tpl) {
-  if (tpl.pro && !isPaid()) {
-    openPlansModal();
-    gallery?.setActive(state.templateId);
-    return;
-  }
+  // Pro templates are fully usable in the preview (select + edit) for everyone;
+  // the paywall is enforced at EXPORT time instead (see the export handler), so
+  // free users can try them first. The gallery still shows a "Pro" badge.
   // Explicitly picking a template re-adopts its default look, including its
   // default sample background (until the user chooses one of their own again).
   state.bgAuto = true;
@@ -1064,7 +1062,13 @@ async function boot() {
   $('btn-projects').addEventListener('click', () =>
     requireAuth(t('Sign in or create a free account to save your projects and reopen them later.'), openProjects)
   );
-  $('btn-export').addEventListener('click', () =>
+  $('btn-export').addEventListener('click', () => {
+    // Pro templates are previewable/editable by everyone but locked at export:
+    // a free user hits the upgrade prompt here instead of the render dialog.
+    if (currentTemplate().pro && !isPaid()) {
+      openPlansModal();
+      return;
+    }
     requireAuth(t('Sign in or create a free account to export your video and save your projects.'), () =>
       openExportDialog(renderer, currentTemplate().name, {
         audio:
@@ -1077,8 +1081,8 @@ async function boot() {
               }
             : null,
       })
-    )
-  );
+    );
+  });
   $('btn-home').addEventListener('click', goHome);
   $('brand-home').addEventListener('click', goHome);
   $('btn-lang').addEventListener('click', () => toggleLang());
