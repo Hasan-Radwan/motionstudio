@@ -19,6 +19,8 @@ import * as curvedCarousel03 from './curvedCarousel03.js';
 import * as gallery01 from './gallery01.js';
 import * as sphere from './sphere.js';
 import * as carousel04 from './carousel04.js';
+import * as colorSquares from './colorSquares.js';
+import * as colorStack from './colorStack.js';
 import * as deck from './deck.js';
 import * as filmstrip from './filmstrip.js';
 import * as slideshow from './slideshow.js';
@@ -77,6 +79,7 @@ export const TEMPLATES = [
   cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
   orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, // Orbit
   carousel, coverflow, curvedCarousel, curvedCarousel02, curvedCarousel03, gallery01, sphere, carousel04, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
+  colorSquares, colorStack, // Colors
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
   grid, wave, mosaic, driftTiles, // Grid
   marquee, totem, // Ticker & Marquee

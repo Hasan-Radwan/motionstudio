@@ -23,6 +23,11 @@ export const TEMPLATE_CATEGORIES = [
     items: ['Arc Carousel', 'Carousel', 'Carousel 03', 'Carousel 04', 'Coverflow', 'Curved Carousel', 'Curved Carousel 02', 'Curved Carousel 03', 'Filmstrip', 'Gallery01', 'Ribbon Flow', 'Swipe Deck'],
   },
   {
+    cat: 'Colors',
+    catAr: 'الألوان',
+    items: ['Color Palette', 'Color Squares'],
+  },
+  {
     cat: 'Stack & Scatter',
     catAr: 'تكديس وتبعثر',
     items: ['Card Fan', 'Cascade', 'Depth Dive', 'Image Trail', 'Polaroid Stack', 'Proximity Field', 'Stack Scatter'],
