@@ -30,10 +30,10 @@ export const meta = {
 };
 
 export const controls = [
-  { key: 'count', type: 'range', label: 'Colors', min: 3, max: 9, step: 1, default: 7 },
+  { key: 'count', type: 'range', label: 'Colors', min: 3, max: 9, step: 1, default: 9 },
   { key: 'size', type: 'range', label: 'Square size', min: 18, max: 60, step: 1, default: 34, unit: '%' },
   { key: 'gap', type: 'range', label: 'Gap', min: 0, max: 12, step: 0.5, default: 4, unit: '%' },
-  { key: 'radius', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 24, unit: '%' },
+  { key: 'radius', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 16, unit: '%' },
   { key: 'stagger', type: 'range', label: 'Stagger', min: 0, max: 100, step: 1, default: 60, unit: '%' },
   { key: 'spin', type: 'range', label: 'Wobble', min: 0, max: 100, step: 1, default: 30, unit: '%' },
   { key: 'posX', type: 'range', label: 'Position X', min: -40, max: 40, step: 1, default: 0, unit: '%' },
