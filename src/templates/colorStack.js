@@ -18,11 +18,19 @@ const rand = (n) => {
   let s = Math.sin(n * 127.1 + 3.7) * 43758.5453;
   return s - Math.floor(s);
 };
+// Parse #rgb / #rrggbb → luminance 0..255 (to pick a readable caption colour).
+const lumOf = (hex) => {
+  let c = String(hex || '').replace('#', '');
+  if (c.length === 3) c = c.split('').map((x) => x + x).join('');
+  const num = parseInt(c || '000000', 16);
+  return 0.299 * ((num >> 16) & 255) + 0.587 * ((num >> 8) & 255) + 0.114 * (num & 255);
+};
 
 export const meta = {
   id: 'colorStack',
   name: 'Color Palette',
   category: 'Colors',
+  pro: true, // Pro template: previewable/editable, gated at export
   media: { default: 1, min: 1, max: 1 },
 };
 
@@ -33,6 +41,8 @@ export const controls = [
   { key: 'radius', type: 'range', label: 'Corners', min: 0, max: 40, step: 1, default: 16, unit: '%' },
   { key: 'stagger', type: 'range', label: 'Stagger', min: 0, max: 100, step: 1, default: 65, unit: '%' },
   { key: 'margin', type: 'range', label: 'Margin', min: 0, max: 20, step: 1, default: 7, unit: '%' },
+  { key: 'showCode', type: 'toggle', label: 'Show code', default: true },
+  { key: 'codeSize', type: 'range', label: 'Code size', min: 6, max: 26, step: 1, default: 12, unit: '%' },
   ...PALETTE.map((c, i) => ({
     key: `c${i + 1}`,
     type: 'color',
@@ -93,11 +103,21 @@ export function render(ctx, t, p, { w, h }) {
       const y = cy + slide;
       const r = (Math.min(40, Math.max(0, p.radius)) / 100) * (Math.min(colW, cardH) / 2);
 
+      const color = p[`c${id + 1}`] || PALETTE[id % PALETTE.length].color;
       ctx.save();
       ctx.globalAlpha = a;
       roundedRectPath(ctx, x, y, colW, cardH, r);
-      ctx.fillStyle = p[`c${id + 1}`] || PALETTE[id % PALETTE.length].color;
+      ctx.fillStyle = color;
       ctx.fill();
+
+      // hex code caption (toggleable) — readable colour from the swatch luminance
+      if (p.showCode) {
+        ctx.fillStyle = lumOf(color) > 150 ? 'rgba(20,22,26,0.9)' : 'rgba(255,255,255,0.95)';
+        ctx.font = `700 ${Math.round(colW * ((p.codeSize ?? 12) / 100))}px Inter, system-ui, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(String(color).toUpperCase(), x + colW * 0.12, y + cardH - colW * 0.14);
+      }
       ctx.restore();
 
       cy += cardH + gap;
