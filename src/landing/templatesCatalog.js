@@ -25,7 +25,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Colors',
     catAr: 'الألوان',
-    items: ['Color Palette', 'Color Squares'],
+    items: ['Color Palette', 'Color Palette 02', 'Color Palette 03', 'Color Squares'],
   },
   {
     cat: 'Stack & Scatter',

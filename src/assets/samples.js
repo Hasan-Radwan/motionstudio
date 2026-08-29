@@ -38,6 +38,8 @@ export const TEMPLATE_SAMPLES = {
   curvedCarousel: CURVED_CAROUSEL_SAMPLE,
   curvedCarousel02: CURVED_CAROUSEL_SAMPLE,
   curvedCarousel03: CURVED_CAROUSEL_SAMPLE,
+  // Colour Palette 02 sits over a user BACKGROUND photo; a default ships here.
+  colorPalette02: { background: '/samples/colorPalette02/bg.jpg' },
 };
 
 // url -> HTMLImageElement | null (null = confirmed missing). Cached so repeated
