@@ -14,6 +14,7 @@ export const meta = {
   id: 'sphere3d',
   name: 'Sphere 3D',
   category: 'Orbit',
+  pro: true, // Pro template: previewable/editable, gated at export
   media: { default: 12, min: 1, max: 40 },
 };
 

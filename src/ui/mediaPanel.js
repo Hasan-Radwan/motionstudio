@@ -36,23 +36,8 @@ function paintThumb(canvas, img) {
 
 export function buildMediaPanel(root, model, handlers) {
   root.innerHTML = '';
-  const { count, min, max, slots, cardShape } = model;
-  const { onCount, onPick, onClear, onDropFile, onCardShape } = handlers;
-
-  // ---------- CARD SHAPE ----------
-  root.appendChild(section(t('Card shape')));
-  const shapeSeg = document.createElement('div');
-  shapeSeg.className = 'segmented card-shapes';
-  for (const s of CARD_SHAPES) {
-    const b = document.createElement('button');
-    b.className = 'seg-btn' + ((cardShape || 'original') === s.value ? ' active' : '');
-    b.textContent = s.label;
-    b.title = t(s.title);
-    b.setAttribute('aria-label', t(s.title));
-    b.addEventListener('click', () => onCardShape && onCardShape(s.value));
-    shapeSeg.appendChild(b);
-  }
-  root.appendChild(shapeSeg);
+  const { count, min, max, slots } = model;
+  const { onCount, onPick, onClear, onDropFile } = handlers;
 
   // ---------- MEDIA ----------
   const head = document.createElement('div');
@@ -160,8 +145,8 @@ export function buildMediaPanel(root, model, handlers) {
   root.appendChild(list);
 }
 
-// Frame (aspect-ratio) selector — its own panel, shown above Motion Curve.
-export function buildFramePanel(root, { aspect, onAspect }) {
+// Frame (aspect-ratio) selector + Card shape — its own panel, above Motion Curve.
+export function buildFramePanel(root, { aspect, cardShape, onAspect, onCardShape }) {
   root.innerHTML = '';
   root.appendChild(section(t('Frame')));
   const seg = document.createElement('div');
@@ -174,6 +159,21 @@ export function buildFramePanel(root, { aspect, onAspect }) {
     seg.appendChild(b);
   }
   root.appendChild(seg);
+
+  // ---------- CARD SHAPE (directly under Frame) ----------
+  root.appendChild(section(t('Card shape')));
+  const shapeSeg = document.createElement('div');
+  shapeSeg.className = 'segmented card-shapes';
+  for (const s of CARD_SHAPES) {
+    const b = document.createElement('button');
+    b.className = 'seg-btn' + ((cardShape || 'original') === s.value ? ' active' : '');
+    b.textContent = s.label;
+    b.title = t(s.title);
+    b.setAttribute('aria-label', t(s.title));
+    b.addEventListener('click', () => onCardShape && onCardShape(s.value));
+    shapeSeg.appendChild(b);
+  }
+  root.appendChild(shapeSeg);
 }
 
 // Global card-shadow slider (0–100%). Returned as an element so it can be

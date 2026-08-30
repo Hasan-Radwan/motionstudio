@@ -361,8 +361,13 @@ async function receiveFile(file, index = firstEmptySlot()) {
 
 // ---------- Media panel ----------
 function renderMedia() {
-  // Frame lives in its own panel (above Motion Curve).
-  buildFramePanel(frameEl, { aspect: renderer.aspect, onAspect: setAspect });
+  // Frame + Card shape live in their own panel (above Motion Curve).
+  buildFramePanel(frameEl, {
+    aspect: renderer.aspect,
+    cardShape: state.cardShape,
+    onAspect: setAspect,
+    onCardShape: setCardShapeChoice,
+  });
   const mc = mediaConfig(currentTemplate());
   buildMediaPanel(
     mediaEl,
@@ -371,7 +376,6 @@ function renderMedia() {
       min: mc.min,
       max: mc.max,
       slots: state.slots,
-      cardShape: state.cardShape,
     },
     {
       onCount: setSlotCount,
@@ -381,7 +385,6 @@ function renderMedia() {
       },
       onClear: clearSlot,
       onDropFile: (i, file) => receiveFile(file, i),
-      onCardShape: setCardShapeChoice,
     }
   );
 }
@@ -1131,6 +1134,10 @@ async function boot() {
   setCardShape(state.cardShape);
   setCardShadow(state.cardShadow);
   applyEasing();
+  // Open on a RANDOM template each time /app loads — a varying showcase.
+  state.templateId = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)].id;
+  state.params = defaultParams(currentTemplate());
+  state.bgAuto = true;
   selectTemplate(currentTemplate());
   renderBackground();
   renderText();
@@ -1171,12 +1178,6 @@ async function boot() {
   // Fetch Arabic web-font glyphs in the background; the RAF preview loop adopts
   // them on font-swap, so Arabic text sharpens up as soon as they arrive.
   preloadWebFonts();
-
-  // restore last session if present
-  const saved = await loadAutosave();
-  if (saved && saved.templateId) {
-    await restoreState(saved);
-  }
 }
 
 // ---------- Landing ↔ Studio routing ----------
