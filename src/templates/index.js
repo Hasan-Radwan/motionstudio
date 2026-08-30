@@ -24,6 +24,7 @@ import * as colorStack from './colorStack.js';
 import * as colorPalette02 from './colorPalette02.js';
 import * as colorPalette03 from './colorPalette03.js';
 import * as colorPalette04 from './colorPalette04.js';
+import * as sphere3d from './sphere3d.js';
 import * as deck from './deck.js';
 import * as filmstrip from './filmstrip.js';
 import * as slideshow from './slideshow.js';
@@ -80,7 +81,7 @@ export const TEMPLATES = [
   logo, neonFrame, // Logo & Branding
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
   cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
-  orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, // Orbit
+  orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, sphere3d, // Orbit
   carousel, coverflow, curvedCarousel, curvedCarousel02, curvedCarousel03, gallery01, sphere, carousel04, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   colorSquares, colorStack, colorPalette02, colorPalette03, colorPalette04, // Colors
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story

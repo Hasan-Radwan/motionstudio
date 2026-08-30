@@ -15,7 +15,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Orbit',
     catAr: 'مدار ودوران',
-    items: ['Card Globe', 'Halo Globe', 'Orb Wall', 'Orbit', 'Orbit Ring', 'Radial Wheel', 'Spiral', 'Spiral Vortex'],
+    items: ['Card Globe', 'Halo Globe', 'Orb Wall', 'Orbit', 'Orbit Ring', 'Radial Wheel', 'Sphere 3D', 'Spiral', 'Spiral Vortex'],
   },
   {
     cat: 'Carousel & Flow',
