@@ -226,9 +226,12 @@ function wireInteractivity(root, lang, c, onLaunch) {
     console.error('hero spiral failed', e);
   }
   setupReveal(root);
-  // Only swap in the real Paddle price when the admin hasn't opted for a fixed
-  // displayed price (pricing.showLivePrice === false).
-  if (c.pricing.showLivePrice !== false) setupLivePricing(root, c.pricing.perMonth);
+  // Swap in the real Paddle price only when the admin wants live pricing AND
+  // there's no monthly/yearly toggle — live pricing rewrites the price element
+  // (monthly only), which would break the yearly swap. With a yearly price the
+  // fixed displayed prices are used and the toggle drives them.
+  const hasYearly = (c.pricing.tiers || []).some((tr) => tr.priceYearly);
+  if (c.pricing.showLivePrice !== false && !hasYearly) setupLivePricing(root, c.pricing.perMonth);
   setupBillingToggle(root, c);
   setupFaq(root);
 }
