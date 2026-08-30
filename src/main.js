@@ -12,7 +12,7 @@ import {
 import { buildGallery } from './ui/templateGallery.js';
 import { buildTimeline } from './ui/timeline.js';
 import { buildPanel } from './ui/controlsPanel.js';
-import { buildMediaPanel } from './ui/mediaPanel.js';
+import { buildMediaPanel, buildFramePanel, buildShadowControl } from './ui/mediaPanel.js';
 import { buildBackgroundPanel } from './ui/backgroundPanel.js';
 import { buildTextPanel } from './ui/textPanel.js';
 import { buildWatermarkPanel } from './ui/watermarkPanel.js';
@@ -53,6 +53,7 @@ const stageWrapEl = $('stage-canvas-wrap');
 const galleryEl = $('gallery');
 const controlsEl = $('panel-controls');
 const mediaEl = $('panel-media');
+const frameEl = $('panel-frame');
 const bgEl = $('panel-background');
 const textEl = $('panel-text');
 const wmEl = $('panel-watermark');
@@ -241,6 +242,10 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
     renderer.setParams(state.params);
     scheduleAutosave();
   });
+  // Global card-shadow slider lives in the Properties panel, under the controls.
+  controlsEl.appendChild(
+    buildShadowControl({ cardShadow: state.cardShadow, onCardShadow: setCardShadowChoice })
+  );
   const mc = mediaConfig(tpl);
   // On template switch, adopt the new template's default slot count; when
   // restoring a saved project we keep the stored count (clamped to limits).
@@ -356,20 +361,19 @@ async function receiveFile(file, index = firstEmptySlot()) {
 
 // ---------- Media panel ----------
 function renderMedia() {
+  // Frame lives in its own panel (above Motion Curve).
+  buildFramePanel(frameEl, { aspect: renderer.aspect, onAspect: setAspect });
   const mc = mediaConfig(currentTemplate());
   buildMediaPanel(
     mediaEl,
     {
-      aspect: renderer.aspect,
       count: state.slotCount,
       min: mc.min,
       max: mc.max,
       slots: state.slots,
       cardShape: state.cardShape,
-      cardShadow: state.cardShadow,
     },
     {
-      onAspect: setAspect,
       onCount: setSlotCount,
       onPick: (i) => {
         pendingSlot = i;
@@ -378,7 +382,6 @@ function renderMedia() {
       onClear: clearSlot,
       onDropFile: (i, file) => receiveFile(file, i),
       onCardShape: setCardShapeChoice,
-      onCardShadow: setCardShadowChoice,
     }
   );
 }
