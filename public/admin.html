@@ -162,6 +162,14 @@
       .toast.err { border-color: var(--danger); color: #ffd9d9; }
 
       .empty { padding: 26px; text-align: center; color: var(--text-mute); }
+      .tpl-row { display: flex; align-items: center; gap: 12px; padding: 9px 4px; border-bottom: 1px solid var(--border); }
+      .tpl-row:last-child { border-bottom: none; }
+      .tpl-rank { width: 26px; text-align: center; color: var(--text-mute); font-size: 13px; font-weight: 700; flex: 0 0 auto; }
+      .tpl-bar-wrap { flex: 1; min-width: 0; }
+      .tpl-name { font-size: 13px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .tpl-bar { height: 8px; border-radius: 999px; background: var(--bg-3); overflow: hidden; }
+      .tpl-bar span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent-2, var(--accent))); }
+      .tpl-num { flex: 0 0 auto; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; min-width: 44px; text-align: left; }
       .spin { display: inline-block; width: 15px; height: 15px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: sp .7s linear infinite; vertical-align: -2px; }
       @keyframes sp { to { transform: rotate(360deg); } }
 
@@ -201,6 +209,7 @@
         <button class="adm-navbtn" data-tab="users"><span class="ico">👥</span> المستخدمون</button>
         <button class="adm-navbtn" data-tab="content"><span class="ico">📝</span> محتوى الصفحة</button>
         <button class="adm-navbtn" data-tab="plans"><span class="ico">💳</span> الباقات والأسعار</button>
+        <button class="adm-navbtn" data-tab="templates"><span class="ico">📈</span> القوالب الأكثر زيارة</button>
         <div class="adm-nav-spacer"></div>
         <div class="adm-nav-foot">
           <a class="adm-navbtn" href="/" target="_blank" rel="noopener"><span class="ico">↗</span> فتح الموقع</a>
@@ -303,6 +312,20 @@
             <span class="hint" id="plansMsg"></span>
           </div>
         </section>
+
+        <section id="tab-templates" class="hidden">
+          <div class="adm-head">
+            <h2>القوالب الأكثر زيارة</h2>
+            <p class="adm-sub">ترتيب القوالب حسب عدد مرات فتحها من المستخدمين.</p>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3>الترتيب <span class="hint" id="tplCount"></span></h3>
+              <button class="adm-btn adm-btn-ghost" id="tplRefresh">تحديث</button>
+            </div>
+            <div id="tplList"><div class="empty">جارٍ التحميل…</div></div>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -354,13 +377,43 @@
       $('signout').addEventListener('click', () => { sessionStorage.removeItem(KEY_STORE); location.reload(); });
 
       /* ---------- nav ---------- */
-      const TABS = ['overview', 'users', 'content', 'plans'];
+      const TABS = ['overview', 'users', 'content', 'plans', 'templates'];
       document.querySelectorAll('.adm-navbtn[data-tab]').forEach((b) =>
         b.addEventListener('click', () => {
           document.querySelectorAll('.adm-navbtn[data-tab]').forEach((x) => x.classList.toggle('active', x === b));
           TABS.forEach((t) => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
+          if (b.dataset.tab === 'templates') loadTemplates();
         })
       );
+
+      /* ---------- templates popularity ---------- */
+      async function loadTemplates() {
+        const host = $('tplList');
+        try {
+          const d = await (await api('/api/admin/templates')).json();
+          const list = (d.templates || []).filter((x) => x.count > 0);
+          $('tplCount').textContent = list.length ? `${list.length} قالب` : '';
+          if (!list.length) {
+            host.innerHTML = '<div class="empty">لا بيانات بعد — ستظهر بمجرد أن يفتح المستخدمون القوالب.</div>';
+            return;
+          }
+          const max = Math.max(...list.map((x) => x.count));
+          host.innerHTML = list
+            .map((x, i) => {
+              const pct = Math.max(3, Math.round((x.count / max) * 100));
+              return (
+                `<div class="tpl-row"><span class="tpl-rank">${i + 1}</span>` +
+                `<div class="tpl-bar-wrap"><div class="tpl-name">${esc(x.name || x.id)}</div>` +
+                `<div class="tpl-bar"><span style="width:${pct}%"></span></div></div>` +
+                `<span class="tpl-num">${x.count.toLocaleString('ar')}</span></div>`
+              );
+            })
+            .join('');
+        } catch {
+          host.innerHTML = '<div class="empty">تعذّر التحميل.</div>';
+        }
+      }
+      $('tplRefresh').addEventListener('click', loadTemplates);
 
       /* ---------- overview ---------- */
       async function loadStats() {

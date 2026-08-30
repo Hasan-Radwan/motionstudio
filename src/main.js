@@ -290,6 +290,18 @@ function pickTemplate(tpl) {
   // default sample background (until the user chooses one of their own again).
   state.bgAuto = true;
   selectTemplate(tpl);
+  trackTemplate(tpl);
+}
+
+// Record a template "visit" (open) for the admin popularity board. Anonymous
+// aggregate count, fire-and-forget.
+function trackTemplate(tpl) {
+  if (!tpl?.id) return;
+  fetch('/api/track/template', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ id: tpl.id, name: tpl.name }),
+  }).catch(() => {});
 }
 
 // ---------- Image slots ----------

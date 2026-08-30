@@ -238,6 +238,41 @@ async function handleAdminStats(request, env) {
   return json({ totalUsers: total, proUsers: pro, freeUsers: Math.max(0, total - pro) });
 }
 
+// ---- Template popularity (a lightweight open/visit counter per template) ----
+async function handleTrackTemplate(request, env) {
+  if (!env.SUBS) return json({ ok: false });
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'bad_json' }, 400);
+  }
+  const id = String(body?.id || '').slice(0, 60).replace(/[^a-zA-Z0-9_-]/g, '');
+  if (!id) return json({ error: 'no_id' }, 400);
+  const name = String(body?.name || id).slice(0, 60);
+  const key = 'tpl:' + id;
+  const existing = await env.SUBS.get(key);
+  const rec = existing ? JSON.parse(existing) : { id, name, count: 0 };
+  rec.count = (rec.count || 0) + 1;
+  rec.name = name; // keep the display name fresh
+  rec.lastSeen = Date.now();
+  await env.SUBS.put(key, JSON.stringify(rec));
+  return json({ ok: true });
+}
+
+async function handleAdminTemplates(request, env) {
+  if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
+  if (!env.SUBS) return json({ templates: [] });
+  const list = await env.SUBS.list({ prefix: 'tpl:', limit: 1000 });
+  const templates = [];
+  for (const k of list.keys) {
+    const rec = JSON.parse((await env.SUBS.get(k.name)) || '{}');
+    templates.push({ id: rec.id || k.name.slice(4), name: rec.name || '', count: rec.count || 0, lastSeen: rec.lastSeen || null });
+  }
+  templates.sort((a, b) => b.count - a.count);
+  return json({ templates });
+}
+
 async function handleAdminSetPlan(request, env) {
   if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
   let body;
@@ -290,10 +325,12 @@ export default {
     if (pathname === '/api/entitlement' && m === 'GET') return handleEntitlement(url, env);
     if (pathname === '/api/auth/google' && m === 'POST') return handleGoogleAuth(request, env);
     if (pathname === '/api/user/track' && m === 'POST') return handleTrackUser(request, env);
+    if (pathname === '/api/track/template' && m === 'POST') return handleTrackTemplate(request, env);
     if (pathname === '/api/config' && m === 'GET') return handleGetConfig(env);
     // admin
     if (pathname === '/api/admin/users' && m === 'GET') return handleAdminUsers(request, env);
     if (pathname === '/api/admin/stats' && m === 'GET') return handleAdminStats(request, env);
+    if (pathname === '/api/admin/templates' && m === 'GET') return handleAdminTemplates(request, env);
     if (pathname === '/api/admin/set-plan' && m === 'POST') return handleAdminSetPlan(request, env);
     if (pathname === '/api/admin/config' && m === 'PUT') return handleAdminConfig(request, env);
     // Everything else → the static site (SPA fallback handled by assets config).
