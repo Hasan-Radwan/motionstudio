@@ -15,9 +15,10 @@ export const meta = {
 };
 
 export const controls = [
-  { key: 'count', type: 'range', label: 'Panels', min: 4, max: 16, step: 1, default: 8 },
-  { key: 'size', type: 'range', label: 'Panel size', min: 14, max: 50, step: 1, default: 30, unit: '%' },
-  { key: 'fov', type: 'range', label: 'Field of view', min: 40, max: 150, step: 1, default: 124, unit: '°' },
+  { key: 'count', type: 'range', label: 'Panels', min: 4, max: 20, step: 1, default: 12 },
+  { key: 'height', type: 'range', label: 'Wall height', min: 20, max: 90, step: 1, default: 58, unit: '%' },
+  { key: 'curve', type: 'range', label: 'Curve', min: 0, max: 100, step: 1, default: 55, unit: '%' },
+  { key: 'fov', type: 'range', label: 'Field of view', min: 40, max: 150, step: 1, default: 108, unit: '°' },
   { key: 'turns', type: 'range', label: 'Turns', min: 1, max: 3, step: 1, default: 1 },
   {
     key: 'direction',
@@ -29,23 +30,25 @@ export const controls = [
       { value: 'ltr', label: 'Left to right' },
     ],
   },
-  { key: 'graze', type: 'range', label: 'Edge shade', min: 0, max: 100, step: 1, default: 42, unit: '%' },
-  { key: 'rounded', type: 'range', label: 'Corners', min: 0, max: 50, step: 1, default: 6, unit: '%' },
+  { key: 'gap', type: 'range', label: 'Gap', min: 0, max: 6, step: 0.5, default: 1, unit: '%' },
+  { key: 'graze', type: 'range', label: 'Edge shade', min: 0, max: 100, step: 1, default: 45, unit: '%' },
+  { key: 'rounded', type: 'range', label: 'Corners', min: 0, max: 40, step: 1, default: 8, unit: '%' },
   { key: 'posX', type: 'range', label: 'Position X', min: -40, max: 40, step: 1, default: 0, unit: '%' },
   { key: 'posY', type: 'range', label: 'Position Y', min: -40, max: 40, step: 1, default: 0, unit: '%' },
 ];
 
-// A rotunda: a ring of pictures hung on a cylinder wall, seen from INSIDE, that
-// turns automatically so the panels sweep past the viewer. Ported from the WebGL
-// Rotunda Carousel — the pointer drag is replaced by a steady auto-spin (default
-// right → left). Canvas2D approximation: each panel is placed by its ring angle
-// with a perspective-tangent screen position, foreshortened + shaded toward the
-// grazing edges. Seamless because `turns` is an integer number of revolutions.
+// A rotunda: pictures hung on a cylinder wall, seen from INSIDE — you stand at
+// the centre and the wall in front of you curves. Ported from the WebGL Rotunda
+// Carousel, the pointer drag replaced by a steady auto-spin (default right→left).
+// The panels TILE the visible arc edge-to-edge (each spans from its own arc edge
+// to the next), foreshorten via a perspective tangent, and shrink in height
+// toward the rim — so the row reads as one concave curved band, not separate
+// cards. Seamless because `turns` is an integer number of revolutions.
 export function render(ctx, t, p, { imageAt, count, w, h }) {
   const n = count;
   if (n < 1) return;
   const min = Math.min(w, h);
-  const dir = p.direction === 'ltr' ? -1 : 1; // rtl default → panels drift right→left
+  const dir = p.direction === 'rtl' ? -1 : 1; // rtl default → panels drift right→left
   const yaw = t * TAU * Math.max(1, Math.round(p.turns)) * dir;
   const viewHalf = (Math.min(150, Math.max(40, p.fov)) / 2) * DEG;
   const tanHalf = Math.tan(viewHalf) || 1;
@@ -53,49 +56,54 @@ export function render(ctx, t, p, { imageAt, count, w, h }) {
   const offY = (h * (p.posY || 0)) / 100;
   const cx = w / 2 + offX;
   const cy = h / 2 + offY;
-  const ref = imageAt(0);
-  const imgR = ref && ref.width ? ref.width / ref.height : 1.4;
-  const cardW = min * (p.size / 100);
-  const cardH = cardW / imgR;
-  const graze = (p.graze / 100);
-  const coverage = 1.14; // how far the FOV edges map past the frame edges
+  const wallH = h * (p.height / 100);
+  const curve = p.curve / 100; // how much shorter the rim panels get (concavity)
+  const graze = p.graze / 100;
+  const gap = min * (p.gap / 100);
+  const coverage = 1.06; // FOV edges map just past the frame edges
   const step = TAU / n;
+  const clampV = (x) => Math.max(-viewHalf, Math.min(viewHalf, x));
+  const mapX = (phi) => cx + (Math.tan(clampV(phi)) / tanHalf) * (w * 0.5 * coverage);
 
   const items = [];
   for (let i = 0; i < n; i++) {
-    const phi = wrapPi(i * step + yaw);
-    if (Math.abs(phi) >= viewHalf) continue; // behind the camera / out of view
-    const face = Math.cos(phi); // 1 dead-centre → smaller toward the edges
-    const x = cx + (Math.tan(phi) / tanHalf) * (w * 0.5 * coverage);
-    const edge = (viewHalf - Math.abs(phi)) / viewHalf; // 1 centre → 0 at the rim
-    const alpha = Math.min(1, edge / 0.12); // fade in/out at the FOV edges
-    const shade = graze + (1 - graze) * face;
-    items.push({ x, face, alpha, shade, idx: i });
+    const c = wrapPi(i * step + yaw);
+    if (Math.abs(c) - step / 2 >= viewHalf) continue; // fully out of the view arc
+    const xL = mapX(c - step / 2);
+    const xR = mapX(c + step / 2);
+    if (xR - xL <= 0.5) continue;
+    const face = Math.cos(clampV(c)); // 1 dead-centre → smaller toward the rim
+    const outer = viewHalf + step / 2; // centre angle at which the panel fully exits
+    const alpha = Math.max(0, Math.min(1, (outer - Math.abs(c)) / (step * 0.85)));
+    items.push({ c, xL, xR, face, alpha, idx: i });
   }
-  // no depth sort needed (convex wall, no self-occlusion); paint edges first so
-  // the centred panel reads on top where they'd graze.
-  items.sort((a, b) => a.face - b.face);
+  items.sort((a, b) => a.c - b.c); // left → right; a convex wall has no occlusion
 
   for (const it of items) {
     if (it.alpha <= 0.01) continue;
-    const cw = cardW * (0.4 + 0.6 * it.face); // horizontal foreshorten
-    const ch = cardH * (0.86 + 0.14 * it.face);
-    const bx = it.x - cw / 2;
+    const bw = it.xR - it.xL - gap;
+    if (bw <= 0.5) continue;
+    // Concave arc: panels shrink toward the frame edges as a parabola of their
+    // screen-x distance from the centre, so the band bows like the inside wall.
+    const nx = Math.min(1, Math.abs((it.xL + it.xR) / 2 - cx) / (w * 0.5));
+    const ch = wallH * (1 - curve * nx * nx);
+    const bx = it.xL + gap / 2;
     const by = cy - ch / 2;
-    const r = cornerR(p.rounded, cw, ch);
+    const r = cornerR(p.rounded, bw, ch);
     ctx.save();
     ctx.globalAlpha = it.alpha;
-    roundedRectPath(ctx, bx, by, cw, ch, r);
+    roundedRectPath(ctx, bx, by, bw, ch, r);
     ctx.clip();
     const im = imageAt(it.idx);
-    if (im && im.width) drawImageCover(ctx, im, bx, by, cw, ch);
+    if (im && im.width) drawImageCover(ctx, im, bx, by, bw, ch);
     else {
-      ctx.fillStyle = `hsl(${(it.idx * 40 + 210) % 360}, 30%, 42%)`;
-      ctx.fillRect(bx, by, cw, ch);
+      ctx.fillStyle = `hsl(${(it.idx * 40 + 210) % 360}, 32%, 44%)`;
+      ctx.fillRect(bx, by, bw, ch);
     }
-    if (it.shade < 1) {
-      ctx.fillStyle = `rgba(0,0,0,${(1 - it.shade).toFixed(3)})`; // grazing dim
-      ctx.fillRect(bx, by, cw, ch);
+    const shade = graze + (1 - graze) * it.face;
+    if (shade < 1) {
+      ctx.fillStyle = `rgba(0,0,0,${(1 - shade).toFixed(3)})`; // grazing dim
+      ctx.fillRect(bx, by, bw, ch);
     }
     ctx.restore();
   }

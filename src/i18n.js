@@ -382,6 +382,7 @@ const AR = {
   'Rotunda Carousel 01': 'كاروسيل دائري 01',
   Panels: 'اللوحات',
   'Panel size': 'حجم اللوحة',
+  'Wall height': 'ارتفاع الجدار',
   'Field of view': 'مجال الرؤية',
   'Right to left': 'يمين ← يسار',
   'Left to right': 'يسار ← يمين',
