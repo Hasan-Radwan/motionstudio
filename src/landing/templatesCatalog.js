@@ -20,7 +20,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Carousel & Flow',
     catAr: 'كاروسيل وانسياب',
-    items: ['Arc Carousel', 'Carousel', 'Carousel 03', 'Carousel 04', 'Coverflow', 'Curved Carousel', 'Curved Carousel 02', 'Curved Carousel 03', 'Filmstrip', 'Gallery01', 'Ribbon Flow', 'Swipe Deck'],
+    items: ['Arc Carousel', 'Carousel', 'Carousel 03', 'Carousel 04', 'Coverflow', 'Curved Carousel', 'Curved Carousel 02', 'Curved Carousel 03', 'Filmstrip', 'Gallery01', 'Ribbon Flow', 'Rotunda Carousel 01', 'Swipe Deck'],
   },
   {
     cat: 'Colors',
