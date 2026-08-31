@@ -16,6 +16,7 @@ import * as coverflow from './coverflow.js';
 import * as curvedCarousel from './curvedCarousel.js';
 import * as curvedCarousel02 from './curvedCarousel02.js';
 import * as curvedCarousel03 from './curvedCarousel03.js';
+import * as curvedCarousel04 from './curvedCarousel04.js';
 import * as gallery01 from './gallery01.js';
 import * as sphere from './sphere.js';
 import * as carousel04 from './carousel04.js';
@@ -83,7 +84,7 @@ export const TEMPLATES = [
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
   cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
   orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, sphere3d, // Orbit
-  carousel, coverflow, curvedCarousel, curvedCarousel02, curvedCarousel03, gallery01, sphere, carousel04, rotundaCarousel01, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
+  carousel, coverflow, curvedCarousel, curvedCarousel02, curvedCarousel03, curvedCarousel04, gallery01, sphere, carousel04, rotundaCarousel01, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
   colorSquares, colorStack, colorPalette02, colorPalette03, colorPalette04, // Colors
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
   grid, wave, mosaic, driftTiles, // Grid

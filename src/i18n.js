@@ -360,6 +360,7 @@ const AR = {
   'Curved Carousel': 'كاروسيل منحنٍ',
   'Curved Carousel 02': 'كاروسيل منحنٍ 02',
   'Curved Carousel 03': 'كاروسيل منحنٍ 03',
+  'Curved Carousel 04': 'كاروسيل منحنٍ 04',
   Spacing: 'التباعد',
   Turns: 'الدورات',
   'Image size': 'حجم الصورة',
