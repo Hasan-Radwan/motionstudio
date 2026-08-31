@@ -16,7 +16,7 @@ export const meta = {
 export const controls = [
   { key: 'panelWidth', type: 'range', label: 'Width', min: 400, max: 2400, step: 10, default: 1200 },
   { key: 'panelHeight', type: 'range', label: 'Height', min: 400, max: 2400, step: 10, default: 1600 },
-  { key: 'size', type: 'range', label: 'Card size', min: 50, max: 150, step: 1, default: 100, unit: '%' },
+  { key: 'size', type: 'range', label: 'Card size', min: 20, max: 150, step: 1, default: 100, unit: '%' },
   { key: 'gap', type: 'range', label: 'Gap', min: -600, max: 600, step: 5, default: 180 },
   { key: 'distance', type: 'range', label: 'Distance', min: 0, max: 90, step: 1, default: 72, unit: '%' },
   { key: 'tilt', type: 'range', label: 'Tilt', min: -30, max: 30, step: 1, default: 0, unit: '°' },
