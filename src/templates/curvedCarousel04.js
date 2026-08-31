@@ -17,7 +17,7 @@ export const controls = [
   { key: 'panelWidth', type: 'range', label: 'Width', min: 400, max: 2400, step: 10, default: 1200 },
   { key: 'panelHeight', type: 'range', label: 'Height', min: 400, max: 2400, step: 10, default: 1600 },
   { key: 'size', type: 'range', label: 'Card size', min: 50, max: 150, step: 1, default: 100, unit: '%' },
-  { key: 'gap', type: 'range', label: 'Gap', min: 0, max: 600, step: 5, default: 180 },
+  { key: 'gap', type: 'range', label: 'Gap', min: -600, max: 600, step: 5, default: 180 },
   { key: 'distance', type: 'range', label: 'Distance', min: 0, max: 90, step: 1, default: 72, unit: '%' },
   { key: 'tilt', type: 'range', label: 'Tilt', min: -30, max: 30, step: 1, default: 0, unit: '°' },
   { key: 'turns', type: 'range', label: 'Turns', min: 1, max: 3, step: 1, default: 1 },
@@ -62,14 +62,16 @@ export function render(ctx, t, p, { imageAt, count, w, h }) {
     const dist = Math.min(0.9, Math.max(0, p.distance / 100)) * R;
     const pw = Math.max(1, p.panelWidth);
     const ph = Math.max(1, p.panelHeight);
-    const gp = Math.max(0, p.gap);
+    const gp = p.gap; // may be negative to overlap → glue cards edge-to-edge
     const circum = Math.max(1, n * (pw + gp));
     const itemArc = TAU / n;
-    // `size` scales every card uniformly on the wall (arc coverage + height
-    // together, so the aspect is preserved and the gap shrinks as cards grow).
+    // `size` scales every card uniformly on the wall. The arc a card covers is
+    // capped at itemArc so cards never overlap past touching (negative Gap just
+    // pulls them together). Height follows the CAPPED width to keep the card
+    // aspect fixed — which also prevents tall blow-ups at very negative Gap.
     const sz = Math.max(0.1, (p.size ?? 100) / 100);
     const span = Math.min(itemArc, ((TAU * pw) / circum) * sz); // arc the card covers
-    const worldH = ((TAU * ph) / circum) * sz;
+    const worldH = span * (ph / pw);
     const halfH = worldH / 2;
     const focal = 1 / Math.tan((FOV / 2) * DEG);
     const aspect = w / h;
