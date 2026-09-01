@@ -7,14 +7,15 @@ export const meta = {
   category: 'Logo & Branding',
   aspect: '16:9',
   duration: 5,
-  // Image 1 = the logo (PNG). Optional image 2 = a photorealistic mockup used as
-  // the background (office wall / product box …). One image works too.
-  media: { default: 1, min: 1, max: 2 },
+  // Image 1 = the logo (PNG). Images 2..N (up to 30) are an optional background
+  // montage that flips quickly behind the revealed logo. One image works too.
+  media: { default: 1, min: 1, max: 30 },
 };
 
 export const controls = [
   { key: 'logoSize', type: 'range', label: 'Logo size', min: 10, max: 90, step: 1, default: 46, unit: '%' },
   { key: 'overshoot', type: 'range', label: 'Overshoot', min: 0, max: 20, step: 1, default: 5, unit: '%' },
+  { key: 'flips', type: 'range', label: 'Flip speed', min: 1, max: 8, step: 1, default: 2 },
   { key: 'bgZoom', type: 'range', label: 'Background zoom', min: 0, max: 12, step: 1, default: 3, unit: '%' },
   { key: 'shadow', type: 'range', label: 'Drop shadow', min: 0, max: 60, step: 1, default: 15, unit: '%' },
   { key: 'vignette', type: 'range', label: 'Vignette', min: 0, max: 100, step: 1, default: 35, unit: '%' },
@@ -35,17 +36,25 @@ const OPAC = 0.5; // opacity is full at 50% of the reveal window (~0.4s)
 
 export function render(ctx, t, p, { imageAt, count, w, h }) {
   const logo = imageAt(0);
-  const mock = count >= 2 ? imageAt(1) : null;
   const min = Math.min(w, h);
   const cx = w / 2;
   const cy = h / 2;
 
-  // ---- background mockup: slow Ken Burns zoom-in for depth ----
-  if (mock && mock.width) {
-    const z = 1 + (clamp(p.bgZoom, 0, 12) / 100) * t; // 100% → 100%+bgZoom over the clip
-    const bw = w * z;
-    const bh = h * z;
-    drawImageCover(ctx, mock, cx - bw / 2, cy - bh / 2, bw, bh);
+  // ---- background: a fast-flipping montage (images 2..N) behind the logo ----
+  // With a single background image it's just a slow Ken Burns; with many it cuts
+  // rapidly through EVERY image — `Flip speed` = full passes through the set per
+  // loop, so all images always show (e.g. 30 images × 1 pass over 5s ≈ 6/sec).
+  const montage = Math.max(0, count - 1);
+  if (montage >= 1) {
+    const flips = clamp(p.flips ?? 2, 1, 8);
+    const idx = montage === 1 ? 0 : Math.floor(t * flips * montage) % montage;
+    const mock = imageAt(1 + idx);
+    if (mock && mock.width) {
+      const z = 1 + (clamp(p.bgZoom, 0, 12) / 100) * t; // gentle Ken Burns zoom
+      const bw = w * z;
+      const bh = h * z;
+      drawImageCover(ctx, mock, cx - bw / 2, cy - bh / 2, bw, bh);
+    }
   }
 
   // ---- logo: fade + scale-overshoot reveal, then hold ----

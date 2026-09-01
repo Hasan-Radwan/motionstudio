@@ -439,6 +439,7 @@ const AR = {
   'Logo size': 'حجم الشعار',
   'Brand Motion 01': 'موشن الهوية 01',
   Overshoot: 'التجاوز',
+  'Flip speed': 'سرعة التقليب',
   'Background zoom': 'تقريب الخلفية',
   'Drop shadow': 'ظل مُسقَط',
   Vignette: 'تعتيم الأطراف',
