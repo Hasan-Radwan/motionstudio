@@ -354,7 +354,8 @@ async function handleTrackUser(request, env, ctx) {
       else await deliver;
     }
   }
-  return json({ ok: true });
+  // `isNew` lets the client show a one-time "thanks for registering" popup.
+  return json({ ok: true, isNew });
 }
 
 // ---- Public site config (editable from the admin dashboard) ----

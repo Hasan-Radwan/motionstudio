@@ -33,6 +33,7 @@ import { openPlansModal } from './ui/plansModal.js';
 import { setProjectScope } from './store/projects.js';
 import { openExportDialog } from './ui/exportDialog.js';
 import { openModal } from './ui/modal.js';
+import { showWelcomePopup, showDiscountOnce } from './ui/popups.js';
 import { BACKGROUNDS, DEFAULT_BACKGROUND } from './assets/backgrounds.js';
 import { loadSampleCards, loadSampleBackground } from './assets/samples.js';
 import { MOCKUPS, DEFAULT_MOCKUP, paintMockupPreview } from './assets/mockups.js';
@@ -943,7 +944,13 @@ function trackUser(user) {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ email: user.email, name: user.name, provider: user.provider || 'local' }),
-  }).catch(() => {});
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      // First-ever registration → thank-you + social-follow popup (once).
+      if (data && data.isNew) showWelcomePopup();
+    })
+    .catch(() => {});
 }
 
 function updateAccountButton() {
@@ -1087,7 +1094,9 @@ async function boot() {
       openPlansModal();
       return;
     }
-    requireAuth(t('Sign in or create a free account to export your video and save your projects.'), () =>
+    requireAuth(t('Sign in or create a free account to export your video and save your projects.'), () => {
+      // Free users get a one-time 50% discount nudge before the export dialog.
+      if (!isPaid()) showDiscountOnce({ code: 'Rotion', onUpgrade: openPlansModal });
       openExportDialog(renderer, currentTemplate().name, {
         audio:
           audioAllowed() && state.audio.blob
@@ -1098,8 +1107,8 @@ async function boot() {
                 fadeOut: state.audio.fadeOut,
               }
             : null,
-      })
-    );
+      });
+    });
   });
   $('btn-home').addEventListener('click', goHome);
   $('brand-home').addEventListener('click', goHome);
