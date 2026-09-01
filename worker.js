@@ -281,27 +281,6 @@ async function handleUnsubscribe(url, env) {
   return page('تم إلغاء الاشتراك ✓', 'لن تصلك رسائل تسويقية بعد الآن · You have been unsubscribed from marketing emails.');
 }
 
-// TEMP diagnostic (no auth): sends to the sender's OWN domain address (no third
-// party / no spam vector) and reports whether the API key reached the Worker plus
-// the raw Resend result. Remove once email delivery is confirmed working.
-function fromAddress(env) {
-  const f = emailFrom(env);
-  const m = f.match(/<([^>]+)>/);
-  return (m ? m[1] : f).trim();
-}
-async function handleEmailDiag(url, env) {
-  if ((url.searchParams.get('k') || '') !== 'diag') return json({ error: 'not_found' }, 404);
-  const to = fromAddress(env);
-  const send = await sendEmail(env, {
-    to,
-    subject: 'Rotion diag',
-    text: 'diagnostic',
-    html: emailShell(env, { bodyHtml: '<p style="color:#c9c9d4">diagnostic</p>', token: '' }),
-    tags: [{ name: 'type', value: 'diag' }],
-  });
-  return json({ hasApiKey: !!env.RESEND_API_KEY, from: emailFrom(env), to, siteUrl: siteUrl(env), send });
-}
-
 // Admin: send a one-off test email to verify Resend + domain setup end-to-end.
 async function handleAdminSendTest(request, env) {
   if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
@@ -521,7 +500,6 @@ export default {
     if (pathname === '/api/track/template' && m === 'POST') return handleTrackTemplate(request, env);
     if (pathname === '/api/config' && m === 'GET') return handleGetConfig(env);
     if (pathname === '/api/email/unsubscribe' && (m === 'GET' || m === 'POST')) return handleUnsubscribe(url, env);
-    if (pathname === '/api/email/diag' && m === 'GET') return handleEmailDiag(url, env);
     // admin
     if (pathname === '/api/admin/send-test' && m === 'POST') return handleAdminSendTest(request, env);
     if (pathname === '/api/admin/users' && m === 'GET') return handleAdminUsers(request, env);
