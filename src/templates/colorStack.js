@@ -28,7 +28,7 @@ const lumOf = (hex) => {
 
 export const meta = {
   id: 'colorStack',
-  name: 'Color Palette',
+  name: 'Color Palette 01',
   category: 'Colors',
   pro: true, // Pro template: previewable/editable, gated at export
   media: { default: 1, min: 1, max: 1 },

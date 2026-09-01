@@ -83,10 +83,10 @@ import * as text3dFlip from './text3dFlip.js';
 export const TEMPLATES = [
   logo, brandMotion01, neonFrame, // Logo & Branding
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
-  cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
+  cardTilt3d, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
   orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, sphere3d, // Orbit
-  carousel, coverflow, curvedCarousel, curvedCarousel02, curvedCarousel03, curvedCarousel04, gallery01, sphere, carousel04, rotundaCarousel01, deck, filmstrip, arcCarousel, ribbonFlow, // Carousel & Flow
-  colorSquares, colorStack, colorPalette02, colorPalette03, colorPalette04, // Colors
+  carousel, carousel04, carousel3d, carousel3d2, sphere, coverflow, curvedCarousel, curvedCarousel02, curvedCarousel03, curvedCarousel04, arcCarousel, rotundaCarousel01, gallery01, filmstrip, deck, ribbonFlow, // Carousel & Flow
+  colorStack, colorPalette02, colorPalette03, colorPalette04, colorSquares, // Colors
   slideshow, featureStream, splitScreen, storyFeed, // Slideshow & Story
   grid, wave, mosaic, driftTiles, // Grid
   marquee, totem, // Ticker & Marquee

@@ -10,7 +10,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: '3D & Perspective',
     catAr: 'ثلاثي الأبعاد والمنظور',
-    items: ['Card Tilt', 'Card Tunnel', 'Carousel 3D 01', 'Carousel 3D 02', 'Cube Spin', 'Flip Card', 'Image Tunnel', 'Reflection'],
+    items: ['Card Tilt', 'Card Tunnel', 'Cube Spin', 'Flip Card', 'Image Tunnel', 'Reflection'],
   },
   {
     cat: 'Orbit',
@@ -20,12 +20,12 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Carousel & Flow',
     catAr: 'كاروسيل وانسياب',
-    items: ['Arc Carousel', 'Carousel', 'Carousel 03', 'Carousel 04', 'Coverflow', 'Curved Carousel', 'Curved Carousel 02', 'Curved Carousel 03', 'Curved Carousel 04', 'Filmstrip', 'Gallery01', 'Ribbon Flow', 'Rotunda Carousel 01', 'Swipe Deck'],
+    items: ['Arc Carousel', 'Carousel', 'Carousel 04', 'Carousel 3D 01', 'Carousel 3D 02', 'Coverflow', 'Curved Carousel', 'Curved Carousel 02', 'Curved Carousel 03', 'Curved Carousel 04', 'Filmstrip', 'Gallery 01', 'Ribbon Flow', 'Rotunda Carousel 01', 'Sphere Carousel', 'Swipe Deck'],
   },
   {
     cat: 'Colors',
     catAr: 'الألوان',
-    items: ['Color Palette', 'Color Palette 02', 'Color Palette 03', 'Color Palette 04', 'Color Squares'],
+    items: ['Color Palette 01', 'Color Palette 02', 'Color Palette 03', 'Color Palette 04', 'Color Squares'],
   },
   {
     cat: 'Stack & Scatter',

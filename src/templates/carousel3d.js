@@ -8,7 +8,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export const meta = {
   id: 'carousel3d',
   name: 'Carousel 3D 01',
-  category: '3D & Perspective',
+  category: 'Carousel & Flow',
   media: { default: 10, min: 1, max: 24 },
 };
 

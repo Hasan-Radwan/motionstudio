@@ -2,7 +2,7 @@ import { drawImageCover, roundedRectPath, cornerR } from '../engine/canvasUtils.
 
 export const meta = {
   id: 'gallery01',
-  name: 'Gallery01',
+  name: 'Gallery 01',
   category: 'Carousel & Flow',
   pro: true, // Pro template: usable in the preview, gated at export (see main.js)
   duration: 6,

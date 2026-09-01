@@ -2,7 +2,7 @@ import { drawImageCover, roundedRectPath, cornerR } from '../engine/canvasUtils.
 
 export const meta = {
   id: 'sphere',
-  name: 'Carousel 03',
+  name: 'Sphere Carousel',
   category: 'Carousel & Flow',
   duration: 5,
   media: { default: 8, min: 3, max: 16 },
