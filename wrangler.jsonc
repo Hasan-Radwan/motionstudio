@@ -16,8 +16,16 @@
   "kv_namespaces": [
     { "binding": "SUBS", "id": "0b66cf5aa8fe4f98afc1e6148d6b47db" }
   ],
-  // Public Google OAuth client ID (used server-side to verify sign-in tokens).
+  // Non-secret config. RESEND_API_KEY is NOT here — it's a secret
+  // (`wrangler secret put RESEND_API_KEY` or the dashboard).
   "vars": {
-    "GOOGLE_CLIENT_ID": "294268681567-l10jimo722ojekr9q6pkoj9psl8pfsm4.apps.googleusercontent.com"
+    // Public Google OAuth client ID (used server-side to verify sign-in tokens).
+    "GOOGLE_CLIENT_ID": "294268681567-l10jimo722ojekr9q6pkoj9psl8pfsm4.apps.googleusercontent.com",
+    // Email (Resend). EMAIL_FROM must use your verified domain; change the mailbox
+    // (hello@ / noreply@) as you like. EMAIL_ADDRESS is the CAN-SPAM footer address
+    // shown in marketing emails — set a real one before sending offers.
+    "EMAIL_FROM": "Rotion <hello@rotionapp.com>",
+    "SITE_URL": "https://rotionapp.com",
+    "EMAIL_ADDRESS": ""
   }
 }
