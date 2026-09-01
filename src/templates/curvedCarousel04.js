@@ -18,7 +18,7 @@ export const controls = [
   { key: 'panelHeight', type: 'range', label: 'Height', min: 400, max: 2400, step: 10, default: 1600 },
   { key: 'size', type: 'range', label: 'Card size', min: 20, max: 150, step: 1, default: 100, unit: '%' },
   { key: 'gap', type: 'range', label: 'Gap', min: -600, max: 600, step: 5, default: 180 },
-  { key: 'distance', type: 'range', label: 'Distance', min: 0, max: 90, step: 1, default: 72, unit: '%' },
+  { key: 'distance', type: 'range', label: 'Distance', min: 0, max: 300, step: 1, default: 72, unit: '%' },
   { key: 'tilt', type: 'range', label: 'Tilt', min: -30, max: 30, step: 1, default: 0, unit: '°' },
   { key: 'turns', type: 'range', label: 'Turns', min: 1, max: 3, step: 1, default: 1 },
   {
@@ -59,7 +59,9 @@ export function render(ctx, t, p, { imageAt, count, w, h }) {
 
   function drawWall() {
     const R = 1;
-    const dist = Math.min(0.9, Math.max(0, p.distance / 100)) * R;
+    // Distance up to ~0.9 keeps the camera INSIDE the rotunda (the classic look);
+    // past 1.0 it pulls back OUTSIDE the ring so the whole ring of cards is seen.
+    const dist = Math.min(3, Math.max(0, p.distance / 100)) * R;
     const pw = Math.max(1, p.panelWidth);
     const ph = Math.max(1, p.panelHeight);
     const gp = p.gap; // may be negative to overlap → glue cards edge-to-edge
@@ -97,7 +99,14 @@ export function render(ctx, t, p, { imageAt, count, w, h }) {
 
     const S = 22; // perspective strips per card
 
-    for (let j = 0; j < n; j++) {
+    // Paint far cards first so nearer ones composite on top. Matters once the
+    // camera pulls back outside the ring (high Distance) and the near/far halves
+    // of the ring overlap on screen; harmless for the inside view.
+    const order = [];
+    for (let j = 0; j < n; j++) order.push({ j, z: Math.cos(j * itemArc + yaw + itemArc / 2) });
+    order.sort((a, b) => a.z - b.z);
+
+    for (const { j } of order) {
       const im = imageAt(posters[j]);
       const arc0 = j * itemArc + yaw + (itemArc - span) / 2;
       for (let s = 0; s < S; s++) {
