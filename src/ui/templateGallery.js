@@ -59,6 +59,10 @@ export function buildGallery(root, { activeId, onSelect }) {
     byCat.get(t.category).push(t);
   }
 
+  // Show "Carousel & Flow" first, then the remaining categories in registry order.
+  const FIRST_CAT = 'Carousel & Flow';
+  const orderedCats = [...byCat.keys()].sort((a, b) => (a === FIRST_CAT ? -1 : b === FIRST_CAT ? 1 : 0));
+
   // ---- search bar ----
   const search = document.createElement('div');
   search.className = 'gallery-search';
@@ -82,9 +86,8 @@ export function buildGallery(root, { activeId, onSelect }) {
   const painted = new Set(); // ids whose thumb has been painted (lazy, on first open)
   const folders = [];
 
-  const activeCat = (TEMPLATES.find((t) => t.id === activeId) || {}).category;
-
-  for (const [cat, tpls] of byCat) {
+  for (const cat of orderedCats) {
+    const tpls = byCat.get(cat);
     const folder = document.createElement('div');
     folder.className = 'gallery-folder';
 
@@ -162,9 +165,8 @@ export function buildGallery(root, { activeId, onSelect }) {
     folders.push({ cat, folder, entries, setOpen });
   }
 
-  // Open the folder holding the active template (fallback: the first folder).
-  const initial = folders.find((f) => f.cat === activeCat) || folders[0];
-  initial?.setOpen(true);
+  // All folders start expanded.
+  for (const f of folders) f.setOpen(true);
 
   // ---- live search: filter cards, auto-expand matching folders, hide empties ----
   const applyFilter = (raw) => {
