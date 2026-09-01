@@ -10,6 +10,7 @@ export const meta = {
   // Image 1 = the logo (PNG). Images 2..N (up to 30) are an optional background
   // montage that flips quickly behind the revealed logo. One image works too.
   media: { default: 1, min: 1, max: 30 },
+  slotLabels: ['Logo'], // name the first media slot "Logo"
 };
 
 export const controls = [
@@ -19,6 +20,9 @@ export const controls = [
   { key: 'bgZoom', type: 'range', label: 'Background zoom', min: 0, max: 12, step: 1, default: 3, unit: '%' },
   { key: 'shadow', type: 'range', label: 'Drop shadow', min: 0, max: 60, step: 1, default: 15, unit: '%' },
   { key: 'vignette', type: 'range', label: 'Vignette', min: 0, max: 100, step: 1, default: 35, unit: '%' },
+  // Logo position — moves only the logo, not the background montage.
+  { key: 'posX', type: 'range', label: 'Position X', min: -50, max: 50, step: 1, default: 0, unit: '%' },
+  { key: 'posY', type: 'range', label: 'Position Y', min: -50, max: 50, step: 1, default: 0, unit: '%' },
 ];
 
 // A professional logo reveal on a photorealistic mockup:
@@ -68,9 +72,11 @@ export function render(ctx, t, p, { imageAt, count, w, h }) {
 
   if (logo && logo.width && opacity > 0.001) {
     const box = min * (clamp(p.logoSize, 10, 90) / 100);
+    const lx = cx + (w * (p.posX || 0)) / 100; // logo-only offset
+    const ly = cy + (h * (p.posY || 0)) / 100;
     ctx.save();
     ctx.globalAlpha = opacity;
-    ctx.translate(cx, cy);
+    ctx.translate(lx, ly);
     ctx.scale(scale, scale);
     const sh = clamp(p.shadow, 0, 60) / 100;
     if (sh > 0) {

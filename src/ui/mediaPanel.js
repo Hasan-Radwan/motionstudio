@@ -36,7 +36,7 @@ function paintThumb(canvas, img) {
 
 export function buildMediaPanel(root, model, handlers) {
   root.innerHTML = '';
-  const { count, min, max, slots } = model;
+  const { count, min, max, slots, slotLabels } = model;
   const { onCount, onPick, onClear, onDropFile } = handlers;
 
   // ---------- MEDIA ----------
@@ -100,7 +100,8 @@ export function buildMediaPanel(root, model, handlers) {
     meta.className = 'slot-meta';
     const name = document.createElement('div');
     name.className = 'slot-name';
-    name.textContent = `${t('Image')} ${i + 1}`;
+    // Templates may name specific slots (e.g. "Logo"); otherwise "Image N".
+    name.textContent = slotLabels && slotLabels[i] ? t(slotLabels[i]) : `${t('Image')} ${i + 1}`;
     const sub = document.createElement('div');
     sub.className = 'slot-sub';
     sub.textContent = filled ? t('Click to replace') : t('Drop or click to add');

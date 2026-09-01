@@ -82,6 +82,7 @@ const AR = {
   Media: 'الوسائط',
   'Number of images': 'عدد الصور',
   Image: 'صورة',
+  Logo: 'الشعار',
   'Click to replace': 'اضغط للاستبدال',
   'Drop or click to add': 'أفلت أو اضغط للإضافة',
   'Remove image': 'إزالة الصورة',

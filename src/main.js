@@ -389,6 +389,7 @@ function renderMedia() {
       min: mc.min,
       max: mc.max,
       slots: state.slots,
+      slotLabels: currentTemplate().slotLabels, // optional per-slot names (e.g. "Logo")
     },
     {
       onCount: setSlotCount,
