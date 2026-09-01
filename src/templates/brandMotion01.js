@@ -5,16 +5,36 @@ export const meta = {
   id: 'brandMotion01',
   name: 'Brand Motion 01',
   category: 'Logo & Branding',
-  aspect: '16:9',
+  aspect: '9:16',
   duration: 5,
   // Image 1 = the logo (PNG). Images 2..N (up to 30) are an optional background
   // montage that flips quickly behind the revealed logo. One image works too.
-  media: { default: 1, min: 1, max: 30 },
+  media: { default: 12, min: 1, max: 30 },
   slotLabels: ['Logo'], // name the first media slot "Logo"
 };
 
 export const controls = [
   { key: 'logoSize', type: 'range', label: 'Logo size', min: 10, max: 90, step: 1, default: 46, unit: '%' },
+  // How the logo blends with the background montage (canvas blend modes, grouped
+  // like Photoshop: Normal / Darken / Lighten / Contrast / Comparative / Component).
+  { key: 'blend', type: 'select', label: 'Blend mode', default: 'source-over', options: [
+      { value: 'source-over', label: 'Normal' },
+      { value: 'darken', label: 'Darken' },
+      { value: 'multiply', label: 'Multiply' },
+      { value: 'color-burn', label: 'Color Burn' },
+      { value: 'lighten', label: 'Lighten' },
+      { value: 'screen', label: 'Screen' },
+      { value: 'color-dodge', label: 'Color Dodge' },
+      { value: 'overlay', label: 'Overlay' },
+      { value: 'soft-light', label: 'Soft Light' },
+      { value: 'hard-light', label: 'Hard Light' },
+      { value: 'difference', label: 'Difference' },
+      { value: 'exclusion', label: 'Exclusion' },
+      { value: 'hue', label: 'Hue' },
+      { value: 'saturation', label: 'Saturation' },
+      { value: 'color', label: 'Color' },
+      { value: 'luminosity', label: 'Luminosity' },
+    ] },
   { key: 'overshoot', type: 'range', label: 'Overshoot', min: 0, max: 20, step: 1, default: 5, unit: '%' },
   { key: 'flips', type: 'range', label: 'Flip speed', min: 1, max: 8, step: 1, default: 2 },
   { key: 'bgZoom', type: 'range', label: 'Background zoom', min: 0, max: 12, step: 1, default: 3, unit: '%' },
@@ -76,6 +96,7 @@ export function render(ctx, t, p, { imageAt, count, w, h }) {
     const ly = cy + (h * (p.posY || 0)) / 100;
     ctx.save();
     ctx.globalAlpha = opacity;
+    if (p.blend && p.blend !== 'source-over') ctx.globalCompositeOperation = p.blend;
     ctx.translate(lx, ly);
     ctx.scale(scale, scale);
     const sh = clamp(p.shadow, 0, 60) / 100;
