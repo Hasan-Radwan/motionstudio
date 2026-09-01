@@ -65,7 +65,7 @@ export const TEMPLATE_CATEGORIES = [
   {
     cat: 'Logo & Branding',
     catAr: 'الشعار والهوية',
-    items: ['Logo Reveal', 'Neon Frame'],
+    items: ['Brand Motion 01', 'Logo Reveal', 'Neon Frame'],
   },
   {
     cat: 'Ticker & Marquee',

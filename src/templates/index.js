@@ -4,6 +4,7 @@
 
 import { sampleCardsSync } from '../assets/samples.js';
 import * as logo from './logo.js';
+import * as brandMotion01 from './brandMotion01.js';
 import * as cardTilt3d from './cardTilt3d.js';
 import * as flip3d from './flip3d.js';
 import * as cardTunnel from './cardTunnel.js';
@@ -80,7 +81,7 @@ import * as text3dFlip from './text3dFlip.js';
 
 // Ordered so the gallery groups cleanly by category type.
 export const TEMPLATES = [
-  logo, neonFrame, // Logo & Branding
+  logo, brandMotion01, neonFrame, // Logo & Branding
   textMorph, videoText, typeSequence, textWave, gradientText, lineReveal, charStagger, fluidText, text3dFlip, // Text
   cardTilt3d, carousel3d, carousel3d2, flip3d, cardTunnel, cube, reflection, imageTunnel, // 3D & Perspective
   orbit, spiral, spiralVortex, globe, haloGlobe, orbWall, radialWheel, orbitRing, sphere3d, // Orbit
