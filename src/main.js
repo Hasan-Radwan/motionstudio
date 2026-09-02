@@ -597,10 +597,9 @@ function renderAudio() {
       applyAudioVolume();
       scheduleAutosave();
     },
-    onTogglePlay: () => {
-      if (audioPlaying) previewAudio.pause();
-      else previewAudio.play().catch(() => {});
-    },
+    // Play/pause the whole preview (video + music together) — the music is tied
+    // to the timeline, so this drives the renderer rather than the audio alone.
+    onTogglePlay: () => renderer.toggle(),
     onUpgrade: openPlansModal,
   });
 }
@@ -678,7 +677,8 @@ async function receiveAudio(file) {
     url,
   };
   applyAudioSource();
-  previewAudio.play().catch(() => {});
+  // The frame sync starts the music if the preview is currently playing; no need
+  // to force it here (which would blip if the preview happens to be paused).
   renderAudio();
   scheduleAutosave();
 }
@@ -702,6 +702,16 @@ function clearAudio() {
 
 previewAudioBindings();
 function previewAudioBindings() {
+  previewAudio.loop = true; // music loops along with the looping preview
+  // The music follows the PREVIEW's play/pause: it should be playing iff the
+  // timeline is playing AND a track is loaded. Reconciled every frame (a no-op
+  // when already correct), so pausing the preview also stops the music.
+  renderer.onFrame((_t, playing) => {
+    const want = playing && !!state.audio.url;
+    if (want === !previewAudio.paused) return; // already in the right state
+    if (want) previewAudio.play().catch(() => {});
+    else previewAudio.pause();
+  });
   // keep the panel play/pause button in sync with actual playback state
   previewAudio.addEventListener('play', () => {
     audioPlaying = true;

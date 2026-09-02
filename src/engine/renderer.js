@@ -44,7 +44,7 @@ export class Renderer {
     this.t = 0; // current normalized loop time [0,1)
     this._playing = true; // whether time advances (timeline play/pause)
     this._last = null; // last rAF timestamp
-    this._onFrame = null; // optional callback(t, playing) for UI (timeline)
+    this._onFrame = []; // callbacks(t, playing) for UI: timeline + audio sync
     this.resizeToAspect();
   }
 
@@ -152,8 +152,12 @@ export class Renderer {
     return this;
   }
   onFrame(cb) {
-    this._onFrame = cb;
+    // Multiple subscribers (the timeline UI + the audio sync) can listen.
+    if (typeof cb === 'function') this._onFrame.push(cb);
     return this;
+  }
+  _emitFrame(t, playing) {
+    for (const cb of this._onFrame) cb(t, playing);
   }
 
   hasImage() {
@@ -333,7 +337,7 @@ export class Renderer {
       if (this.t < 0) this.t += 1;
     }
     this.drawScene(this.ctx, this.canvas.width, this.canvas.height, this.t);
-    if (this._onFrame) this._onFrame(this.t, this._playing);
+    this._emitFrame(this.t, this._playing);
     this._raf = requestAnimationFrame(this._tick);
   };
 
@@ -354,11 +358,11 @@ export class Renderer {
     this._playing = true;
     this._last = null;
     if (!this._raf) this._raf = requestAnimationFrame(this._tick);
-    if (this._onFrame) this._onFrame(this.t, true);
+    this._emitFrame(this.t, true);
   }
   pause() {
     this._playing = false;
-    if (this._onFrame) this._onFrame(this.t, false);
+    this._emitFrame(this.t, false);
   }
   toggle() {
     if (this._playing) this.pause();
@@ -369,7 +373,7 @@ export class Renderer {
     this.t = ((t % 1) + 1) % 1;
     this._last = null;
     if (!this._raf) this.drawScene(this.ctx, this.canvas.width, this.canvas.height, this.t);
-    if (this._onFrame) this._onFrame(this.t, this._playing);
+    this._emitFrame(this.t, this._playing);
   }
   isPlaying() {
     return !!this._playing;
