@@ -1045,6 +1045,24 @@ function setupMobileTabs() {
   setMobileTab(appEl.dataset.mtab || 'templates');
 }
 
+// Properties sub-tabs (mobile): Control / Image / Audio / Text / BG / Curve group
+// the settings panels; CSS keyed off #panel[data-ptab] shows only the active one.
+const PANEL_TAB_LABELS = { control: 'Control', image: 'Image', audio: 'Audio', text: 'Text', bg: 'BG', curve: 'Curve' };
+function setPanelTab(ptab) {
+  const panel = $('panel');
+  if (panel) panel.dataset.ptab = ptab;
+  for (const b of document.querySelectorAll('.panel-tab')) b.classList.toggle('active', b.dataset.ptab === ptab);
+  document.querySelector('.workspace')?.scrollTo({ top: 0 });
+}
+function localizePanelTabs() {
+  for (const b of document.querySelectorAll('.panel-tab')) b.textContent = t(PANEL_TAB_LABELS[b.dataset.ptab] || b.dataset.ptab);
+}
+function setupPanelTabs() {
+  for (const b of document.querySelectorAll('.panel-tab')) b.addEventListener('click', () => setPanelTab(b.dataset.ptab));
+  localizePanelTabs();
+  setPanelTab($('panel')?.dataset.ptab || 'control');
+}
+
 // ---------- Localization ----------
 // Re-apply the current language across the studio chrome + data-driven panels,
 // and flip the layout direction (RTL for Arabic). Called on boot and whenever
@@ -1057,6 +1075,7 @@ function relocalizeStudio() {
   $('btn-lang').textContent = isRTL() ? 'EN' : 'ع';
   updateAccountButton();
   localizeMobileNav();
+  localizePanelTabs();
   hintEl.innerHTML = `<p>${t('Drop an image anywhere to start.')}</p>`;
   // Rebuild the gallery (category titles) and the data-driven panels.
   gallery = buildGallery(galleryEl, {
@@ -1154,6 +1173,7 @@ async function boot() {
   $('btn-lang').addEventListener('click', () => toggleLang());
   $('btn-account').addEventListener('click', onAccountClick);
   setupMobileTabs(); // bottom Templates/Properties tabs on phones
+  setupPanelTabs(); // Properties sub-tabs (Control/Image/Audio/Text/BG/Curve)
   // Keep the account button + project scope in sync with auth/plan changes.
   onAuth((user) => {
     setProjectScope(user?.id || '');

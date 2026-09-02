@@ -191,15 +191,24 @@
 
       <main class="workspace">
         <!-- Left: settings panel (controls + media + background) -->
-        <aside class="panel" id="panel" aria-label="Settings">
-          <div id="panel-controls"></div>
-          <div id="panel-frame"></div>
-          <div id="panel-easing"></div>
-          <div id="panel-media"></div>
-          <div id="panel-text"></div>
-          <div id="panel-audio"></div>
-          <div id="panel-watermark"></div>
-          <div id="panel-background"></div>
+        <aside class="panel" id="panel" aria-label="Settings" data-ptab="control">
+          <!-- Mobile-only sub-tabs that group the settings under "Properties". -->
+          <div class="panel-tabs" id="panel-tabs" role="tablist">
+            <button class="panel-tab" type="button" data-ptab="control">Control</button>
+            <button class="panel-tab" type="button" data-ptab="image">Image</button>
+            <button class="panel-tab" type="button" data-ptab="audio">Audio</button>
+            <button class="panel-tab" type="button" data-ptab="text">Text</button>
+            <button class="panel-tab" type="button" data-ptab="bg">BG</button>
+            <button class="panel-tab" type="button" data-ptab="curve">Curve</button>
+          </div>
+          <div id="panel-controls" class="panel-group"></div>
+          <div id="panel-frame" class="panel-group"></div>
+          <div id="panel-easing" class="panel-group"></div>
+          <div id="panel-media" class="panel-group"></div>
+          <div id="panel-text" class="panel-group"></div>
+          <div id="panel-audio" class="panel-group"></div>
+          <div id="panel-watermark" class="panel-group"></div>
+          <div id="panel-background" class="panel-group"></div>
         </aside>
 
         <!-- Center: canvas stage -->

@@ -49,6 +49,8 @@ const AR = {
   Home: 'الرئيسية',
   Templates: 'القوالب',
   Properties: 'الخصائص',
+  Control: 'التحكم',
+  BG: 'خلفية',
   'Drop an image anywhere to start.': 'أفلت صورة في أي مكان لتبدأ.',
   loop: 'حلقة',
   image: 'صورة',

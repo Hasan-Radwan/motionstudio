@@ -1651,6 +1651,28 @@ select,
   color: var(--accent-2);
 }
 
+/* Properties sub-tabs (Control / Image / Audio / Text / BG / Curve) — mobile only. */
+.panel-tabs {
+  display: none;
+}
+.panel-tab {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--bg-3);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.panel-tab.active {
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
+  color: #04120c;
+  border-color: transparent;
+}
+
 @media (max-width: 720px) {
   .plans-grid { grid-template-columns: 1fr; }
 }
@@ -1779,6 +1801,35 @@ select,
   }
   #app[data-mtab='properties'] .gallery {
     display: none;
+  }
+
+  /* Properties sub-tabs: a scrollable pill row pinned under the canvas. */
+  .panel-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 0 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .panel-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  /* Under Properties, show only the group for the active sub-tab. */
+  #panel[data-ptab] .panel-group {
+    display: none;
+  }
+  #panel[data-ptab='control'] #panel-controls,
+  #panel[data-ptab='control'] #panel-frame,
+  #panel[data-ptab='control'] #panel-watermark,
+  #panel[data-ptab='image'] #panel-media,
+  #panel[data-ptab='audio'] #panel-audio,
+  #panel[data-ptab='text'] #panel-text,
+  #panel[data-ptab='bg'] #panel-background,
+  #panel[data-ptab='curve'] #panel-easing {
+    display: block;
   }
 }
 
