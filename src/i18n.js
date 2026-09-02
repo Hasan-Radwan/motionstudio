@@ -47,6 +47,8 @@ const AR = {
   'My projects': 'مشاريعي',
   Export: 'تصدير',
   Home: 'الرئيسية',
+  Templates: 'القوالب',
+  Properties: 'الخصائص',
   'Drop an image anywhere to start.': 'أفلت صورة في أي مكان لتبدأ.',
   loop: 'حلقة',
   image: 'صورة',

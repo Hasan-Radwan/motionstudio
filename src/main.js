@@ -1023,6 +1023,28 @@ function requireAuth(reason, next) {
   openAuthModal({ reason, startTab: 'signup', onDone: () => next() });
 }
 
+// ---------- Mobile bottom tabs (Templates / Properties) ----------
+// On phones the gallery and settings don't fit side-by-side, so a fixed bottom
+// bar toggles which one shows under the pinned canvas (CSS keyed off #app[data-mtab]).
+function setMobileTab(tab) {
+  appEl.dataset.mtab = tab;
+  $('mnav-templates')?.classList.toggle('active', tab === 'templates');
+  $('mnav-properties')?.classList.toggle('active', tab === 'properties');
+  document.querySelector('.workspace')?.scrollTo({ top: 0 });
+}
+function localizeMobileNav() {
+  const a = $('mnav-templates')?.querySelector('.mobile-nav-label');
+  const b = $('mnav-properties')?.querySelector('.mobile-nav-label');
+  if (a) a.textContent = t('Templates');
+  if (b) b.textContent = t('Properties');
+}
+function setupMobileTabs() {
+  $('mnav-templates')?.addEventListener('click', () => setMobileTab('templates'));
+  $('mnav-properties')?.addEventListener('click', () => setMobileTab('properties'));
+  localizeMobileNav();
+  setMobileTab(appEl.dataset.mtab || 'templates');
+}
+
 // ---------- Localization ----------
 // Re-apply the current language across the studio chrome + data-driven panels,
 // and flip the layout direction (RTL for Arabic). Called on boot and whenever
@@ -1034,6 +1056,7 @@ function relocalizeStudio() {
   $('btn-home').textContent = t('Home');
   $('btn-lang').textContent = isRTL() ? 'EN' : 'ع';
   updateAccountButton();
+  localizeMobileNav();
   hintEl.innerHTML = `<p>${t('Drop an image anywhere to start.')}</p>`;
   // Rebuild the gallery (category titles) and the data-driven panels.
   gallery = buildGallery(galleryEl, {
@@ -1130,6 +1153,7 @@ async function boot() {
   $('brand-home').addEventListener('click', goHome);
   $('btn-lang').addEventListener('click', () => toggleLang());
   $('btn-account').addEventListener('click', onAccountClick);
+  setupMobileTabs(); // bottom Templates/Properties tabs on phones
   // Keep the account button + project scope in sync with auth/plan changes.
   onAuth((user) => {
     setProjectScope(user?.id || '');

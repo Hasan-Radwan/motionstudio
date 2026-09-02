@@ -173,7 +173,7 @@
     <!-- Marketing landing page (front door); the studio boots on "Launch". -->
     <div id="landing"></div>
 
-    <div id="app" class="hidden">
+    <div id="app" class="hidden" data-mtab="templates">
       <!-- Top bar -->
       <header class="topbar">
         <button class="brand" id="brand-home" title="Home">
@@ -219,6 +219,23 @@
         <!-- Right: template gallery -->
         <aside class="gallery" id="gallery" aria-label="Templates"></aside>
       </main>
+
+      <!-- Mobile-only bottom tabs: switch between the gallery and the settings. -->
+      <nav class="mobile-nav" id="mobile-nav" aria-label="Studio sections">
+        <button class="mobile-nav-btn" id="mnav-templates" type="button" data-tab="templates" aria-label="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.6" /><rect x="14" y="3" width="7" height="7" rx="1.6" />
+            <rect x="3" y="14" width="7" height="7" rx="1.6" /><rect x="14" y="14" width="7" height="7" rx="1.6" />
+          </svg>
+          <span class="mobile-nav-label">Templates</span>
+        </button>
+        <button class="mobile-nav-btn" id="mnav-properties" type="button" data-tab="properties" aria-label="Properties">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
+          <span class="mobile-nav-label">Properties</span>
+        </button>
+      </nav>
     </div>
 
     <input id="file-input" type="file" accept="image/*" hidden />

@@ -1622,6 +1622,35 @@ select,
   color: var(--accent-2) !important;
   background: var(--accent-glow) !important;
 }
+
+/* ---------- Mobile bottom tabs (Templates / Properties) ---------- */
+/* Hidden on desktop; the mobile media query below turns it into a fixed bar and
+   toggles which section (gallery vs settings) is visible. */
+.mobile-nav {
+  display: none;
+}
+.mobile-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 6px;
+  background: none;
+  border: none;
+  color: var(--text-mute);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mobile-nav-btn svg {
+  width: 22px;
+  height: 22px;
+}
+.mobile-nav-btn.active {
+  color: var(--accent-2);
+}
+
 @media (max-width: 720px) {
   .plans-grid { grid-template-columns: 1fr; }
 }
@@ -1726,6 +1755,30 @@ select,
   /* Export dialog: stack the two-up rows */
   .modal-row {
     flex-direction: column;
+  }
+
+  /* Bottom tab bar: fixed, above everything. */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  /* Keep scrollable content clear of the fixed bar. */
+  .workspace {
+    padding-bottom: 60px;
+  }
+  /* Show only the tab the user picked (the pinned stage stays visible). */
+  #app[data-mtab='templates'] .panel {
+    display: none;
+  }
+  #app[data-mtab='properties'] .gallery {
+    display: none;
   }
 }
 
