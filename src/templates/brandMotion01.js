@@ -6,7 +6,7 @@ export const meta = {
   name: 'Brand Motion 01',
   category: 'Logo & Branding',
   aspect: '9:16',
-  duration: 5,
+  duration: 6,
   // Image 1 = the logo (PNG). Images 2..N (up to 30) are an optional background
   // montage that flips quickly behind the revealed logo. One image works too.
   media: { default: 12, min: 1, max: 30 },
@@ -50,11 +50,11 @@ export const controls = [
 //     "Scale & Overshoot" pop — 0% → 105% (~0.6s) → 100% (~0.8s), ease-out — then
 //     holds for the rest of the clip.
 //   • The mockup background (image 2, optional) does a slow Ken Burns zoom
-//     (100% → 100%+Background-zoom) across the full 5s to add depth.
+//     (100% → 100%+Background-zoom) across the full 6s to add depth.
 //   • A soft vignette darkens the edges so the eye lands on the centred logo, and
 //     the logo casts a subtle drop shadow matched to the mockup lighting.
-// Timings are fractions of the loop tuned for the default 5s duration.
-const REVEAL = 0.16; // logo has fully settled by ~0.8s (16% of 5s)
+// Timings are fractions of the loop; REVEAL keeps the reveal ~0.8s at 6s.
+const REVEAL = 0.133; // logo has fully settled by ~0.8s (13.3% of 6s)
 const PEAK = 0.75; // overshoot peak at 75% of the reveal window (~0.6s)
 const OPAC = 0.5; // opacity is full at 50% of the reveal window (~0.4s)
 
