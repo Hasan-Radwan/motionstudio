@@ -1623,11 +1623,14 @@ select,
   background: var(--accent-glow) !important;
 }
 
-/* ---------- Mobile bottom tabs (Templates / Properties) ---------- */
-/* Hidden on desktop; the mobile media query below turns it into a fixed bar and
-   toggles which section (gallery vs settings) is visible. */
-.mobile-nav {
+/* ---------- Mobile bottom bars (sub-tabs + Templates / Properties) ---------- */
+/* Hidden on desktop; the mobile media query below turns the wrapper into a fixed
+   bottom bar and toggles which section (gallery vs settings) is visible. */
+.mobile-bottom {
   display: none;
+}
+.mobile-nav {
+  display: flex;
 }
 .mobile-nav-btn {
   flex: 1;
@@ -1779,9 +1782,10 @@ select,
     flex-direction: column;
   }
 
-  /* Bottom tab bar: fixed, above everything. */
-  .mobile-nav {
-    display: flex;
+  /* Fixed bottom area: Properties sub-tabs (when active) stacked over the
+     Templates/Properties section switch. */
+  .mobile-bottom {
+    display: block;
     position: fixed;
     left: 0;
     right: 0;
@@ -1791,9 +1795,12 @@ select,
     border-top: 1px solid var(--border);
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  /* Keep scrollable content clear of the fixed bar. */
+  /* Keep scrollable content clear of the fixed bars (taller when sub-tabs show). */
   .workspace {
-    padding-bottom: 60px;
+    padding-bottom: 64px;
+  }
+  #app[data-mtab='properties'] .workspace {
+    padding-bottom: 116px;
   }
   /* Show only the tab the user picked (the pinned stage stays visible). */
   #app[data-mtab='templates'] .panel {
@@ -1803,13 +1810,13 @@ select,
     display: none;
   }
 
-  /* Properties sub-tabs: a scrollable pill row pinned under the canvas. */
-  .panel-tabs {
+  /* Sub-tabs row — a scrollable pill strip shown only in Properties mode,
+     sitting directly above the section switch. */
+  #app[data-mtab='properties'] .panel-tabs {
     display: flex;
     gap: 6px;
     overflow-x: auto;
-    padding: 10px 0 12px;
-    margin-bottom: 6px;
+    padding: 9px 12px;
     border-bottom: 1px solid var(--border);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;

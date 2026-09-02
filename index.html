@@ -192,15 +192,6 @@
       <main class="workspace">
         <!-- Left: settings panel (controls + media + background) -->
         <aside class="panel" id="panel" aria-label="Settings" data-ptab="control">
-          <!-- Mobile-only sub-tabs that group the settings under "Properties". -->
-          <div class="panel-tabs" id="panel-tabs" role="tablist">
-            <button class="panel-tab" type="button" data-ptab="control">Control</button>
-            <button class="panel-tab" type="button" data-ptab="image">Image</button>
-            <button class="panel-tab" type="button" data-ptab="audio">Audio</button>
-            <button class="panel-tab" type="button" data-ptab="text">Text</button>
-            <button class="panel-tab" type="button" data-ptab="bg">BG</button>
-            <button class="panel-tab" type="button" data-ptab="curve">Curve</button>
-          </div>
           <div id="panel-controls" class="panel-group"></div>
           <div id="panel-frame" class="panel-group"></div>
           <div id="panel-easing" class="panel-group"></div>
@@ -229,22 +220,33 @@
         <aside class="gallery" id="gallery" aria-label="Templates"></aside>
       </main>
 
-      <!-- Mobile-only bottom tabs: switch between the gallery and the settings. -->
-      <nav class="mobile-nav" id="mobile-nav" aria-label="Studio sections">
-        <button class="mobile-nav-btn" id="mnav-templates" type="button" data-tab="templates" aria-label="Templates">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <rect x="3" y="3" width="7" height="7" rx="1.6" /><rect x="14" y="3" width="7" height="7" rx="1.6" />
-            <rect x="3" y="14" width="7" height="7" rx="1.6" /><rect x="14" y="14" width="7" height="7" rx="1.6" />
-          </svg>
-          <span class="mobile-nav-label">Templates</span>
-        </button>
-        <button class="mobile-nav-btn" id="mnav-properties" type="button" data-tab="properties" aria-label="Properties">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
-          </svg>
-          <span class="mobile-nav-label">Properties</span>
-        </button>
-      </nav>
+      <!-- Mobile-only bottom bars: the Properties sub-tabs sit just above the
+           section switch (Templates / Properties). -->
+      <div class="mobile-bottom">
+        <div class="panel-tabs" id="panel-tabs" role="tablist">
+          <button class="panel-tab" type="button" data-ptab="control">Control</button>
+          <button class="panel-tab" type="button" data-ptab="image">Image</button>
+          <button class="panel-tab" type="button" data-ptab="audio">Audio</button>
+          <button class="panel-tab" type="button" data-ptab="text">Text</button>
+          <button class="panel-tab" type="button" data-ptab="bg">BG</button>
+          <button class="panel-tab" type="button" data-ptab="curve">Curve</button>
+        </div>
+        <nav class="mobile-nav" id="mobile-nav" aria-label="Studio sections">
+          <button class="mobile-nav-btn" id="mnav-templates" type="button" data-tab="templates" aria-label="Templates">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" rx="1.6" /><rect x="14" y="3" width="7" height="7" rx="1.6" />
+              <rect x="3" y="14" width="7" height="7" rx="1.6" /><rect x="14" y="14" width="7" height="7" rx="1.6" />
+            </svg>
+            <span class="mobile-nav-label">Templates</span>
+          </button>
+          <button class="mobile-nav-btn" id="mnav-properties" type="button" data-tab="properties" aria-label="Properties">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" />
+            </svg>
+            <span class="mobile-nav-label">Properties</span>
+          </button>
+        </nav>
+      </div>
     </div>
 
     <input id="file-input" type="file" accept="image/*" hidden />
