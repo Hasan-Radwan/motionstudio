@@ -33,6 +33,10 @@ const CURVED_CAROUSEL_SAMPLE = {
   background: '/samples/curvedCarousel/bg.jpg',
 };
 
+// The Rotion "R" brand mark (transparent PNG) — shipped as the default logo for
+// the Logo & Branding templates.
+const ROTION_LOGO = '/icon-rotion-02.png';
+
 // Per-template overrides. `cards` is a list of image URLs; `background` is one URL.
 export const TEMPLATE_SAMPLES = {
   curvedCarousel: CURVED_CAROUSEL_SAMPLE,
@@ -41,6 +45,11 @@ export const TEMPLATE_SAMPLES = {
   curvedCarousel04: CURVED_CAROUSEL_SAMPLE,
   // Colour Palette 02 sits over a user BACKGROUND photo; a default ships here.
   colorPalette02: { background: '/samples/colorPalette02/bg.jpg' },
+  // Logo & Branding — default to the Rotion R mark.
+  logo: { cards: [ROTION_LOGO] },
+  neonFrame: { cards: [ROTION_LOGO] },
+  // Brand Motion 01: slot 0 = logo, the rest = a background montage.
+  brandMotion01: { cards: [ROTION_LOGO, ...GENERIC_CARDS] },
 };
 
 // url -> HTMLImageElement | null (null = confirmed missing). Cached so repeated
