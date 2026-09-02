@@ -31,14 +31,18 @@ export function render(ctx, t, p, { imageAt, w, h }) {
   const period = n * step;
 
   const items = [];
-  for (let i = -2; i < n; i++) {
+  // Exactly `n` cards — one per slot in the wrap period. (Using more than n here
+  // makes two indices wrap onto the SAME position: identical-position duplicates
+  // whose paint order flips every frame → a visible jitter/flicker.)
+  for (let i = 0; i < n; i++) {
     let x = w / 2 + i * step - scroll - ((n - 1) / 2) * step + step / 2;
     x = ((((x - w / 2) % period) + period) % period) - period / 2 + w / 2;
     const dist = (x - w / 2) / step; // signed distance in card-steps
     items.push({ x, dist, idx: i });
   }
-  // paint far cards first so the centre card lands on top
-  items.sort((a, b) => Math.abs(b.dist) - Math.abs(a.dist));
+  // Paint far cards first so the centre card lands on top; a stable tie-break on
+  // `dist` keeps the order from flipping when two cards are equidistant.
+  items.sort((a, b) => Math.abs(b.dist) - Math.abs(a.dist) || a.dist - b.dist);
 
   for (const it of items) {
     const ad = Math.min(1.4, Math.abs(it.dist));
