@@ -48,16 +48,11 @@ export const TEMPLATE_SAMPLES = {
   // Logo & Branding — default to the Rotion R mark.
   logo: { cards: [ROTION_LOGO] },
   neonFrame: { cards: [ROTION_LOGO] },
-  // Brand Motion 01: slot 0 = the logo (Rotion R). The rest is a background
-  // montage — drop your own images into public/samples/brandMotion01/ named
-  // card-1.jpg … card-12.jpg to use them; missing files are skipped, so it
-  // falls back to the generic cards until you add your own.
+  // Brand Motion 01: slot 0 = the logo (Rotion R). The rest is the background
+  // montage from public/samples/brandMotion01/ (card-1.jpg … card-12.jpg).
+  // No generic fallback here, so the montage shows ONLY these images.
   brandMotion01: {
-    cards: [
-      ROTION_LOGO,
-      ...Array.from({ length: 12 }, (_, i) => `/samples/brandMotion01/card-${i + 1}.jpg`),
-      ...GENERIC_CARDS,
-    ],
+    cards: [ROTION_LOGO, ...Array.from({ length: 12 }, (_, i) => `/samples/brandMotion01/card-${i + 1}.jpg`)],
   },
 };
 
