@@ -274,9 +274,12 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
 // "auto" (state.bgAuto) — i.e. the user hasn't picked one of their own — so it
 // works for both a fresh switch and a restored session that never set a bg.
 function loadTemplateDefaults(tpl) {
+  sampleCount = 0; // reset until this template's samples resolve
   loadSampleCards(tpl.id).then((imgs) => {
     if (state.templateId !== tpl.id) return; // user moved on
     renderer.setSampleImages(imgs);
+    sampleCount = imgs.length;
+    updateHint(); // hide the hint now that the sample preview is showing
   });
   loadSampleBackground(tpl.id).then((bg) => {
     if (state.templateId !== tpl.id) return;
@@ -318,10 +321,17 @@ function resizeSlots(n) {
   state.slots = next;
 }
 
+// The "Drop an image…" hint hides whenever the stage shows something — the user's
+// own uploads OR the template's default sample images (set by loadTemplateDefaults).
+let sampleCount = 0;
+function updateHint() {
+  hintEl.classList.toggle('hidden', hasAnyImage() || sampleCount > 0);
+}
+
 // Push the filled images into the renderer and toggle the empty-stage hint.
 function applyImages() {
   renderer.setImages(filledImages());
-  hintEl.classList.toggle('hidden', hasAnyImage());
+  updateHint();
 }
 
 function setSlotImage(index, img, file) {
