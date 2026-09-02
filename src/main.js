@@ -237,7 +237,12 @@ function selectTemplate(tpl, keepParams = false, keepSlots = false) {
   // a fresh switch only, so restoring a saved project keeps its stored duration.
   if (!keepParams && tpl.duration) renderer.setDuration(tpl.duration);
   // A template may also prefer a specific frame (e.g. a portrait portfolio).
-  if (!keepParams && tpl.aspect) renderer.setAspect(tpl.aspect);
+  // Re-fit the canvas display to the new aspect so it isn't stretched until the
+  // user manually picks a frame (the aspect picker fits; this switch must too).
+  if (!keepParams && tpl.aspect) {
+    renderer.setAspect(tpl.aspect);
+    fitCanvas();
+  }
   buildPanel(controlsEl, tpl, state.params, (key, value) => {
     state.params = { ...state.params, [key]: value };
     renderer.setParams(state.params);
