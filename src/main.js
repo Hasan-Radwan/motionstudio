@@ -973,8 +973,15 @@ function trackUser(user) {
   })
     .then((r) => r.json())
     .then((data) => {
-      // First-ever registration → thank-you + social-follow popup (once).
-      if (data && data.isNew) showWelcomePopup();
+      // First-ever registration → GA4 conversion + thank-you/social popup (once).
+      if (data && data.isNew) {
+        try {
+          window.gtag?.('event', 'sign_up', { method: user.provider || 'local' });
+        } catch {
+          /* best-effort */
+        }
+        showWelcomePopup();
+      }
     })
     .catch(() => {});
 }
