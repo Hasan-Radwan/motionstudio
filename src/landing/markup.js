@@ -6,7 +6,7 @@
 
 import { COPY } from './copy.js';
 import { mergeCopy } from './mergeCopy.js';
-import { TEMPLATE_CATEGORIES } from './templatesCatalog.js';
+import { TEMPLATE_CATEGORIES, categorySlug } from './templatesCatalog.js';
 
 // `doc` lets the prerender script pass a virtual (linkedom) document; defaults
 // to the real one in the browser. `overrides` (optional) is an admin-authored
@@ -114,6 +114,7 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
   const isAr = lang === 'ar';
   const templates = make('section', 'lp-section lp-reveal');
   templates.id = 'templates';
+  const tbase = isAr ? '/ar/templates' : '/templates';
   templates.innerHTML = `
     <h2 class="lp-h2">${c.templates.title}</h2>
     <p class="lp-section-lead">${c.templates.sub}</p>
@@ -121,13 +122,14 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
       ${TEMPLATE_CATEGORIES.map(
         (g) => `
         <div class="lp-tpl-group">
-          <h3 class="lp-tpl-cat">${isAr ? g.catAr : g.cat}</h3>
+          <h3 class="lp-tpl-cat"><a href="${tbase}/${categorySlug(g.cat)}">${isAr ? g.catAr : g.cat}</a></h3>
           <ul class="lp-tpl-list">
             ${g.items.map((name) => `<li class="lp-tpl-chip">${name}</li>`).join('')}
           </ul>
         </div>`
       ).join('')}
-    </div>`;
+    </div>
+    <p class="lp-tpl-all"><a class="lp-btn-ghost" href="${tbase}">${isAr ? 'تصفّح كل القوالب حسب القسم ←' : 'Browse all templates by category →'}</a></p>`;
 
   // ---------- pricing ----------
   const pricing = make('section', 'lp-section lp-section-alt lp-reveal');

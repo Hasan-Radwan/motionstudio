@@ -12,6 +12,9 @@
 // Everything is guarded so the Worker still deploys and serves the site before
 // KV / the secret are configured.
 
+import { TEMPLATE_CATEGORIES, categorySlug } from './src/landing/templatesCatalog.js';
+import { renderTemplatesIndex, renderCategoryPage } from './src/landing/templatePages.js';
+
 const enc = new TextEncoder();
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), {
@@ -489,6 +492,82 @@ async function handleAdminConfig(request, env) {
   return json({ ok: true });
 }
 
+// ---- Template landing pages (server-rendered so admin edits show instantly) ----
+async function loadTemplatesContent(env) {
+  if (!env.SUBS) return {};
+  try {
+    const raw = await env.SUBS.get('config:templates');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+function htmlPage(html) {
+  return new Response(html, {
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' },
+  });
+}
+// Serves /templates, /templates/<slug> and the /ar/… siblings. Returns null for an
+// unknown slug so the request falls through to the normal 404 handling.
+async function handleTemplatePages(url, env) {
+  const p = url.pathname.replace(/\/+$/, '') || '/';
+  const ar = p === '/ar/templates' || p.startsWith('/ar/templates/');
+  const rest = ar ? p.slice('/ar/templates'.length) : p.slice('/templates'.length);
+  const lang = ar ? 'ar' : 'en';
+  const cfg = await loadTemplatesContent(env);
+  if (rest === '' || rest === '/') return htmlPage(renderTemplatesIndex(lang, cfg));
+  const slug = rest.replace(/^\//, '');
+  const cat = TEMPLATE_CATEGORIES.find((c) => categorySlug(c.cat) === slug);
+  if (!cat) return null;
+  return htmlPage(renderCategoryPage(lang, cat, cfg));
+}
+
+// Dynamic sitemap so the template pages (and their /ar siblings) are always
+// listed and in sync with the catalog — no hand-maintained XML.
+function handleSitemap() {
+  const S = 'https://rotionapp.com';
+  const bi = (en, ar, priority, cf = 'weekly') => {
+    const alts = `<xhtml:link rel="alternate" hreflang="en" href="${S}${en}"/><xhtml:link rel="alternate" hreflang="ar" href="${S}${ar}"/><xhtml:link rel="alternate" hreflang="x-default" href="${S}${en}"/>`;
+    return [en, ar].map((loc) => `<url><loc>${S}${loc}</loc>${alts}<changefreq>${cf}</changefreq><priority>${priority}</priority></url>`).join('');
+  };
+  const one = (loc, priority) => `<url><loc>${S}${loc}</loc><changefreq>monthly</changefreq><priority>${priority}</priority></url>`;
+  let body = bi('/', '/ar', '1.0') + bi('/templates', '/ar/templates', '0.8');
+  for (const c of TEMPLATE_CATEGORIES) {
+    const s = categorySlug(c.cat);
+    body += bi('/templates/' + s, '/ar/templates/' + s, '0.7');
+  }
+  for (const p of ['/terms', '/privacy', '/refund', '/contact']) body += one(p, '0.4');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${body}</urlset>`;
+  return new Response(xml, { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+}
+
+// Admin: read / write the per-category page content (descriptions + a media URL).
+async function handleAdminTemplatesContent(request, env, method) {
+  if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
+  if (method === 'GET') return json(await loadTemplatesContent(env));
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'bad_json' }, 400);
+  }
+  const slugs = new Set(TEMPLATE_CATEGORIES.map((c) => categorySlug(c.cat)));
+  const clean = {};
+  for (const [k, v] of Object.entries(body || {})) {
+    if (!slugs.has(k) || !v || typeof v !== 'object') continue;
+    const e = {};
+    if (typeof v.desc === 'string') e.desc = v.desc.slice(0, 600);
+    if (typeof v.descAr === 'string') e.descAr = v.descAr.slice(0, 600);
+    // Only allow absolute https / same-origin URLs for the media embed.
+    if (typeof v.mediaUrl === 'string' && /^(https:\/\/|\/)/.test(v.mediaUrl.trim())) {
+      e.mediaUrl = v.mediaUrl.trim().slice(0, 400);
+    }
+    clean[k] = e;
+  }
+  await env.SUBS.put('config:templates', JSON.stringify(clean));
+  return json({ ok: true });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -500,6 +579,17 @@ export default {
     if (pathname === '/api/user/track' && m === 'POST') return handleTrackUser(request, env, ctx);
     if (pathname === '/api/track/template' && m === 'POST') return handleTrackTemplate(request, env);
     if (pathname === '/api/config' && m === 'GET') return handleGetConfig(env);
+    // Server-rendered template landing pages (+ their /ar siblings).
+    if (
+      m === 'GET' &&
+      (pathname === '/templates' || pathname.startsWith('/templates/') || pathname === '/ar/templates' || pathname.startsWith('/ar/templates/'))
+    ) {
+      const res = await handleTemplatePages(url, env);
+      if (res) return res;
+    }
+    if (pathname === '/api/admin/templates-content' && (m === 'GET' || m === 'PUT'))
+      return handleAdminTemplatesContent(request, env, m);
+    if (pathname === '/sitemap.xml' && m === 'GET') return handleSitemap();
     if (pathname === '/api/email/unsubscribe' && (m === 'GET' || m === 'POST')) return handleUnsubscribe(url, env);
     // admin
     if (pathname === '/api/admin/send-test' && m === 'POST') return handleAdminSendTest(request, env);

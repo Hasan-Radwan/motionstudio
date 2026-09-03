@@ -412,6 +412,16 @@
   color: var(--accent-2);
   letter-spacing: 0.2px;
 }
+.lp-tpl-cat a {
+  color: inherit;
+  text-decoration: none;
+}
+.lp-tpl-cat a:hover {
+  text-decoration: underline;
+}
+.lp-tpl-all {
+  margin-top: 22px;
+}
 .lp-tpl-list {
   list-style: none;
   margin: 0;

@@ -210,6 +210,7 @@
         <button class="adm-navbtn" data-tab="content"><span class="ico">📝</span> محتوى الصفحة</button>
         <button class="adm-navbtn" data-tab="plans"><span class="ico">💳</span> الباقات والأسعار</button>
         <button class="adm-navbtn" data-tab="templates"><span class="ico">📈</span> القوالب الأكثر زيارة</button>
+        <button class="adm-navbtn" data-tab="tpages"><span class="ico">🗂️</span> صفحات الأقسام</button>
         <div class="adm-nav-spacer"></div>
         <div class="adm-nav-foot">
           <a class="adm-navbtn" href="/" target="_blank" rel="noopener"><span class="ico">↗</span> فتح الموقع</a>
@@ -326,6 +327,20 @@
             <div id="tplList"><div class="empty">جارٍ التحميل…</div></div>
           </div>
         </section>
+
+        <!-- Template category landing pages: /templates/<slug> content -->
+        <section id="tab-tpages" class="hidden">
+          <h1 class="adm-h">صفحات الأقسام</h1>
+          <p class="adm-sub">
+            عدّل وصف كل قسم (عربي/إنجليزي) ورابط فيديو/صورة مثال. الحقل الفارغ يستخدم النص الافتراضي.
+            تظهر التعديلات فوراً على <a href="/templates" target="_blank" rel="noopener">‏/templates</a>.
+          </p>
+          <div id="tpagesForm"><div class="empty">جارٍ التحميل…</div></div>
+          <div class="savebar">
+            <button class="adm-btn" id="saveTpages">حفظ الصفحات</button>
+            <span class="hint" id="tpagesMsg"></span>
+          </div>
+        </section>
       </main>
     </div>
 
@@ -377,14 +392,63 @@
       $('signout').addEventListener('click', () => { sessionStorage.removeItem(KEY_STORE); location.reload(); });
 
       /* ---------- nav ---------- */
-      const TABS = ['overview', 'users', 'content', 'plans', 'templates'];
+      const TABS = ['overview', 'users', 'content', 'plans', 'templates', 'tpages'];
       document.querySelectorAll('.adm-navbtn[data-tab]').forEach((b) =>
         b.addEventListener('click', () => {
           document.querySelectorAll('.adm-navbtn[data-tab]').forEach((x) => x.classList.toggle('active', x === b));
           TABS.forEach((t) => $('tab-' + t).classList.toggle('hidden', t !== b.dataset.tab));
           if (b.dataset.tab === 'templates') loadTemplates();
+          if (b.dataset.tab === 'tpages') loadTpages();
         })
       );
+
+      /* ---------- template category pages ---------- */
+      const TPAGE_CATS = [
+        { slug: '3d-perspective', en: '3D & Perspective', ar: 'ثلاثي الأبعاد والمنظور' },
+        { slug: 'orbit', en: 'Orbit', ar: 'مدار ودوران' },
+        { slug: 'carousel-flow', en: 'Carousel & Flow', ar: 'كاروسيل وانسياب' },
+        { slug: 'colors', en: 'Colors', ar: 'الألوان' },
+        { slug: 'stack-scatter', en: 'Stack & Scatter', ar: 'تكديس وتبعثر' },
+        { slug: 'text', en: 'Text', ar: 'نصوص متحركة' },
+        { slug: 'grid', en: 'Grid', ar: 'شبكة' },
+        { slug: 'reveal-wipe', en: 'Reveal & Wipe', ar: 'كشف ومسح' },
+        { slug: 'slideshow-story', en: 'Slideshow & Story', ar: 'شرائح وقصة' },
+        { slug: 'spotlight-focus', en: 'Spotlight & Focus', ar: 'إبراز وتركيز' },
+        { slug: 'isometric', en: 'Isometric', ar: 'أيزومترك' },
+        { slug: 'logo-branding', en: 'Logo & Branding', ar: 'الشعار والهوية' },
+        { slug: 'ticker-marquee', en: 'Ticker & Marquee', ar: 'شريط متحرك' },
+      ];
+      async function loadTpages() {
+        const host = $('tpagesForm');
+        let content = {};
+        try { content = await (await api('/api/admin/templates-content')).json(); } catch {}
+        host.innerHTML = TPAGE_CATS.map((c) => {
+          const v = content[c.slug] || {};
+          return `<div class="card">
+            <div class="card-head"><h3>${esc(c.ar)} · <span class="hint">${esc(c.en)}</span></h3>
+              <a class="row-btn" href="/templates/${c.slug}" target="_blank" rel="noopener">معاينة ↗</a></div>
+            <div class="field"><label>الوصف (عربي)</label><textarea id="tp-${c.slug}-ar" rows="2" placeholder="النص الافتراضي">${esc(v.descAr || '')}</textarea></div>
+            <div class="field"><label>Description (English)</label><textarea id="tp-${c.slug}-en" rows="2" placeholder="default text">${esc(v.desc || '')}</textarea></div>
+            <div class="field"><label>رابط فيديو/صورة مثال (يبدأ بـ https:// أو /)</label><input id="tp-${c.slug}-media" placeholder="https://…/example.mp4" value="${esc(v.mediaUrl || '')}" /></div>
+          </div>`;
+        }).join('');
+      }
+      async function saveTpages() {
+        const payload = {};
+        for (const c of TPAGE_CATS) {
+          payload[c.slug] = {
+            desc: $('tp-' + c.slug + '-en').value.trim(),
+            descAr: $('tp-' + c.slug + '-ar').value.trim(),
+            mediaUrl: $('tp-' + c.slug + '-media').value.trim(),
+          };
+        }
+        try {
+          const r = await api('/api/admin/templates-content', { method: 'PUT', body: JSON.stringify(payload) });
+          if (!r.ok) throw 0;
+          toast('تم حفظ صفحات الأقسام');
+        } catch { toast('تعذّر الحفظ', true); }
+      }
+      $('saveTpages').addEventListener('click', saveTpages);
 
       /* ---------- templates popularity ---------- */
       async function loadTemplates() {

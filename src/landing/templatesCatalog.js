@@ -76,3 +76,13 @@ export const TEMPLATE_CATEGORIES = [
 
 // Flat list of all template names (used by the ItemList JSON-LD schema).
 export const ALL_TEMPLATE_NAMES = TEMPLATE_CATEGORIES.flatMap((g) => g.items);
+
+// Stable URL slug for a category's English name, e.g. 'Carousel & Flow' ->
+// 'carousel-flow'. Used by the server-rendered /templates/<slug> landing pages.
+export function categorySlug(cat) {
+  return String(cat)
+    .toLowerCase()
+    .replace(/&/g, ' ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
