@@ -123,7 +123,15 @@ a{color:inherit;text-decoration:none}
 .t-btn{display:inline-block;background:linear-gradient(180deg,var(--acc2),var(--acc));color:#04120c;font-weight:700;padding:13px 26px;border-radius:12px;font-size:16px}
 .t-foot{border-top:1px solid var(--bd);color:var(--mut);font-size:13px;padding:24px 20px;text-align:center}
 .t-foot a{color:var(--dim)}.t-foot a:hover{color:var(--acc2)}
-@media(max-width:520px){.t-h1{font-size:27px}.t-nav .t-lbl{display:none}}
+/* Live-preview gallery: masonry columns so varied aspect ratios tile artfully. */
+.tpv-gallery{columns:3 250px;column-gap:16px;margin:8px 0 34px}
+.tpv-card{break-inside:avoid;margin:0 0 16px;border-radius:16px;overflow:hidden;border:1px solid var(--bd);background:var(--panel);transition:border-color .15s,transform .06s}
+.tpv-card:hover{border-color:var(--acc2);transform:translateY(-2px)}
+.tpv-card canvas{display:block;width:100%;height:auto;background:#0b0f16}
+.tpv-meta{padding:12px 15px}
+.tpv-meta h3{margin:0 0 4px;font-size:15.5px;color:#fff}
+.tpv-meta p{margin:0;font-size:12.5px;color:var(--mut);line-height:1.5}
+@media(max-width:520px){.t-h1{font-size:27px}.t-nav .t-lbl{display:none}.tpv-gallery{columns:2 150px;column-gap:12px}}
 `;
 
 // Merge admin overrides (KV) over the curated defaults for one category.
@@ -139,7 +147,7 @@ function mergeCat(cat, lang, cfg) {
   return { slug, name, desc, media, items: cat.items || [] };
 }
 
-function shell({ lang, path, title, desc, body, jsonLd }) {
+function shell({ lang, path, title, desc, body, jsonLd, preview }) {
   const rtl = lang === 'ar';
   const canonical = SITE + path;
   const altPath = rtl ? path.replace(/^\/ar/, '') || '/' : '/ar' + path;
@@ -176,6 +184,7 @@ function shell({ lang, path, title, desc, body, jsonLd }) {
 <footer class="t-foot">${esc(u.footer)}<br>
   <a href="${rtl ? '/ar' : '/'}">${u.home}</a> · <a href="${rtl ? '/ar/templates' : '/templates'}">${u.templates}</a> · <a href="/app">${u.editor}</a> · © Rotion App
 </footer>
+${preview ? '<script type="module" src="/template-preview.js"></script>' : ''}
 </body></html>`;
 }
 
@@ -231,12 +240,26 @@ export function renderCategoryPage(lang, cat, cfg) {
   const base = rtl ? '/ar/templates' : '/templates';
   const c = mergeCat(cat, lang, cfg);
   const path = `${base}/${c.slug}`;
-  const chips = c.items.map((name) => `<span class="t-chip">${esc(name)}</span>`).join('');
+  // Optional admin-set hero example (image/video) shown above the live gallery.
   const media = c.media
     ? /\.(mp4|webm)(\?|$)/i.test(c.media)
       ? `<video class="t-media" src="${esc(c.media)}" autoplay muted loop playsinline></video>`
       : `<img class="t-media" src="${esc(c.media)}" alt="${esc(c.name)}" loading="lazy">`
     : '';
+  // Short per-template blurb (category-based). Names + blurbs are real HTML (SEO);
+  // the canvas is animated client-side by /template-preview.js.
+  const blurb = rtl
+    ? `قالب موشن من قسم ${c.name} — أضف صورك وصدّر فيديو متكرّراً.`
+    : `A ${c.name} motion template — add your images and export a looping video.`;
+  const gallery = c.items
+    .map(
+      (name) => `
+      <figure class="tpv-card">
+        <canvas class="tpv" data-tpl="${esc(name)}" aria-label="${esc(name)}"></canvas>
+        <figcaption class="tpv-meta"><h3>${esc(name)}</h3><p>${esc(blurb)}</p></figcaption>
+      </figure>`
+    )
+    .join('');
   const body = `
     <div class="t-crumb"><a href="${rtl ? '/ar' : '/'}">${esc(u.home)}</a> / <a href="${base}">${esc(u.templates)}</a> / ${esc(c.name)}</div>
     <h1 class="t-h1">${esc(c.name)}</h1>
@@ -244,8 +267,8 @@ export function renderCategoryPage(lang, cat, cfg) {
     ${media}
     <a class="t-btn" href="/app">${esc(u.tryNow)}</a>
     <h2 class="t-h2">${esc(u.inThis)} (${c.items.length})</h2>
-    <div class="t-chips">${chips}</div>
-    <p><a class="t-card" style="max-width:260px" href="${base}">← ${esc(u.other)}</a></p>`;
+    <div class="tpv-gallery">${gallery}</div>
+    <p><a class="t-card" style="max-width:260px;margin-top:10px" href="${base}">← ${esc(u.other)}</a></p>`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -270,7 +293,7 @@ export function renderCategoryPage(lang, cat, cfg) {
       },
     ],
   };
-  return shell({ lang, path, title: `${c.name} — Rotion App`, desc: c.desc, body, jsonLd });
+  return shell({ lang, path, title: `${c.name} — Rotion App`, desc: c.desc, body, jsonLd, preview: true });
 }
 
 // All category slugs (for the sitemap).
