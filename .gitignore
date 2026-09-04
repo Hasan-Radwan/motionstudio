@@ -17,3 +17,6 @@ dist/
 
 # wrangler local dev secrets (never commit)
 .dev.vars
+
+# wrangler local dev state (never commit)
+.wrangler/
