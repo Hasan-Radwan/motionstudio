@@ -234,6 +234,42 @@ function wireInteractivity(root, lang, c, onLaunch) {
   if (c.pricing.showLivePrice !== false && !hasYearly) setupLivePricing(root, c.pricing.perMonth);
   setupBillingToggle(root, c);
   setupFaq(root);
+  setupTemplateSlider(root);
+}
+
+// Homepage Templates slider: swap the fallback cards for the REAL most-visited
+// templates, duplicate the set for a seamless marquee, and animate each card with
+// the live template engine (offscreen cards pause). Best-effort — never throws.
+async function setupTemplateSlider(root) {
+  const slider = root.querySelector('[data-tpl-slider]');
+  if (!slider) return;
+  const track = slider.querySelector('.lp-tpl-track');
+  if (!track) return;
+  const fallback = [...track.querySelectorAll('.lp-tpv-name')].map((n) => n.textContent).filter(Boolean);
+  let names = [];
+  try {
+    const r = await fetch('/api/popular-templates?limit=8');
+    if (r.ok) names = ((await r.json()).templates || []).map((t) => t.name).filter(Boolean);
+  } catch {
+    /* offline / not configured — fall back below */
+  }
+  // Always show at least 6: top up from the fallback set (deduped).
+  for (const f of fallback) {
+    if (names.length >= 8) break;
+    if (!names.includes(f)) names.push(f);
+  }
+  if (names.length < 6) names = fallback;
+  const card = (name) =>
+    `<div class="lp-tpv-card"><canvas class="lp-tpv" data-tpl="${name}" aria-label="${name}"></canvas><span class="lp-tpv-name">${name}</span></div>`;
+  const set = names.map(card).join('');
+  track.innerHTML = set + set; // duplicate for the -50% marquee loop
+  slider.classList.add('is-live');
+  try {
+    const { mountLivePreviews } = await import('../preview/livePreview.js');
+    mountLivePreviews(track.querySelectorAll('canvas.lp-tpv[data-tpl]'));
+  } catch (e) {
+    console.error('template slider previews failed', e);
+  }
 }
 
 // Monthly / Yearly billing toggle: swaps the price + per-period label on any plan

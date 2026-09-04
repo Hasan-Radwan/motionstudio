@@ -115,20 +115,20 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
   const templates = make('section', 'lp-section lp-reveal');
   templates.id = 'templates';
   const tbase = isAr ? '/ar/templates' : '/templates';
+  // A moving slider of popular templates (live previews) replaces the long text
+  // list. The client (setupTemplateSlider) swaps in the real most-visited set and
+  // animates the canvases; this fallback set keeps it useful pre-hydration / no-JS.
+  const sliderFallback = ['Coverflow', 'Rotunda Carousel 01', 'Curved Carousel 04', 'Sphere 3D', 'Brand Motion 01', 'Ken Burns', 'Text Morph', 'Cube Spin'];
+  const tpvCard = (name) =>
+    `<div class="lp-tpv-card"><canvas class="lp-tpv" data-tpl="${name}" aria-label="${name}"></canvas><span class="lp-tpv-name">${name}</span></div>`;
+  const catLinks = TEMPLATE_CATEGORIES.map(
+    (g) => `<a class="lp-tpl-catlink" href="${tbase}/${categorySlug(g.cat)}">${isAr ? g.catAr : g.cat}</a>`
+  ).join('');
   templates.innerHTML = `
     <h2 class="lp-h2">${c.templates.title}</h2>
     <p class="lp-section-lead">${c.templates.sub}</p>
-    <div class="lp-tpl-groups">
-      ${TEMPLATE_CATEGORIES.map(
-        (g) => `
-        <div class="lp-tpl-group">
-          <h3 class="lp-tpl-cat"><a href="${tbase}/${categorySlug(g.cat)}">${isAr ? g.catAr : g.cat}</a></h3>
-          <ul class="lp-tpl-list">
-            ${g.items.map((name) => `<li class="lp-tpl-chip">${name}</li>`).join('')}
-          </ul>
-        </div>`
-      ).join('')}
-    </div>
+    <div class="lp-tpl-slider" data-tpl-slider><div class="lp-tpl-track">${sliderFallback.map(tpvCard).join('')}</div></div>
+    <div class="lp-tpl-cats">${catLinks}</div>
     <p class="lp-tpl-all"><a class="lp-btn-ghost" href="${tbase}">${isAr ? 'تصفّح كل القوالب حسب القسم ←' : 'Browse all templates by category →'}</a></p>`;
 
   // ---------- pricing ----------

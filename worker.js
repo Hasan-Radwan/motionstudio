@@ -436,6 +436,23 @@ async function handleTrackTemplate(request, env) {
   return json({ ok: true });
 }
 
+// Public: the most-visited templates (for the homepage slider). Edge-cached so
+// the KV scan runs rarely, not on every homepage load.
+async function handlePopularTemplates(url, env) {
+  const limit = Math.min(24, Math.max(1, parseInt(url.searchParams.get('limit') || '8', 10)));
+  if (!env.SUBS) return json({ templates: [] });
+  const list = await env.SUBS.list({ prefix: 'tpl:', limit: 1000 });
+  const arr = [];
+  for (const k of list.keys) {
+    const rec = JSON.parse((await env.SUBS.get(k.name)) || '{}');
+    if ((rec.count || 0) > 0) arr.push({ id: rec.id || k.name.slice(4), name: rec.name || '', count: rec.count || 0 });
+  }
+  arr.sort((a, b) => b.count - a.count);
+  return new Response(JSON.stringify({ templates: arr.slice(0, limit) }), {
+    headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=600' },
+  });
+}
+
 async function handleAdminTemplates(request, env) {
   if (!adminOk(request, env)) return json({ error: 'unauthorized' }, 401);
   if (!env.SUBS) return json({ templates: [] });
@@ -579,6 +596,7 @@ export default {
     if (pathname === '/api/user/track' && m === 'POST') return handleTrackUser(request, env, ctx);
     if (pathname === '/api/track/template' && m === 'POST') return handleTrackTemplate(request, env);
     if (pathname === '/api/config' && m === 'GET') return handleGetConfig(env);
+    if (pathname === '/api/popular-templates' && m === 'GET') return handlePopularTemplates(url, env);
     // Server-rendered template landing pages (+ their /ar siblings).
     if (
       m === 'GET' &&
