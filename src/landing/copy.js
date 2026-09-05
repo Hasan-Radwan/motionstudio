@@ -17,7 +17,7 @@ export const COPY = {
       ctaSecondary: 'See how easy it is',
     },
     stats: [
-      ['60+', 'ready-made templates'],
+      ['75+', 'ready-made templates'],
       ['~30s', 'from image to video'],
       ['8K', 'crisp MP4 / WebM export'],
     ],
@@ -34,7 +34,7 @@ export const COPY = {
       title: 'From image to video in 4 easy steps',
       sub: 'No experience needed — really.',
       steps: [
-        ['Pick a template', 'Browse 60+ animated templates and preview each one live.'],
+        ['Pick a template', 'Browse 75+ animated templates and preview each one live.'],
         ['Drop your images', 'Drag & drop a photo or logo — that is it.'],
         ['Tweak (optional)', 'Colours, text, background, timing… or just keep the defaults.'],
         ['Export', 'Download a seamless looping MP4 or WebM in any size, up to 8K.'],
@@ -43,7 +43,7 @@ export const COPY = {
     features: {
       title: 'Powerful results, zero effort',
       items: [
-        ['🎬', '60+ animated templates', '3D carousels, kinetic text, spirals, cinematic and more.'],
+        ['🎬', '75+ animated templates', '3D carousels, kinetic text, spirals, cinematic and more.'],
         ['🖱️', 'Zero learning curve', 'No timeline, no keyframes. If you can drag a file, you can use it.'],
         ['✍️', 'Add custom text', 'Type your own headlines with animated effects — morph, typewriter, gradient, 3D.'],
         ['🎵', 'Add music', 'Drop a soundtrack onto your clip; it is baked into the exported video.'],
@@ -52,7 +52,7 @@ export const COPY = {
       ],
     },
     templates: {
-      title: '60+ motion templates',
+      title: '75+ motion templates',
       sub: 'From 3D carousels and orbits to kinetic text, isometric tiles, and cinematic slideshows — pick a style and make it yours.',
     },
     pricing: {
@@ -121,7 +121,7 @@ export const COPY = {
       ctaSecondary: 'شاهد كم هو سهل',
     },
     stats: [
-      ['+60', 'قالب جاهز'],
+      ['+75', 'قالب جاهز'],
       ['~30ث', 'من الصورة إلى الفيديو'],
       ['8K', 'تصدير MP4 / WebM عالي الوضوح'],
     ],
@@ -138,7 +138,7 @@ export const COPY = {
       title: 'من الصورة إلى الفيديو في 4 خطوات سهلة',
       sub: 'لا تحتاج أي خبرة — حقاً.',
       steps: [
-        ['اختر قالباً', 'تصفّح أكثر من 60 قالباً متحركاً، وعاين كلّاً منها حيّاً.'],
+        ['اختر قالباً', 'تصفّح أكثر من 75 قالباً متحركاً، وعاين كلّاً منها حيّاً.'],
         ['أفلت صورك', 'اسحب وأفلت صورة أو شعاراً — وهذا كل شيء.'],
         ['عدّل (اختياري)', 'ألوان، نصوص، خلفية، توقيت… أو اترك الإعدادات الافتراضية.'],
         ['صدّر', 'نزّل فيديو حلقة سلساً MP4 أو WebM بأي مقاس، حتى 8K.'],
@@ -147,7 +147,7 @@ export const COPY = {
     features: {
       title: 'نتائج قوية بلا أي جهد',
       items: [
-        ['🎬', '+60 قالب متحرك', 'كاروسيلات ثلاثية الأبعاد، نصوص حركية، حلزونات، سينمائي والمزيد.'],
+        ['🎬', '+75 قالب متحرك', 'كاروسيلات ثلاثية الأبعاد، نصوص حركية، حلزونات، سينمائي والمزيد.'],
         ['🖱️', 'بلا منحنى تعلّم', 'لا خطوط زمنية ولا مفاتيح حركة. إن كنت تسحب ملفاً فأنت تُتقنه.'],
         ['✍️', 'أضف نصاً مخصّصاً', 'اكتب عناوينك الخاصة بتأثيرات متحركة — تحوّل، آلة كاتبة، تدرّج، وثلاثي الأبعاد.'],
         ['🎵', 'أضف موسيقى', 'أضف مقطعاً صوتياً إلى الفيديو، ويُدمَج تلقائياً في التصدير.'],
@@ -156,7 +156,7 @@ export const COPY = {
       ],
     },
     templates: {
-      title: 'أكثر من 60 قالب موشن',
+      title: 'أكثر من 75 قالب موشن',
       sub: 'من الكاروسيلات ثلاثية الأبعاد والمدارات إلى النصوص الحركية والبلاطات الأيزومترية والشرائح السينمائية — اختر أسلوباً واجعله لك.',
     },
     pricing: {

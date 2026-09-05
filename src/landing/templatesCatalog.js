@@ -2,7 +2,7 @@
 // name grouped by category. Kept SEPARATE from src/templates/* (which import the
 // canvas render code) so it can be imported safely by both the browser landing
 // page AND the build-time prerender (linkedom/node) without pulling in any
-// canvas/render modules. This is what makes all 61 template names appear in the
+// canvas/render modules. This is what makes all 75 template names appear in the
 // static HTML a crawler / AI engine sees (they are otherwise only rendered inside
 // the /app on the client). Keep in sync with the registry in src/templates/index.js.
 

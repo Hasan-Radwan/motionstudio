@@ -110,7 +110,7 @@ export function buildMarkup(root, lang, doc = document, overrides = null) {
         .join('')}
     </div>`;
 
-  // ---------- templates (indexable catalog: all 61 names, grouped) ----------
+  // ---------- templates (indexable catalog: all 75 names, grouped) ----------
   const isAr = lang === 'ar';
   const templates = make('section', 'lp-section lp-reveal');
   templates.id = 'templates';
